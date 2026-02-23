@@ -1,0 +1,200 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  background: #000; /* or match your theme */
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.about-hero {
+  position: relative;
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("./images/banner_image1.jpg") center center / cover no-repeat;
+  color: #fff;
+  padding: 120px 16px;
+}
+
+.about-hero .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.about-hero h1 {
+  margin: 0 0 12px 0;
+  font-size: 36px;
+  letter-spacing: 1px;
+  color: #fff;
+}
+
+.about-content {
+  background: #fff;
+  color: #222;
+  padding: 40px 16px;
+}
+
+.about-content .container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.about-subtitle {
+  color: #666;
+  margin-top: 8px;
+}
+
+/* Typography and layout refinements */
+h1, h2, h3, h4 {
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  color: #111;
+}
+
+.lead {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  align-items: start;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 22px;
+  box-shadow: 0 8px 20px rgba(17,17,17,0.06);
+}
+
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.brand-badge {
+  background: #fafafa;
+  border: 1px solid #eee;
+  padding: 10px 8px;
+  font-size: 13px;
+  text-align: center;
+  border-radius: 6px;
+  color: #333;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.timeline .event {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.timeline .event .date {
+  min-width: 88px;
+  font-weight: 600;
+  color: #e04040;
+}
+
+.timeline .event .desc {
+  color: #444;
+  line-height: 1.6;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.feature-box {
+  background: linear-gradient(180deg,#fff,#fff);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(17,17,17,0.04);
+}
+
+.cta {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 12px 22px;
+  background: linear-gradient(135deg,#e04040,#e46475);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Corporate layout styles */
+.about-content h2 {
+  font-size: 28px;
+  color: #111;
+  margin-top: 0;
+}
+
+.about-content p {
+  line-height: 1.7;
+  color: #444;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.section-block {
+  padding: 30px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.container { max-width: 1100px; margin: 0 auto; }
+
+/* Scroll animation */
+.animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 480ms ease, transform 480ms cubic-bezier(.2,.9,.2,1);
+}
+
+.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger utility: set --delay on element or data-delay attribute */
+[data-delay] {
+  transition-delay: calc(var(--delay, 0s) + 0s);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .about-hero { padding: 80px 16px; }
+  .about-hero h1 { font-size: 28px; }
+  .about-content { padding: 24px 12px; }
+  .about-grid { grid-template-columns: 1fr; }
+  .brand-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .about-hero { padding: 60px 12px; }
+  .about-hero h1 { font-size: 22px; }
+}
+

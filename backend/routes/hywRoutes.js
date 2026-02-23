@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const { getHYW, insertHYW } = require('../controller/hywController.js');
 
 
-const {
- insertFormHYW
-} = require("../controller/insertForm.js");
-
-
-router.route("/").post(insertFormHYW);
+router.route('/')
+    .get(getHYW)
+    .post(insertHYW);
 
 module.exports = router;

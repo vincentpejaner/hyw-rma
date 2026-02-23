@@ -19,7 +19,7 @@ function App() {
     setInputData({ ...inputData, [name]: value });
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const form = e.currentTarget;
@@ -27,7 +27,13 @@ function App() {
       form.reportValidity();
       return;
     } else {
-      console.log("Submitted Data: ", inputData);
+      await fetch("http://localhost:3001/api/hywForm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(inputData),
+      });
+
+
       setInputData({
         fullName: "",
         emailAddress: "",
@@ -39,6 +45,7 @@ function App() {
         preferredResolution: "",
         issueDescription: "",
       });
+      
     }
 
     alert("✅ RMA request submitted!");
@@ -118,7 +125,7 @@ function App() {
                   name="productModel"
                   required
                   placeholder="e.g., XYZ-1000"
-                  value={inputData.productName}
+                  value={inputData.productModel}
                   onChange={handleChange}
                 />
               </div>
@@ -162,7 +169,6 @@ function App() {
                 <select
                   name="issueType"
                   required
-                  defaultValue=""
                   value={inputData.issueType}
                   onChange={handleChange}
                 >
@@ -184,8 +190,7 @@ function App() {
                 <select
                   name="preferredResolution"
                   required
-                  defaultValue=""
-                  value={inputData.replaceResol}
+                  value={inputData.preferredResolution}
                   onChange={handleChange}
                 >
                   <option value="" disabled>
