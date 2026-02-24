@@ -113,6 +113,28 @@ html, body, #root {
   object-fit: contain;
 }
 
+.header-actions {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-login {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, #e04040 0%, #e46475 100%);
+  font-weight: 600;
+}
+
+.header-login:hover { opacity: 0.95; }
+
 .login-wrapper {
   display: flex;
   flex-direction: column;
@@ -253,6 +275,7 @@ html, body, #root {
   margin-top: 150px;
   width: 100%;
   box-sizing: border-box;
+  border-top: 1px solid #ddd;
 }
 
 .footer-content {

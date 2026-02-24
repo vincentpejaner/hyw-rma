@@ -57,6 +57,9 @@ export default function About() {
 						</a>
 					</nav>
 				</div>
+				<div className="header-actions">
+					<a className="header-login" href="#login">Log In</a>
+				</div>
 			</header>
 
 			<section className="about-hero">

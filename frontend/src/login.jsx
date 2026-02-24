@@ -1,7 +1,6 @@
 import "./login.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import logo from "./images/logo1.png";
-import About from "./about";
 
 function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -59,6 +58,9 @@ function Login({ onLoginSuccess }) {
             <a href="#track" onClick={() => setMenuOpen(false)}>Track RMA</a>
             <a href="#about" onClick={() => setMenuOpen(false)}>About Us</a>
           </nav>
+        </div>
+        <div className="header-actions">
+          <a className="header-login" href="#login">Log In</a>
         </div>
       </header>
       <div className="login-wrapper">
@@ -147,18 +149,4 @@ function Login({ onLoginSuccess }) {
   );
 }
 
-export default function App() {
-  const [page, setPage] = useState(() => (window.location.hash || "#home").replace("#", ""));
-
-  useEffect(() => {
-    const onHash = () => setPage((window.location.hash || "#home").replace("#", ""));
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
-
-  if (page === "about") {
-    return <About />;
-  }
-
-  return <Login />;
-}
+export default Login;

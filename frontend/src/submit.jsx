@@ -1,7 +1,10 @@
 import "./form.css";
+import "./submit.css";
 import { useState } from "react";
+import logo from "./images/logo1.png";
 
-function App() {
+function Submit() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [inputData, setInputData] = useState({
     fullName: "",
     emailAddress: "",
@@ -33,7 +36,6 @@ function App() {
         body: JSON.stringify(inputData),
       });
 
-
       setInputData({
         fullName: "",
         emailAddress: "",
@@ -45,7 +47,6 @@ function App() {
         preferredResolution: "",
         issueDescription: "",
       });
-      
     }
 
     alert("✅ RMA request submitted!");
@@ -53,20 +54,38 @@ function App() {
   };
 
   return (
-    <div className="page">
-      <main className="card">
-        <div className="header">
-          <div>
-            <h1>RMA Request</h1>
-            <p className="sub">
-              Fill out the details below. Fields marked <span>*</span> are
-              required.
-            </p>
+    <div className="submit-container">
+      <header className="page-header">
+        <button
+          className="menu-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div className="header-content">
+          <nav className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}>
+            <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
+            <a href="#submit" onClick={() => setMenuOpen(false)}>Submit RMA</a>
+          </nav>
+          <div className="header-logo">
+            <img src={logo} alt="HYW Logo" />
           </div>
-          <div className="badge">Form</div>
+          <nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>
+            <a href="#track" onClick={() => setMenuOpen(false)}>Track RMA</a>
+            <a href="#about" onClick={() => setMenuOpen(false)}>About Us</a>
+          </nav>
         </div>
+        <div className="header-actions">
+          <a className="header-login" href="#login">Log In</a>
+        </div>
+      </header>
 
-        <form onSubmit={handleSubmit} className="form">
+      <main className="submit-main">
+        <div className="submit-form-container">
+          <form onSubmit={handleSubmit} className="form">
           <section className="section">
             <h2>Customer Information</h2>
 
@@ -234,16 +253,44 @@ function App() {
             </button>
           </div>
         </form>
-
-        <footer className="footer">
-          <small>
-            After submitting, you’ll receive an email confirmation (if enabled
-            in your backend).
-          </small>
-        </footer>
+        </div>
       </main>
+
+      <footer className="page-footer">
+        <div className="footer-content">
+          <div className="footer-section">
+            <h3>HYW</h3>
+            <p>HYW RMA Management System - Your trusted return and warranty solution.</p>
+          </div>
+          <div className="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#home">Home</a></li>
+              <li><a href="#about">About Us</a></li>
+              <li><a href="#rma">RMA Services</a></li>
+              <li><a href="#support">Support</a></li>
+            </ul>
+          </div>
+          <div className="footer-section">
+            <h4>Contact</h4>
+            <p>Email: <a href="mailto:support@hyw.com">support@hyw.com</a></p>
+            <p>Phone: <a href="tel:+1234567890">+1 (234) 567-890</a></p>
+            <p>Address: 123 HYW Street, City, Country</p>
+          </div>
+          <div className="footer-section">
+            <h4>Follow Us</h4>
+            <ul>
+              <li><a href="#facebook">Facebook</a></li>
+              <li><a href="#twitter">Twitter</a></li>
+              <li><a href="#linkedin">LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; 2026 HYW Inc. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
-
-export default App;
+export default Submit;
