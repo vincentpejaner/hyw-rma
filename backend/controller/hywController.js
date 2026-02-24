@@ -15,6 +15,7 @@ function getHYW(req, res) {
 
 
 function insertHYW(req, res) {
+  console.log("insertHYW received body:", req.body);
   const {
     fullName,
     emailAddress,
@@ -25,14 +26,15 @@ function insertHYW(req, res) {
     purchaseDate,
     preferredResolution,
     issueDescription,
+    ticketNumber,
   } = req.body;
 
   const queryProduct =
-    "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date) VALUES (?, ?, ?)";
+    "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_ticket) VALUES (?, ?, ?, ?)";
 
   db.query(
     queryProduct,
-    [productModel, serialNumber, purchaseDate],
+    [productModel, serialNumber, purchaseDate, ticketNumber],
     (err, productResult) => {
       if (err) {
         console.error(err);
