@@ -137,6 +137,56 @@ function trackHYWByTicket(req, res) {
   });
 }
 
+function getMyRmaRequests(req, res) {
+  const accountEmail = (req.params.email || "").trim();
+
+  if (!accountEmail) {
+    return res.status(400).json({ message: "Account email is required." });
+  }
+
+  const query = `
+    SELECT
+      p.db_ticket,
+      p.db_product_name,
+      p.db_serial_number,
+      p.db_purchase_date,
+      i.db_issue_type,
+      i.db_resolution,
+      i.db_description,
+      c.db_fullname,
+      c.db_email,
+      c.db_phone_number
+    FROM db_product p
+    LEFT JOIN db_issue i ON p.db_productid = i.F_productid
+    LEFT JOIN db_customer c ON p.db_productid = c.F_productid
+    WHERE c.db_email = ?
+    ORDER BY p.db_productid DESC;
+  `;
+
+  db.query(query, [accountEmail], (err, results) => {
+    if (err) {
+      console.error("My RMA query error:", err);
+      return res.status(500).json({ message: "Failed to fetch your RMA requests." });
+    }
+
+    const requests = (results || []).map((row) => ({
+      ticketNumber: row.db_ticket,
+      productModel: row.db_product_name,
+      serialNumber: row.db_serial_number,
+      purchaseDate: row.db_purchase_date,
+      issueType: row.db_issue_type,
+      preferredResolution: row.db_resolution,
+      issueDescription: row.db_description,
+      fullName: row.db_fullname,
+      emailAddress: row.db_email,
+      phoneNumber: row.db_phone_number,
+      status: "Submitted",
+    }));
+
+    return res.status(200).json({ requests });
+  });
+}
+
 function getAccount(req, res) {
   const { email, password } = req.body;
 
@@ -165,4 +215,4 @@ function getAccount(req, res) {
   });
 }
 
-module.exports = { getHYW, insertHYW, trackHYWByTicket, getAccount };
+module.exports = { getHYW, insertHYW, trackHYWByTicket, getMyRmaRequests, getAccount };

@@ -1,9 +1,11 @@
 import "./form.css";
 import "./submit.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
 function Submit() {
+  const isAuthenticated = Boolean(window.localStorage.getItem("account"));
   const [menuOpen, setMenuOpen] = useState(false);
   const [randomString, setRandomString] = useState("");
   const [inputData, setInputData] = useState({
@@ -18,6 +20,16 @@ function Submit() {
     issueDescription: "",
     ticketNumber: "",
   });
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      window.location.hash = "#login";
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const generateRandomString = () => {
     const chars =
@@ -46,7 +58,7 @@ function Submit() {
       form.reportValidity();
       return;
     } else {
-      const response = await fetch("http://192.168.254.130:3001/api/hyw", {
+      const response = await fetch("http://192.168.254.151:3001/api/hyw", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
@@ -114,9 +126,7 @@ function Submit() {
           </nav>
         </div>
         <div className="header-actions">
-          <a className="header-login" href="#login">
-            Log In
-          </a>
+          <AuthMenu />
         </div>
       </header>
 

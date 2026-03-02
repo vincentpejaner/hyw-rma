@@ -1,5 +1,6 @@
 import "./login.css";
 import { useState } from "react";
+import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
 function Login() {
@@ -27,7 +28,7 @@ function Login() {
     }
 
     try {
-      const response = await fetch("http://localhost:3001/api/hyw/login", {
+      const response = await fetch("http://192.168.254.151:3001/api/hyw/login", {
         method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({...credential}),
@@ -36,7 +37,7 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Invalid credentials");
+        setError(data.message || "Invalid credentials");
         setLoading(false);
         return;
       }
@@ -45,7 +46,8 @@ function Login() {
 
       setLoading(false);
 
-      localStorage.setItem("account", JSON.stringify(data.user));
+      localStorage.setItem("account", JSON.stringify(data.account));
+      window.location.hash = "#submit";
       
     } catch (err) {
       console.error("Server error:", err);
@@ -92,9 +94,7 @@ function Login() {
           </nav>
         </div>
         <div className="header-actions">
-          <a className="header-login" href="#login">
-            Log In
-          </a>
+          <AuthMenu />
         </div>
       </header>
       <div className="login-wrapper">
