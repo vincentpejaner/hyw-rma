@@ -1,0 +1,120 @@
+.my-rma-page {
+  min-height: 100vh;
+  background: #f6f7fb;
+}
+
+.my-rma-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+.my-rma-hero {
+  margin-bottom: 24px;
+}
+
+.my-rma-hero h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  color: #111827;
+  letter-spacing: -0.03em;
+}
+
+.my-rma-hero p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.my-rma-state {
+  padding: 16px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  color: #374151;
+}
+
+.my-rma-list {
+  display: grid;
+  gap: 16px;
+}
+
+.my-rma-card {
+  padding: 20px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.my-rma-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.my-rma-card-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #111827;
+}
+
+.my-rma-ticket {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.my-rma-status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.06);
+  color: #111827;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.my-rma-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.my-rma-field {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f9fafb;
+}
+
+.my-rma-field.full {
+  grid-column: 1 / -1;
+}
+
+.my-rma-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.my-rma-value {
+  margin-top: 6px;
+  color: #111827;
+  font-weight: 600;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .my-rma-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .my-rma-grid {
+    grid-template-columns: 1fr;
+  }
+}

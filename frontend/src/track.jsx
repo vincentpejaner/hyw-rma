@@ -1,8 +1,10 @@
 import "./track.css";
 import { useState, useEffect } from "react";
+import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 import About from "./about";
 import Login from "./login.jsx";
+import MyRma from "./my-rma.jsx";
 import Submit from "./submit.jsx";
 
 const API_BASE = "http://192.168.254.130:3001";
@@ -137,9 +139,7 @@ function Home() {
         </div>
 
         <div className="header-actions">
-          <a className="header-login" href="#login">
-            Log In
-          </a>
+          <AuthMenu />
         </div>
       </header>
 
@@ -345,6 +345,7 @@ export default function App() {
 
   if (page === "about") return <About />;
   if (page === "login") return <Login />;
+  if (page === "my-rma") return <MyRma />;
   if (page === "submit") return <Submit />;
 
   return <Home />;

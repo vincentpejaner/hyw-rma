@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./login.css";
 import "./about.css";
+import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
 export default function About() {
@@ -58,7 +59,7 @@ export default function About() {
 					</nav>
 				</div>
 				<div className="header-actions">
-					<a className="header-login" href="#login">Log In</a>
+					<AuthMenu />
 				</div>
 			</header>
 

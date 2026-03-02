@@ -2,9 +2,25 @@ import "./home.css";
 import { useState, useEffect } from "react";
 import logo from "./images/logo1.png";
 import About from "./about";
+import AuthMenu from "./auth-menu.jsx";
 import Login from "./login.jsx";
+import MyRma from "./my-rma.jsx";
 import Submit from "./submit.jsx";
 import Track from "./track.jsx";
+
+function isAuthenticated() {
+  return Boolean(window.localStorage.getItem("account"));
+}
+
+function getCurrentPage() {
+  const route = (window.location.hash || "#home").replace("#", "");
+
+  if (route === "submit" && !isAuthenticated()) {
+    return "login";
+  }
+
+  return route;
+}
 
 function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,9 +63,7 @@ function Home() {
         </div>
 
         <div className="header-actions">
-          <a className="header-login" href="#login">
-            Log In
-          </a>
+          <AuthMenu />
         </div>
       </header>
 
@@ -149,18 +163,29 @@ function Home() {
 }
 
 export default function App() {
-  const [page, setPage] = useState(() =>
-    (window.location.hash || "#home").replace("#", "")
-  );
+  const [page, setPage] = useState(() => getCurrentPage());
 
   useEffect(() => {
-    const onHash = () => setPage((window.location.hash || "#home").replace("#", ""));
+    const onHash = () => {
+      const route = (window.location.hash || "#home").replace("#", "");
+
+      if (route === "submit" && !isAuthenticated()) {
+        window.location.hash = "#login";
+        setPage("login");
+        return;
+      }
+
+      setPage(route);
+    };
+
+    onHash();
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
   if (page === "about") return <About />;
   if (page === "login") return <Login />;
+  if (page === "my-rma") return <MyRma />;
   if (page === "submit") return <Submit />;
   if (page === "track") return <Track />;
 

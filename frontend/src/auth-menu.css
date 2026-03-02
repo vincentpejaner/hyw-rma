@@ -1,0 +1,265 @@
+.auth-menu {
+  position: relative;
+}
+
+.account-button {
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #e04040 0%, #e46475 100%);
+  font: inherit;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.account-button:hover,
+.account-button:focus-visible {
+  opacity: 0.95;
+}
+
+.account-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  padding: 12px;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.account-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.account-avatar-small {
+  width: 24px;
+  height: 24px;
+}
+
+.account-details {
+  min-width: 0;
+}
+
+.account-name {
+  margin: 0;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.account-email {
+  margin: 4px 0 0;
+  color: rgba(17, 24, 39, 0.6);
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.account-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.account-menu-item,
+.account-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+  color: #111827;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.account-menu-item {
+  border: none;
+  cursor: pointer;
+}
+
+.account-menu-item:hover,
+.account-menu-item:focus-visible {
+  background: #f3f4f6;
+}
+
+.darkmode-toggle {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: #d1d5db;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.darkmode-toggle.active {
+  background: #111827;
+}
+
+.darkmode-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.darkmode-toggle.active .darkmode-knob {
+  transform: translateX(20px);
+}
+
+.account-welcome {
+  margin: 0 0 10px;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.account-logout {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  background: #111827;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+}
+
+.account-logout:hover,
+.account-logout:focus-visible {
+  opacity: 0.94;
+}
+
+body.dark-mode {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+body.dark-mode #root,
+body.dark-mode .site-container,
+body.dark-mode .submit-container,
+body.dark-mode .login-container {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+body.dark-mode .page-header,
+body.dark-mode .page-footer,
+body.dark-mode .login-card,
+body.dark-mode .form,
+body.dark-mode .search-container,
+body.dark-mode .summary-card,
+body.dark-mode .track-point,
+body.dark-mode .summary-field,
+body.dark-mode .stat-card,
+body.dark-mode .card,
+body.dark-mode .feature-box {
+  background: #111827;
+  color: #e5e7eb;
+  border-color: rgba(229, 231, 235, 0.12);
+}
+
+body.dark-mode .header-nav a,
+body.dark-mode .footer-section a,
+body.dark-mode .footer-section p,
+body.dark-mode .footer-bottom,
+body.dark-mode .hero-inner p,
+body.dark-mode .track-sub,
+body.dark-mode .track-point-sub,
+body.dark-mode .summary-sub,
+body.dark-mode .label,
+body.dark-mode .stat-sub,
+body.dark-mode .login-header p {
+  color: rgba(229, 231, 235, 0.75);
+}
+
+body.dark-mode .hero-inner h1,
+body.dark-mode .hero-badge,
+body.dark-mode .track-left h1,
+body.dark-mode .summary-header h2,
+body.dark-mode .summary-section h3,
+body.dark-mode .value,
+body.dark-mode .stat-title,
+body.dark-mode .login-header h1,
+body.dark-mode .footer-section h4,
+body.dark-mode .footer-section h3,
+body.dark-mode label {
+  color: #f9fafb;
+}
+
+body.dark-mode .hero-badge,
+body.dark-mode .hero-cta .btn,
+body.dark-mode .status-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f9fafb;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .search-input {
+  background: #1f2937;
+  color: #f9fafb;
+  border-color: rgba(229, 231, 235, 0.12);
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder,
+body.dark-mode .search-input::placeholder {
+  color: rgba(229, 231, 235, 0.45);
+}
+
+body.dark-mode .account-dropdown {
+  background: #111827;
+  border-color: rgba(229, 231, 235, 0.12);
+}
+
+body.dark-mode .account-name,
+body.dark-mode .account-welcome,
+body.dark-mode .account-menu-item,
+body.dark-mode .account-toggle-row {
+  color: #f9fafb;
+}
+
+body.dark-mode .account-email {
+  color: rgba(229, 231, 235, 0.6);
+}
+
+body.dark-mode .account-menu-item,
+body.dark-mode .account-toggle-row {
+  background: #1f2937;
+}
+
+body.dark-mode .account-menu-item:hover,
+body.dark-mode .account-menu-item:focus-visible {
+  background: #273449;
+}
