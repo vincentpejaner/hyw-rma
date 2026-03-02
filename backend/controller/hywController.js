@@ -5,17 +5,15 @@ function getHYW(req, res) {
   db.query(query, (err, results) => {
     if (err) {
       console.error("Error fetching HYW data:", err);
-      res.status(500).json({ error: "Failed to fetch HYW data" });
-    } else {
-      res.status(200).json(results);
-      console.log("Fetched HYW data:", results);
+      return res.status(500).json({ error: "Failed to fetch HYW data" });
     }
+    res.status(200).json(results);
   });
 }
 
-
 function insertHYW(req, res) {
   console.log("insertHYW received body:", req.body);
+
   const {
     fullName,
     emailAddress,
@@ -37,7 +35,7 @@ function insertHYW(req, res) {
     [productModel, serialNumber, purchaseDate, ticketNumber],
     (err, productResult) => {
       if (err) {
-        console.error(err);
+        console.error("Product insert failed:", err);
         return res.status(500).json({ error: "Product insert failed" });
       }
 
@@ -51,7 +49,7 @@ function insertHYW(req, res) {
         [issueType, preferredResolution, issueDescription, productId],
         (err) => {
           if (err) {
-            console.error(err);
+            console.error("Issue insert failed:", err);
             return res.status(500).json({ error: "Issue insert failed" });
           }
 
@@ -63,7 +61,7 @@ function insertHYW(req, res) {
             [fullName, emailAddress, phoneNumber, productId],
             (err) => {
               if (err) {
-                console.error(err);
+                console.error("Customer insert failed:", err);
                 return res.status(500).json({ error: "Customer insert failed" });
               }
 
@@ -78,4 +76,67 @@ function insertHYW(req, res) {
   );
 }
 
-module.exports = { getHYW, insertHYW };
+/**
+ * ✅ NEW: Track RMA Summary by Ticket
+ * GET /api/hyw/track/:ticket
+ */
+function trackHYWByTicket(req, res) {
+  const ticket = (req.params.ticket || "").trim();
+
+  if (!ticket) {
+    return res.status(400).json({ message: "Ticket is required." });
+  }
+
+  const query = `
+    SELECT 
+      p.db_ticket,
+      p.db_product_name,
+      p.db_serial_number,
+      p.db_purchase_date,
+
+      i.db_issue_type,
+      i.db_resolution,
+      i.db_description,
+
+      c.db_fullname,
+      c.db_email,
+      c.db_phone_number
+
+    FROM db_product p
+    LEFT JOIN db_issue i ON p.db_productid = i.F_productid
+    LEFT JOIN db_customer c ON p.db_productid = c.F_productid
+    WHERE p.db_ticket = ?
+    LIMIT 1;
+  `;
+
+  db.query(query, [ticket], (err, results) => {
+    if (err) {
+      console.error("Track query error:", err);
+      return res.status(500).json({ message: "Failed to fetch RMA details." });
+    }
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "Ticket not found." });
+    }
+
+    const row = results[0];
+
+    // Return clean JSON keys that match your frontend fields
+    return res.status(200).json({
+      ticketNumber: row.db_ticket,
+      productModel: row.db_product_name,
+      serialNumber: row.db_serial_number,
+      purchaseDate: row.db_purchase_date,
+
+      issueType: row.db_issue_type,
+      preferredResolution: row.db_resolution,
+      issueDescription: row.db_description,
+
+      fullName: row.db_fullname,
+      emailAddress: row.db_email,
+      phoneNumber: row.db_phone_number,
+    });
+  });
+}
+
+module.exports = { getHYW, insertHYW, trackHYWByTicket };
