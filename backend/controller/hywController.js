@@ -1,34 +1,5 @@
 const db = require("../db");
 
-function getAccount(req, res) {
-  const { email, password } = req.body;
-
-  const query = `
-    SELECT * 
-    FROM db_account 
-    WHERE account_username = ? 
-    AND account_password = ?
-  `;
-
-  db.query(query, [email, password], (err, results) => {
-    if (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Server error" });
-    }
-
- 
-    if (results.length === 0) {
-      return res.status(401).json({ error: "Invalid email or password" });
-    }
-
-
-    res.status(200).json({
-      message: "Successfully login!",
-      user: results[0], 
-    });
-  });
-}
-
 function getHYW(req, res) {
   const query = "SELECT * FROM db_issue";
   db.query(query, (err, results) => {
@@ -90,19 +61,82 @@ function insertHYW(req, res) {
             [fullName, emailAddress, phoneNumber, productId],
             (err) => {
               if (err) {
-                console.error(err);
+                console.error("Customer insert failed:", err);
                 return res.status(500).json({ error: "Customer insert failed" });
               }
 
               res.status(200).json({
                 message: "RMA submitted successfully",
               });
-            },
+            }
           );
-        },
+        }
       );
-    },
+    }
   );
 }
 
-module.exports = { getHYW, insertHYW };
+/**
+ * ✅ NEW: Track RMA Summary by Ticket
+ * GET /api/hyw/track/:ticket
+ */
+function trackHYWByTicket(req, res) {
+  const ticket = (req.params.ticket || "").trim();
+
+  if (!ticket) {
+    return res.status(400).json({ message: "Ticket is required." });
+  }
+
+  const query = `
+    SELECT 
+      p.db_ticket,
+      p.db_product_name,
+      p.db_serial_number,
+      p.db_purchase_date,
+
+      i.db_issue_type,
+      i.db_resolution,
+      i.db_description,
+
+      c.db_fullname,
+      c.db_email,
+      c.db_phone_number
+
+    FROM db_product p
+    LEFT JOIN db_issue i ON p.db_productid = i.F_productid
+    LEFT JOIN db_customer c ON p.db_productid = c.F_productid
+    WHERE p.db_ticket = ?
+    LIMIT 1;
+  `;
+
+  db.query(query, [ticket], (err, results) => {
+    if (err) {
+      console.error("Track query error:", err);
+      return res.status(500).json({ message: "Failed to fetch RMA details." });
+    }
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "Ticket not found." });
+    }
+
+    const row = results[0];
+
+    // Return clean JSON keys that match your frontend fields
+    return res.status(200).json({
+      ticketNumber: row.db_ticket,
+      productModel: row.db_product_name,
+      serialNumber: row.db_serial_number,
+      purchaseDate: row.db_purchase_date,
+
+      issueType: row.db_issue_type,
+      preferredResolution: row.db_resolution,
+      issueDescription: row.db_description,
+
+      fullName: row.db_fullname,
+      emailAddress: row.db_email,
+      phoneNumber: row.db_phone_number,
+    });
+  });
+}
+
+module.exports = { getHYW, insertHYW, trackHYWByTicket };

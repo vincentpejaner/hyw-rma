@@ -46,6 +46,7 @@ function Login() {
       setLoading(false);
 
       localStorage.setItem("account", JSON.stringify(data.user));
+      
     } catch (err) {
       console.error("Server error:", err);
       setError("Server error. Try again later.");
