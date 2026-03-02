@@ -25,6 +25,7 @@ function insertHYW(req, res) {
     preferredResolution,
     issueDescription,
     ticketNumber,
+    accountid,
   } = req.body;
 
   const queryProduct =
@@ -53,12 +54,16 @@ function insertHYW(req, res) {
             return res.status(500).json({ error: "Issue insert failed" });
           }
 
+          if (!accountid) {
+            return res.status(400).json({ error: "Account ID is missing" });
+          }
+
           const customerQuery =
-            "INSERT INTO db_customer (db_fullname, db_email, db_phone_number, F_productid) VALUES (?, ?, ?, ?)";
+            "INSERT INTO db_customer (db_fullname, db_email, db_phone_number, F_productid, F_accountid) VALUES (?, ?, ?, ?, ?)";
 
           db.query(
             customerQuery,
-            [fullName, emailAddress, phoneNumber, productId],
+            [fullName, emailAddress, phoneNumber, productId, Number(accountid)],
             (err) => {
               if (err) {
                 console.error("Customer insert failed:", err);
@@ -119,7 +124,6 @@ function trackHYWByTicket(req, res) {
 
     const row = results[0];
 
-    // Return clean JSON keys that match your frontend fields
     return res.status(200).json({
       ticketNumber: row.db_ticket,
       productModel: row.db_product_name,
@@ -166,7 +170,9 @@ function getMyRmaRequests(req, res) {
   db.query(query, [accountEmail], (err, results) => {
     if (err) {
       console.error("My RMA query error:", err);
-      return res.status(500).json({ message: "Failed to fetch your RMA requests." });
+      return res
+        .status(500)
+        .json({ message: "Failed to fetch your RMA requests." });
     }
 
     const requests = (results || []).map((row) => ({
@@ -215,4 +221,10 @@ function getAccount(req, res) {
   });
 }
 
-module.exports = { getHYW, insertHYW, trackHYWByTicket, getMyRmaRequests, getAccount };
+module.exports = {
+  getHYW,
+  insertHYW,
+  trackHYWByTicket,
+  getMyRmaRequests,
+  getAccount,
+};

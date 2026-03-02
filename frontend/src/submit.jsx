@@ -5,6 +5,8 @@ import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
 function Submit() {
+
+    const accountId = Number(localStorage.getItem("account"));
   const isAuthenticated = Boolean(window.localStorage.getItem("account"));
   const [menuOpen, setMenuOpen] = useState(false);
   const [randomString, setRandomString] = useState("");
@@ -19,6 +21,7 @@ function Submit() {
     preferredResolution: "",
     issueDescription: "",
     ticketNumber: "",
+    accountid: Number(accountId),
   });
 
   useEffect(() => {
@@ -54,6 +57,8 @@ function Submit() {
     const ticketNumber = randomString || generateRandomString();
     const dataToSend = { ...inputData, ticketNumber };
     const form = e.currentTarget;
+
+
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -69,7 +74,7 @@ function Submit() {
         alert("❌ Submission failed: " + (errData.error || response.statusText));
         return;
       }
-
+/*
       setInputData({
         fullName: "",
         emailAddress: "",
@@ -81,7 +86,9 @@ function Submit() {
         preferredResolution: "",
         issueDescription: "",
         ticketNumber: "",
+
       });
+      */
     }
 
     alert("✅ RMA request submitted!");

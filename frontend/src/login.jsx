@@ -42,11 +42,12 @@ function Login() {
         return;
       }
 
-      console.log("Login successful:", data);
+      localStorage.setItem("account", JSON.stringify(data.account.account_id));
+      console.log("Login successful:", JSON.parse(localStorage.getItem("account")));
 
       setLoading(false);
 
-      localStorage.setItem("account", JSON.stringify(data.account));
+      localStorage.setItem("account", JSON.stringify(data.account.account_id));
       window.location.hash = "#submit";
       
     } catch (err) {
