@@ -1,98 +1,398 @@
 /* ============================= */
-/* TRACK PAGE STYLES */
+/* TRACK PAGE (RMA TRACK + SUMMARY) */
+/* Professional, clean, responsive */
 /* ============================= */
 
+:root {
+  --rma-bg: #f6f7fb;
+  --rma-card: #ffffff;
+  --rma-text: #0f172a;
+  --rma-muted: #64748b;
+  --rma-border: rgba(15, 23, 42, 0.12);
+  --rma-shadow: 0 10px 30px rgba(2, 6, 23, 0.10);
+  --rma-shadow-soft: 0 6px 18px rgba(2, 6, 23, 0.08);
+}
+
+/* Light app background (won't override pages that already have backgrounds) */
+.site-container {
+  background: var(--rma-bg);
+  min-height: 100vh;
+}
+
+/* Wrapper handles the “no-result hero” vs “search + summary” layout */
+.track-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2rem;
+}
+
+/* ============================= */
+/* NO RESULT: HERO (left text + right search card) */
+/* ============================= */
+.track-hero {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 3rem;
+  align-items: center;
+  min-height: calc(100vh - 180px); /* leaves space for header/footer */
+  padding: 2rem 0;
+}
+
+.track-left h1 {
+  margin: 0 0 0.85rem;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--rma-text);
+}
+
+.track-sub {
+  margin: 0 0 1.25rem;
+  max-width: 560px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--rma-muted);
+}
+
+.track-points {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  max-width: 560px;
+}
+
+.track-point {
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.track-point-title {
+  font-weight: 800;
+  color: var(--rma-text);
+  letter-spacing: -0.01em;
+}
+
+.track-point-sub {
+  margin-top: 0.25rem;
+  color: var(--rma-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.track-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end; /* keeps the card to the right edge */
+  gap: 0.75rem;
+}
+
+/* Keep card width nice in hero */
+.track-right .search-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Hero error message aligns under the card */
+.track-right .error-text {
+  max-width: 420px;
+  margin: 0;
+}
+
+/* ============================= */
+/* WITH RESULT: left search + right summary */
+/* ============================= */
+.track-wrapper.has-result {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 3.25rem;
+  align-items: start;
+}
+
+/* Search area (result state) */
 .content {
   width: 100%;
-  max-width: 1200px;   /* Match your header width */
-  margin: 0 auto;      /* Center page content */
   display: flex;
-  justify-content: flex-end; /* Align search bar to right */
+  justify-content: center;
   align-items: center;
-  padding: 1.5rem 1rem;
+  gap: 0.75rem;
 }
 
-/* ============================= */
-/* SEARCH CONTAINER */
-/* ============================= */
+.track-wrapper.has-result .content {
+  display: block;          /* prevents overlap and disables centering */
+  position: sticky;
+  top: 84px;               /* keeps search visible below header */
+  align-items: flex-start;
+  justify-content: stretch;
+  z-index: 1;
+}
 
+/* Search card */
 .search-container {
+  width: 100%;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--rma-card);
+  border: 1px solid var(--rma-border);
+  border-radius: 14px;
+  box-shadow: var(--rma-shadow-soft);
 }
 
-/* ============================= */
-/* SEARCH INPUT */
-/* ============================= */
+/* Card title + hint */
+.search-container::before {
+  content: "Track your RMA";
+  display: block;
+  font-weight: 800;
+  color: var(--rma-text);
+  letter-spacing: -0.01em;
+  font-size: 1.05rem;
+}
 
+.search-container::after {
+  content: "Enter your Ticket ID to view the summary and status.";
+  display: block;
+  margin-top: -0.3rem;
+  font-size: 0.9rem;
+  color: var(--rma-muted);
+}
+
+/* Input + buttons row */
 .search-input {
-  width: 280px;
-  padding: 0.75rem 1rem;
-  border: 1px solid #ccc;      /* full border instead of bottom-only */
-  border-radius: 30px;         /* ✅ rounded */
+  width: 100%;
+  padding: 0.78rem 0.95rem;
+  border: 1px solid var(--rma-border);
+  border-radius: 12px;
   background: #fff;
-  color: #333;
+  color: var(--rma-text);
   font-size: 1rem;
   outline: none;
-  transition: all 0.3s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .search-input:focus {
-  border-bottom: 2px solid #000;
-   border-color: #000;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+  border-color: rgba(15, 23, 42, 0.35);
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06);
 }
 
 .search-input::placeholder {
-  color: #777;
+  color: #94a3b8;
 }
 
-/* ============================= */
-/* SEARCH BUTTON */
-/* ============================= */
+.search-button,
+.clear-button {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease;
+}
 
 .search-button {
-  background: #111;
-  border: none;
+  background: #0f172a;
   color: #fff;
-  padding: 0.65rem 1.2rem;
-  font-size: 0.9rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.3s ease;
 }
 
 .search-button:hover {
-  background: #000;
+  background: #0b1220;
+}
+
+.search-button:active,
+.clear-button:active {
+  transform: translateY(1px);
+}
+
+.search-button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.clear-button {
+  background: #fff;
+  border-color: var(--rma-border);
+  color: var(--rma-text);
+}
+
+.clear-button:hover {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.error-text {
+  width: 100%;
+  max-width: 520px;
+  margin: 0.75rem auto 0;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #991b1b;
+  border-radius: 12px;
 }
 
 /* ============================= */
-/* RESPONSIVE */
+/* SUMMARY CARD */
 /* ============================= */
+.track-result {
+  width: 100%;
+  min-width: 0; /* prevents overflow that can cause overlap */
+}
 
-@media (max-width: 768px) {
-  .content {
-    justify-content: center;
+.summary-card {
+  width: 100%;
+  background: var(--rma-card);
+  border: 1px solid var(--rma-border);
+  border-radius: 16px;
+  box-shadow: var(--rma-shadow);
+  overflow: hidden;
+}
+
+.summary-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.03), rgba(15, 23, 42, 0.00));
+}
+
+.summary-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: var(--rma-text);
+}
+
+.summary-sub {
+  margin: 0.35rem 0 0;
+  color: var(--rma-muted);
+  font-size: 0.95rem;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-weight: 800;
+  color: var(--rma-text);
+}
+
+.status-pill {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--rma-text);
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.summary-section {
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.summary-section + .summary-section {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.summary-section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+  color: var(--rma-text);
+  letter-spacing: -0.01em;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.summary-field {
+  padding: 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.summary-field.full {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rma-muted);
+}
+
+.value {
+  margin-top: 0.35rem;
+  font-size: 1rem;
+  color: var(--rma-text);
+  font-weight: 700;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* ============================= */
+/* Responsive */
+/* ============================= */
+@media (max-width: 980px) {
+  .track-wrapper.has-result {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 
-  .search-input {
-    width: 100%;
-    max-width: 260px;
+  .track-wrapper.has-result .content {
+    position: static;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .track-hero {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    min-height: auto;
+    text-align: center;
+  }
+
+  .track-sub,
+  .track-points {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .track-right {
+    align-items: center;
+  }
+
+  .track-right .search-container,
+  .track-right .error-text {
+    max-width: 520px;
   }
 }
 
 @media (max-width: 480px) {
-  .search-container {
+  .track-wrapper {
+    padding: 1rem 0.85rem 1.5rem;
+  }
+
+  .summary-header {
     flex-direction: column;
-    width: 100%;
+    align-items: flex-start;
   }
 
-  .search-input {
-    width: 100%;
-  }
-
-  .search-button {
-    width: 100%;
+  .track-left h1 {
+    font-size: 2rem;
   }
 }
