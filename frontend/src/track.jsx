@@ -7,6 +7,49 @@ import Submit from "./submit.jsx";
 
 const API_BASE = "http://192.168.254.130:3001";
 
+function SearchCard({
+  query,
+  setQuery,
+  loading,
+  rma,
+  errorMsg,
+  handleSearch,
+  handleClear,
+}) {
+  return (
+    <div className="search-container">
+      <input
+        type="text"
+        className="search-input"
+        placeholder="Enter Ticket ID..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleSearch();
+        }}
+      />
+
+      <button
+        className="search-button"
+        onClick={handleSearch}
+        disabled={loading}
+      >
+        {loading ? "Searching..." : "Search"}
+      </button>
+
+      {(rma || errorMsg) && (
+        <button
+          className="clear-button"
+          onClick={handleClear}
+          disabled={loading}
+        >
+          Clear
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -54,30 +97,7 @@ function Home() {
     setRma(null);
   };
 
-  const SearchCard = () => (
-    <div className="search-container">
-      <input
-        type="text"
-        className="search-input"
-        placeholder="Enter Ticket ID..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleSearch();
-        }}
-      />
-
-      <button className="search-button" onClick={handleSearch} disabled={loading}>
-        {loading ? "Searching..." : "Search"}
-      </button>
-
-      {(rma || errorMsg) && (
-        <button className="clear-button" onClick={handleClear} disabled={loading}>
-          Clear
-        </button>
-      )}
-    </div>
-  );
+  
 
   return (
     <div className="site-container">
@@ -153,7 +173,15 @@ function Home() {
             </div>
 
             <div className="track-right">
-              <SearchCard />
+             <SearchCard
+  query={query}
+  setQuery={setQuery}
+  loading={loading}
+  rma={rma}
+  errorMsg={errorMsg}
+  handleSearch={handleSearch}
+  handleClear={handleClear}
+/>
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
           </div>
@@ -163,7 +191,15 @@ function Home() {
         {rma && (
           <>
             <div className="content">
-              <SearchCard />
+             <SearchCard
+  query={query}
+  setQuery={setQuery}
+  loading={loading}
+  rma={rma}
+  errorMsg={errorMsg}
+  handleSearch={handleSearch}
+  handleClear={handleClear}
+/>
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
 
