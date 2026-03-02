@@ -5,7 +5,7 @@ import About from "./about";
 import Login from "./login.jsx";
 import Submit from "./submit.jsx";
 
-const API_BASE = "http://192.168.254.130:3001"; 
+const API_BASE = "http://192.168.254.130:3001";
 
 function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,19 +33,12 @@ function Home() {
       );
 
       const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json")
-        ? await res.json()
-        : null;
+      const data = contentType.includes("application/json") ? await res.json() : null;
 
       if (!res.ok) {
-        // API returns { message: "Ticket not found." }
         throw new Error(data?.message || "Failed to fetch RMA details.");
       }
 
-      // Expected keys from backend:
-      // ticketNumber, productModel, serialNumber, purchaseDate,
-      // issueType, preferredResolution, issueDescription,
-      // fullName, emailAddress, phoneNumber
       setRma(data);
     } catch (err) {
       setRma(null);
@@ -60,6 +53,31 @@ function Home() {
     setErrorMsg("");
     setRma(null);
   };
+
+  const SearchCard = () => (
+    <div className="search-container">
+      <input
+        type="text"
+        className="search-input"
+        placeholder="Enter Ticket ID..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleSearch();
+        }}
+      />
+
+      <button className="search-button" onClick={handleSearch} disabled={loading}>
+        {loading ? "Searching..." : "Search"}
+      </button>
+
+      {(rma || errorMsg) && (
+        <button className="clear-button" onClick={handleClear} disabled={loading}>
+          Clear
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="site-container">
@@ -76,8 +94,12 @@ function Home() {
 
         <div className="header-content">
           <nav className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}>
-            <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
-            <a href="#submit" onClick={() => setMenuOpen(false)}>Submit RMA</a>
+            <a href="#home" onClick={() => setMenuOpen(false)}>
+              Home
+            </a>
+            <a href="#submit" onClick={() => setMenuOpen(false)}>
+              Submit RMA
+            </a>
           </nav>
 
           <div className="header-logo">
@@ -85,120 +107,136 @@ function Home() {
           </div>
 
           <nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>
-            <a href="#track" onClick={() => setMenuOpen(false)}>Track RMA</a>
-            <a href="#about" onClick={() => setMenuOpen(false)}>About Us</a>
+            <a href="#track" onClick={() => setMenuOpen(false)}>
+              Track RMA
+            </a>
+            <a href="#about" onClick={() => setMenuOpen(false)}>
+              About Us
+            </a>
           </nav>
         </div>
 
         <div className="header-actions">
-          <a className="header-login" href="#login">Log In</a>
+          <a className="header-login" href="#login">
+            Log In
+          </a>
         </div>
       </header>
 
-      {/* ✅ Moves search to right when result exists */}
+      {/* Track Page */}
       <div className={`track-wrapper ${rma ? "has-result" : ""}`}>
-        <div className="content">
-          <div className="search-container">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Enter Ticket ID..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-            />
+        {/* NO RESULT: Left text content + Right search card */}
+        {!rma && (
+          <div className="track-hero">
+            <div className="track-left">
+              <h1>Track Your RMA</h1>
+              <p className="track-sub">
+                Stay informed every step of the way. Enter your Ticket ID to view your
+                current status, service progress, and the details we recorded for your
+                request—securely and in real time.
+              </p>
 
-            <button
-              className="search-button"
-              onClick={handleSearch}
-              disabled={loading}
-            >
-              {loading ? "Searching..." : "Search"}
-            </button>
-
-            {(rma || errorMsg) && (
-              <button className="clear-button" onClick={handleClear} disabled={loading}>
-                Clear
-              </button>
-            )}
-          </div>
-
-          {errorMsg && <p className="error-text">{errorMsg}</p>}
-        </div>
-
-        {/* ✅ Summary form */}
-        {rma && (
-          <div className="track-result">
-            <div className="summary-card">
-              <div className="summary-header">
-                <div>
-                  <h2>RMA Summary</h2>
-                  <p className="summary-sub">
-                    Ticket ID: <span className="mono">{rma.ticketNumber}</span>
-                  </p>
+              <div className="track-points">
+                <div className="track-point">
+                  <div className="track-point-title">Fast status checks</div>
+                  <div className="track-point-sub">See updates instantly using your Ticket ID.</div>
                 </div>
-
-                <span className="status-pill">{rma.status || "Submitted"}</span>
+                <div className="track-point">
+                  <div className="track-point-title">Clear summary view</div>
+                  <div className="track-point-sub">Review customer and product details in one place.</div>
+                </div>
+                <div className="track-point">
+                  <div className="track-point-title">Secure and traceable</div>
+                  <div className="track-point-sub">Each request is tracked using a unique ticket number.</div>
+                </div>
               </div>
+            </div>
 
-              <section className="summary-section">
-                <h3>Customer Information</h3>
-                <div className="summary-grid">
-                  <div className="summary-field">
-                    <div className="label">Full Name</div>
-                    <div className="value">{rma.fullName || "-"}</div>
-                  </div>
-
-                  <div className="summary-field">
-                    <div className="label">Email</div>
-                    <div className="value">{rma.emailAddress || "-"}</div>
-                  </div>
-
-                  <div className="summary-field">
-                    <div className="label">Phone Number</div>
-                    <div className="value">{rma.phoneNumber || "-"}</div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="summary-section">
-                <h3>Product Information</h3>
-                <div className="summary-grid">
-                  <div className="summary-field">
-                    <div className="label">Product Name / Model</div>
-                    <div className="value">{rma.productModel || "-"}</div>
-                  </div>
-
-                  <div className="summary-field">
-                    <div className="label">Serial Number</div>
-                    <div className="value">{rma.serialNumber || "-"}</div>
-                  </div>
-
-                  <div className="summary-field">
-                    <div className="label">Purchase Date</div>
-                    <div className="value">{rma.purchaseDate || "-"}</div>
-                  </div>
-
-                  <div className="summary-field">
-                    <div className="label">Issue Type</div>
-                    <div className="value">{rma.issueType || "-"}</div>
-                  </div>
-
-                  <div className="summary-field">
-                    <div className="label">Preferred Resolution</div>
-                    <div className="value">{rma.preferredResolution || "-"}</div>
-                  </div>
-
-                  <div className="summary-field full">
-                    <div className="label">Issue Description</div>
-                    <div className="value">{rma.issueDescription || "-"}</div>
-                  </div>
-                </div>
-              </section>
+            <div className="track-right">
+              <SearchCard />
+              {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
           </div>
+        )}
+
+        {/* WITH RESULT: Search on left + Summary on right */}
+        {rma && (
+          <>
+            <div className="content">
+              <SearchCard />
+              {errorMsg && <p className="error-text">{errorMsg}</p>}
+            </div>
+
+            <div className="track-result">
+              <div className="summary-card">
+                <div className="summary-header">
+                  <div>
+                    <h2>RMA Summary</h2>
+                    <p className="summary-sub">
+                      Ticket ID: <span className="mono">{rma.ticketNumber}</span>
+                    </p>
+                  </div>
+
+                  <span className="status-pill">{rma.status || "Submitted"}</span>
+                </div>
+
+                <section className="summary-section">
+                  <h3>Customer Information</h3>
+                  <div className="summary-grid">
+                    <div className="summary-field">
+                      <div className="label">Full Name</div>
+                      <div className="value">{rma.fullName || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Email</div>
+                      <div className="value">{rma.emailAddress || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Phone Number</div>
+                      <div className="value">{rma.phoneNumber || "-"}</div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="summary-section">
+                  <h3>Product Information</h3>
+                  <div className="summary-grid">
+                    <div className="summary-field">
+                      <div className="label">Product Name / Model</div>
+                      <div className="value">{rma.productModel || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Serial Number</div>
+                      <div className="value">{rma.serialNumber || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Purchase Date</div>
+                      <div className="value">{rma.purchaseDate || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Issue Type</div>
+                      <div className="value">{rma.issueType || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Preferred Resolution</div>
+                      <div className="value">{rma.preferredResolution || "-"}</div>
+                    </div>
+
+                    <div className="summary-field full">
+                      <div className="label">Issue Description</div>
+                      <div className="value">{rma.issueDescription || "-"}</div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -211,24 +249,42 @@ function Home() {
           <div className="footer-section">
             <h4>Quick Links</h4>
             <ul>
-              <li><a href="#home">Home</a></li>
-              <li><a href="#about">About Us</a></li>
-              <li><a href="#rma">RMA Services</a></li>
-              <li><a href="#support">Support</a></li>
+              <li>
+                <a href="#home">Home</a>
+              </li>
+              <li>
+                <a href="#about">About Us</a>
+              </li>
+              <li>
+                <a href="#rma">RMA Services</a>
+              </li>
+              <li>
+                <a href="#support">Support</a>
+              </li>
             </ul>
           </div>
           <div className="footer-section">
             <h4>Contact</h4>
-            <p>Email: <a href="mailto:support@hyw.com">support@hyw.com</a></p>
-            <p>Phone: <a href="tel:+1234567890">+1 (234) 567-890</a></p>
+            <p>
+              Email: <a href="mailto:support@hyw.com">support@hyw.com</a>
+            </p>
+            <p>
+              Phone: <a href="tel:+1234567890">+1 (234) 567-890</a>
+            </p>
             <p>Address: 123 HYW Street, City, Country</p>
           </div>
           <div className="footer-section">
             <h4>Follow Us</h4>
             <ul>
-              <li><a href="#facebook">Facebook</a></li>
-              <li><a href="#twitter">Twitter</a></li>
-              <li><a href="#linkedin">LinkedIn</a></li>
+              <li>
+                <a href="#facebook">Facebook</a>
+              </li>
+              <li>
+                <a href="#twitter">Twitter</a>
+              </li>
+              <li>
+                <a href="#linkedin">LinkedIn</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -241,7 +297,9 @@ function Home() {
 }
 
 export default function App() {
-  const [page, setPage] = useState(() => (window.location.hash || "#home").replace("#", ""));
+  const [page, setPage] = useState(() =>
+    (window.location.hash || "#home").replace("#", "")
+  );
 
   useEffect(() => {
     const onHash = () => setPage((window.location.hash || "#home").replace("#", ""));
