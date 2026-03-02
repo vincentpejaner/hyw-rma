@@ -1,12 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getHYW, insertHYW, getAccount } = require('../controller/hywController.js');
+const { getHYW, insertHYW } = require('../controller/hywController.js');
 
+const { getHYW, insertHYW, trackHYWByTicket } = require("../controller/hywController.js");
 
-router.route('/')
-    .get(getHYW)
-    .post(insertHYW);
-
-router.route('/login').post(getAccount);
+router.route("/")
+  .get(getHYW)
+  .post(insertHYW);
 
 module.exports = router;

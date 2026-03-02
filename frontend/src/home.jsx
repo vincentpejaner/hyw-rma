@@ -4,6 +4,7 @@ import logo from "./images/logo1.png";
 import About from "./about";
 import Login from "./login.jsx";
 import Submit from "./submit.jsx";
+import Track from "./track.jsx";
 
 function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -108,6 +109,9 @@ export default function App() {
 
   if (page === "submit") {
     return <Submit />;
+  }
+  if (page === "track") {
+    return <Track />;
   }
 
   return <Home />;

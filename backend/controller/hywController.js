@@ -34,16 +34,15 @@ function getHYW(req, res) {
   db.query(query, (err, results) => {
     if (err) {
       console.error("Error fetching HYW data:", err);
-      res.status(500).json({ error: "Failed to fetch HYW data" });
-    } else {
-      res.status(200).json(results);
-      console.log("Fetched HYW data:", results);
+      return res.status(500).json({ error: "Failed to fetch HYW data" });
     }
+    res.status(200).json(results);
   });
 }
 
 function insertHYW(req, res) {
   console.log("insertHYW received body:", req.body);
+
   const {
     fullName,
     emailAddress,
@@ -65,7 +64,7 @@ function insertHYW(req, res) {
     [productModel, serialNumber, purchaseDate, ticketNumber],
     (err, productResult) => {
       if (err) {
-        console.error(err);
+        console.error("Product insert failed:", err);
         return res.status(500).json({ error: "Product insert failed" });
       }
 
@@ -79,7 +78,7 @@ function insertHYW(req, res) {
         [issueType, preferredResolution, issueDescription, productId],
         (err) => {
           if (err) {
-            console.error(err);
+            console.error("Issue insert failed:", err);
             return res.status(500).json({ error: "Issue insert failed" });
           }
 
@@ -92,9 +91,7 @@ function insertHYW(req, res) {
             (err) => {
               if (err) {
                 console.error(err);
-                return res
-                  .status(500)
-                  .json({ error: "Customer insert failed" });
+                return res.status(500).json({ error: "Customer insert failed" });
               }
 
               res.status(200).json({
@@ -108,4 +105,4 @@ function insertHYW(req, res) {
   );
 }
 
-module.exports = { getHYW, insertHYW, getAccount };
+module.exports = { getHYW, insertHYW };
