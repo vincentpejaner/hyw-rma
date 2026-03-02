@@ -2,42 +2,61 @@ import "./login.css";
 import { useState } from "react";
 import logo from "./images/logo1.png";
 
-function Login({ onLoginSuccess }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function Login() {
+  const [credential, setCredential] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setCredential({ ...credential, [name]: value });
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    // Simple validation
-    if (!email || !password) {
+
+
+    if (!credential.email || !credential.password) {
       setError("Please fill in all fields");
       setLoading(false);
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email && password) {
-        console.log("Login successful:", { email });
-        onLoginSuccess(email);
+    try {
+      const response = await fetch("http://localhost:3001/api/hyw/login", {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({...credential}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Invalid credentials");
         setLoading(false);
-      } else {
-        setError("Invalid credentials");
-        setLoading(false);
+        return;
       }
-    }, 500);
+
+      console.log("Login successful:", data);
+
+      setLoading(false);
+
+      localStorage.setItem("account", JSON.stringify(data.user));
+    } catch (err) {
+      console.error("Server error:", err);
+      setError("Server error. Try again later.");
+      setLoading(false);
+    }
   };
 
   return (
     <div className="login-container">
       <header className="page-header">
-        <button 
+        <button
           className="menu-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
@@ -47,20 +66,34 @@ function Login({ onLoginSuccess }) {
           <span></span>
         </button>
         <div className="header-content">
-          <nav className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}>
-            <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
-            <a href="#submit" onClick={() => setMenuOpen(false)}>Submit RMA</a>
+          <nav
+            className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}
+          >
+            <a href="#home" onClick={() => setMenuOpen(false)}>
+              Home
+            </a>
+            <a href="#submit" onClick={() => setMenuOpen(false)}>
+              Submit RMA
+            </a>
           </nav>
           <div className="header-logo">
             <img src={logo} alt="HYW Logo" />
           </div>
-          <nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>
-            <a href="#track" onClick={() => setMenuOpen(false)}>Track RMA</a>
-            <a href="#about" onClick={() => setMenuOpen(false)}>About Us</a>
+          <nav
+            className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}
+          >
+            <a href="#track" onClick={() => setMenuOpen(false)}>
+              Track RMA
+            </a>
+            <a href="#about" onClick={() => setMenuOpen(false)}>
+              About Us
+            </a>
           </nav>
         </div>
         <div className="header-actions">
-          <a className="header-login" href="#login">Log In</a>
+          <a className="header-login" href="#login">
+            Log In
+          </a>
         </div>
       </header>
       <div className="login-wrapper">
@@ -82,8 +115,9 @@ function Login({ onLoginSuccess }) {
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={credential.email}
+                name="email"
+                onChange={handleChange}
                 required
               />
             </div>
@@ -94,8 +128,9 @@ function Login({ onLoginSuccess }) {
                 id="password"
                 type="password"
                 placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={credential.password}
+                name="password"
+                onChange={handleChange}
                 required
               />
             </div>
@@ -114,29 +149,50 @@ function Login({ onLoginSuccess }) {
           <div className="footer-content">
             <div className="footer-section">
               <h3>HYW</h3>
-              <p>HYW RMA Management System - Your trusted return and warranty solution.</p>
+              <p>
+                HYW RMA Management System - Your trusted return and warranty
+                solution.
+              </p>
             </div>
             <div className="footer-section">
               <h4>Quick Links</h4>
               <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About Us</a></li>
-                <li><a href="#rma">RMA Services</a></li>
-                <li><a href="#support">Support</a></li>
+                <li>
+                  <a href="#home">Home</a>
+                </li>
+                <li>
+                  <a href="#about">About Us</a>
+                </li>
+                <li>
+                  <a href="#rma">RMA Services</a>
+                </li>
+                <li>
+                  <a href="#support">Support</a>
+                </li>
               </ul>
             </div>
             <div className="footer-section">
               <h4>Contact</h4>
-              <p>Email: <a href="mailto:support@hyw.com">support@hyw.com</a></p>
-              <p>Phone: <a href="tel:+1234567890">+1 (234) 567-890</a></p>
+              <p>
+                Email: <a href="mailto:support@hyw.com">support@hyw.com</a>
+              </p>
+              <p>
+                Phone: <a href="tel:+1234567890">+1 (234) 567-890</a>
+              </p>
               <p>Address: 123 HYW Street, City, Country</p>
             </div>
             <div className="footer-section">
               <h4>Follow Us</h4>
               <ul>
-                <li><a href="#facebook">Facebook</a></li>
-                <li><a href="#twitter">Twitter</a></li>
-                <li><a href="#linkedin">LinkedIn</a></li>
+                <li>
+                  <a href="#facebook">Facebook</a>
+                </li>
+                <li>
+                  <a href="#twitter">Twitter</a>
+                </li>
+                <li>
+                  <a href="#linkedin">LinkedIn</a>
+                </li>
               </ul>
             </div>
           </div>

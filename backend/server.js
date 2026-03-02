@@ -10,4 +10,4 @@ app.get('/', (req, res) => res.send("Server is running!"));
 
 app.use('/api/hyw', require('./routes/hywRoutes.js'));
 
-app.listen(3001, () => console.log("Listening on port 3001"));
+app.listen(3001, "0.0.0.0", () => console.log("Listening on port 3001"));

@@ -1,5 +1,34 @@
 const db = require("../db");
 
+function getAccount(req, res) {
+  const { email, password } = req.body;
+
+  const query = `
+    SELECT * 
+    FROM db_account 
+    WHERE account_username = ? 
+    AND account_password = ?
+  `;
+
+  db.query(query, [email, password], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Server error" });
+    }
+
+ 
+    if (results.length === 0) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+
+    res.status(200).json({
+      message: "Successfully login!",
+      user: results[0], 
+    });
+  });
+}
+
 function getHYW(req, res) {
   const query = "SELECT * FROM db_issue";
   db.query(query, (err, results) => {
@@ -12,7 +41,6 @@ function getHYW(req, res) {
     }
   });
 }
-
 
 function insertHYW(req, res) {
   console.log("insertHYW received body:", req.body);
@@ -64,18 +92,20 @@ function insertHYW(req, res) {
             (err) => {
               if (err) {
                 console.error(err);
-                return res.status(500).json({ error: "Customer insert failed" });
+                return res
+                  .status(500)
+                  .json({ error: "Customer insert failed" });
               }
 
               res.status(200).json({
                 message: "RMA submitted successfully",
               });
-            }
+            },
           );
-        }
+        },
       );
-    }
+    },
   );
 }
 
-module.exports = { getHYW, insertHYW };
+module.exports = { getHYW, insertHYW, getAccount };
