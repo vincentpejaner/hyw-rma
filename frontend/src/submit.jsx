@@ -63,7 +63,7 @@ function Submit() {
       form.reportValidity();
       return;
     } else {
-      const response = await fetch("http://192.168.254.151:3001/api/hyw", {
+      const response = await fetch("http://192.168.254.131:3001/api/hyw", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
