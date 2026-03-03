@@ -48,7 +48,7 @@ function Login() {
         JSON.stringify({
           account_id: data.account.account_id,
           account_name: data.account.account_name,
-          account_email: data.account.username,
+          account_email: data.account.account_username,
         }),
       );
       console.log(
