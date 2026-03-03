@@ -55,7 +55,6 @@ function Login() {
 
       setLoading(false);
 
-      localStorage.setItem("account", JSON.stringify(data.account.account_id));
       window.location.hash = "#submit";
     } catch (err) {
       console.error("Server error:", err);

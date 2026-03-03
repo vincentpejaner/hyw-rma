@@ -7,7 +7,11 @@ const DEFAULT_AVATAR =
 function getStoredAccount() {
   try {
     const rawAccount = window.localStorage.getItem("account");
-    return rawAccount ? JSON.parse(rawAccount) : null;
+    if (!rawAccount) {
+      return null;
+    }
+    const parsed = JSON.parse(rawAccount);
+    return parsed && typeof parsed === "object" ? parsed : null;
   } catch {
     return null;
   }
@@ -49,8 +53,9 @@ export default function AuthMenu() {
     );
   }
 
-  const accountName = account.account_name || account.account_name || "";
-  const accountEmail = account.account_username || account.account_username || "";
+  const accountName =
+    account.account_name || account.account_username || account.account_email || "Account";
+  const accountEmail = account.account_email || account.account_username || "";
 
   const handleLogout = () => {
     window.localStorage.removeItem("account");
