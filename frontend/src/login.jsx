@@ -19,8 +19,6 @@ function Login() {
     setError("");
     setLoading(true);
 
-
-
     if (!credential.email || !credential.password) {
       setError("Please fill in all fields");
       setLoading(false);
@@ -28,11 +26,14 @@ function Login() {
     }
 
     try {
-      const response = await fetch("http://192.168.254.151:3001/api/hyw/login", {
-        method: "POST", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({...credential}),
-      });
+      const response = await fetch(
+        "http://192.168.254.151:3001/api/hyw/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...credential }),
+        },
+      );
 
       const data = await response.json();
 
@@ -42,14 +43,23 @@ function Login() {
         return;
       }
 
-      localStorage.setItem("account", JSON.stringify(data.account.account_id));
-      console.log("Login successful:", JSON.parse(localStorage.getItem("account")));
+      localStorage.setItem(
+        "account",
+        JSON.stringify({
+          account_id: data.account.account_id,
+          account_name: data.account.account_name,
+          account_email: data.account.username,
+        }),
+      );
+      console.log(
+        "Login successful:",
+        JSON.parse(localStorage.getItem("account")),
+      );
 
       setLoading(false);
 
       localStorage.setItem("account", JSON.stringify(data.account.account_id));
       window.location.hash = "#submit";
-      
     } catch (err) {
       console.error("Server error:", err);
       setError("Server error. Try again later.");

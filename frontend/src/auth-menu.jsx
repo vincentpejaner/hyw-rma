@@ -49,8 +49,8 @@ export default function AuthMenu() {
     );
   }
 
-  const accountName = account.account_name || account.account_username || "Account";
-  const accountEmail = account.account_email || account.account_username || "";
+  const accountName = account.account_name || account.account_name || "";
+  const accountEmail = account.account_username || account.account_username || "";
 
   const handleLogout = () => {
     window.localStorage.removeItem("account");
@@ -65,7 +65,11 @@ export default function AuthMenu() {
         className="account-button"
         onClick={() => setMenuOpen((current) => !current)}
       >
-        <img className="account-avatar account-avatar-small" src={DEFAULT_AVATAR} alt="" />
+        <img
+          className="account-avatar account-avatar-small"
+          src={DEFAULT_AVATAR}
+          alt=""
+        />
         {accountName}
       </button>
 
@@ -107,7 +111,11 @@ export default function AuthMenu() {
           </div>
 
           <p className="account-welcome">Welcome {accountName}</p>
-          <button type="button" className="account-logout" onClick={handleLogout}>
+          <button
+            type="button"
+            className="account-logout"
+            onClick={handleLogout}
+          >
             Log Out
           </button>
         </div>
