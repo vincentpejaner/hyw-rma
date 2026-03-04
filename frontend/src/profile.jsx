@@ -6,11 +6,52 @@ import logo from "./images/logo1.png";
 function Profile() {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const [companyName, setCompanyName] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [companyEmail, setCompanyEmail] = useState("");
-  const [companyPhone, setCompanyPhone] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
+  const [data, setData] = useState({
+    companyName: "",
+    fullName: "",
+    companyEmail: "",
+    companyPhone: "",
+    companyAddress: "",
+  });
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setData({ ...data, [name]: value });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const storedAccount = JSON.parse(localStorage.getItem("account"));
+    const accountId = storedAccount?.account_id;
+
+    const dataToSend = {
+      ...data,
+      accountId: Number(accountId),
+    };
+
+    try {
+      const response = await fetch(
+        `http://${window.location.hostname}:3001/api/hyw/profile`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dataToSend),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.log(result.message || "Failed to update profile.");
+      } else {
+        console.log("Profile updated successfully!");
+        console.log(result); // ✅ use result, not response.json()
+      }
+    } catch (error) {
+      console.log("Server error:", error);
+    }
+  }
 
   return (
     <div className="submit-container">
@@ -56,17 +97,16 @@ function Profile() {
 
       <main className="submit-main">
         <div className="profile-card">
-
           <h1>Account Settings</h1>
 
           <form className="profile-form">
-
             <div className="form-group">
               <label>Company Name</label>
               <input
                 type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
+                name="companyName"
+                value={data.companyName}
+                onChange={handleChange}
                 placeholder="Enter company name"
               />
             </div>
@@ -75,8 +115,9 @@ function Profile() {
               <label>Contact Person / Full Name</label>
               <input
                 type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                name="fullName"
+                value={data.fullName}
+                onChange={handleChange}
                 placeholder="Enter full name"
               />
             </div>
@@ -85,8 +126,9 @@ function Profile() {
               <label>Email Address</label>
               <input
                 type="email"
-                value={companyEmail}
-                onChange={(e) => setCompanyEmail(e.target.value)}
+                name="companyEmail"
+                value={data.companyEmail}
+                onChange={handleChange}
                 placeholder="Enter email"
               />
             </div>
@@ -95,8 +137,9 @@ function Profile() {
               <label>Contact Number</label>
               <input
                 type="text"
-                value={companyPhone}
-                onChange={(e) => setCompanyPhone(e.target.value)}
+                name="companyPhone"
+                value={data.companyPhone}
+                onChange={handleChange}
                 placeholder="Enter contact number"
               />
             </div>
@@ -104,18 +147,21 @@ function Profile() {
             <div className="form-group">
               <label>Company Address</label>
               <textarea
-                value={companyAddress}
-                onChange={(e) => setCompanyAddress(e.target.value)}
+                name="companyAddress"
+                value={data.companyAddress}
+                onChange={handleChange}
                 placeholder="Enter company address"
               />
             </div>
 
-            <button className="save-button">
+            <button
+              type="submit"
+              className="save-button"
+              onClick={handleSubmit}
+            >
               Save Changes
             </button>
-
           </form>
-
         </div>
       </main>
 

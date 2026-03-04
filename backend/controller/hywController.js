@@ -88,7 +88,7 @@ function insertHYW(req, res) {
     },
   );
 }
-
+/*
 function trackHYWByTicket(req, res) {
   const ticket = (req.params.ticket || "").trim();
 
@@ -146,7 +146,7 @@ function trackHYWByTicket(req, res) {
     });
   });
 }
-
+*/
 function getMyRmaRequests(req, res) {
   const accountEmail = (req.params.email || "").trim();
 
@@ -226,11 +226,62 @@ function getAccount(req, res) {
       .json({ message: "Login successful.", account: results[0] });
   });
 }
+function insertProfile(req, res) {
+  const {
+    fullName,
+    companyPhone,
+    companyEmail,
+    companyName,
+    companyAddress,
+    accountId,
+  } = req.body;
 
+  if (!accountId || isNaN(accountId)) {
+    return res.status(400).json({ message: "Invalid account ID." });
+  }
+
+  const query = `
+    INSERT INTO db_customer (
+      db_fullname,
+      db_phone_number,
+      db_companyEmail,
+      db_companyName,
+      db_companyAddress,
+      F_accountid
+    ) VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    query,
+    [
+      fullName,
+      companyPhone,
+      companyEmail,
+      companyName,
+      companyAddress,
+      Number(accountId),
+    ],
+    (err, results) => {
+      if (err) {
+        console.error(err); // 👈 very important
+        return res.status(500).json({
+          message: "Failed to insert profile.",
+          error: err.message, // show real error
+        });
+      }
+
+      return res.status(201).json({
+        message: "Profile inserted successfully.",
+        results,
+      });
+    }
+  );
+}
 module.exports = {
   getHYW,
   insertHYW,
-  trackHYWByTicket,
+  //trackHYWByTicket,
   getMyRmaRequests,
   getAccount,
+  insertProfile,
 };

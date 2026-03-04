@@ -34,7 +34,7 @@ function Submit() {
       const randomIndex = Math.floor(Math.random() * chars.length);
       result += chars[randomIndex];
     }
-  
+
     setRandomString(result);
     return result;
   };
@@ -50,7 +50,6 @@ function Submit() {
     const dataToSend = { ...inputData, ticketNumber };
     const form = e.currentTarget;
 
-
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -63,10 +62,12 @@ function Submit() {
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         console.error("Server responded with error:", errData);
-        alert("❌ Submission failed: " + (errData.error || response.statusText));
+        alert(
+          "❌ Submission failed: " + (errData.error || response.statusText),
+        );
         return;
       }
-/*
+      /*
       setInputData({
         fullName: "",
         emailAddress: "",
