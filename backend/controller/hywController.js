@@ -28,6 +28,10 @@ function insertHYW(req, res) {
     accountid,
   } = req.body;
 
+  if (!accountid) {
+    return res.status(400).json({ error: "Account ID is missing" });
+  }
+
   const queryProduct =
     "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_ticket) VALUES (?, ?, ?, ?)";
 
@@ -43,19 +47,21 @@ function insertHYW(req, res) {
       const productId = productResult.insertId;
 
       const issueQuery =
-        "INSERT INTO db_issue (db_issue_type, db_resolution, db_description, F_productid) VALUES (?, ?, ?, ?)";
+        "INSERT INTO db_issue (db_issue_type, db_resolution, db_description, F_productid, F_accountid) VALUES (?, ?, ?, ?, ?)";
 
       db.query(
         issueQuery,
-        [issueType, preferredResolution, issueDescription, productId],
+        [
+          issueType,
+          preferredResolution,
+          issueDescription,
+          productId,
+          Number(accountid),
+        ],
         (err) => {
           if (err) {
             console.error("Issue insert failed:", err);
             return res.status(500).json({ error: "Issue insert failed" });
-          }
-
-          if (!accountid) {
-            return res.status(400).json({ error: "Account ID is missing" });
           }
 
           const customerQuery =

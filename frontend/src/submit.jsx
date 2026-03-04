@@ -1,28 +1,20 @@
-import "./form.css";
 import "./submit.css";
 import { useEffect, useState } from "react";
 import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
 function Submit() {
-
-    const accountId = Number(localStorage.getItem("account"));
-  const isAuthenticated = Boolean(window.localStorage.getItem("account"));
+  const account = (() => {
+    try {
+      const rawAccount = window.localStorage.getItem("account");
+      return rawAccount ? JSON.parse(rawAccount) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const accountId = account?.account_id ? Number(account.account_id) : null;
+  const isAuthenticated = Boolean(accountId);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [randomString, setRandomString] = useState("");
-  const [inputData, setInputData] = useState({
-    fullName: "",
-    emailAddress: "",
-    phoneNumber: "",
-    productModel: "",
-    serialNumber: "",
-    issueType: "",
-    purchaseDate: "",
-    preferredResolution: "",
-    issueDescription: "",
-    ticketNumber: "",
-    accountid: Number(accountId),
-  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -33,67 +25,6 @@ function Submit() {
   if (!isAuthenticated) {
     return null;
   }
-
-  const generateRandomString = () => {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < 8; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      result += chars[randomIndex];
-    }
-  
-    setRandomString(result);
-    return result;
-  };
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setInputData({ ...inputData, [name]: value });
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const ticketNumber = randomString || generateRandomString();
-    const dataToSend = { ...inputData, ticketNumber };
-    const form = e.currentTarget;
-
-
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    } else {
-      const response = await fetch("http://192.168.254.131:3001/api/hyw", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
-      });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        console.error("Server responded with error:", errData);
-        alert("❌ Submission failed: " + (errData.error || response.statusText));
-        return;
-      }
-/*
-      setInputData({
-        fullName: "",
-        emailAddress: "",
-        phoneNumber: "",
-        productModel: "",
-        serialNumber: "",
-        issueType: "",
-        purchaseDate: "",
-        preferredResolution: "",
-        issueDescription: "",
-        ticketNumber: "",
-
-      });
-      */
-    }
-
-    alert("✅ RMA request submitted!");
-    form.reset();
-  };
 
   return (
     <div className="submit-container">
@@ -138,175 +69,9 @@ function Submit() {
       </header>
 
       <main className="submit-main">
-        <div className="submit-form-container">
-          <form onSubmit={handleSubmit} className="form">
-            <section className="section">
-              <h2>Customer Information</h2>
-
-              <div className="grid">
-                <div className="field">
-                  <label>
-                    Full Name <span>*</span>
-                  </label>
-                  <input
-                    name="fullName"
-                    required
-                    placeholder="Juan Dela Cruz"
-                    value={inputData.fullName}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="field">
-                  <label>
-                    Email <span>*</span>
-                  </label>
-                  <input
-                    name="emailAddress"
-                    type="email"
-                    required
-                    placeholder="juan@email.com"
-                    value={inputData.emailAddress}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="field">
-                  <label>
-                    Phone Number <span>*</span>
-                  </label>
-                  <input
-                    name="phoneNumber"
-                    required
-                    placeholder="09xxxxxxxxx"
-                    value={inputData.phoneNumber}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="section">
-              <h2>Product Information</h2>
-
-              <div className="grid">
-                <div className="field">
-                  <label>
-                    Product Name / Model <span>*</span>
-                  </label>
-                  <input
-                    name="productModel"
-                    required
-                    placeholder="e.g., XYZ-1000"
-                    value={inputData.productModel}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="field">
-                  <label>
-                    Serial Number <span>*</span>
-                  </label>
-                  <input
-                    name="serialNumber"
-                    required
-                    placeholder="SN123456789"
-                    value={inputData.serialNumber}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="field">
-                  <label>
-                    Purchase Date <span>*</span>
-                  </label>
-                  <input
-                    name="purchaseDate"
-                    type="date"
-                    required
-                    value={inputData.purchaseDate}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="section">
-              <h2>Issue Details</h2>
-
-              <div className="grid">
-                <div className="field">
-                  <label>
-                    Issue Type <span>*</span>
-                  </label>
-                  <select
-                    name="issueType"
-                    required
-                    value={inputData.issueType}
-                    onChange={handleChange}
-                  >
-                    <option value="" disabled>
-                      Select issue type
-                    </option>
-                    <option value="Defective">Defective</option>
-                    <option value="Damaged">Damaged</option>
-                    <option value="Wrong Item">Wrong Item</option>
-                    <option value="Missing Parts">Missing Parts</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div className="field">
-                  <label>
-                    Preferred Resolution <span>*</span>
-                  </label>
-                  <select
-                    name="preferredResolution"
-                    required
-                    value={inputData.preferredResolution}
-                    onChange={handleChange}
-                  >
-                    <option value="" disabled>
-                      Select resolution
-                    </option>
-                    <option value="Repair">Repair</option>
-                    <option value="Replace">Replace</option>
-                    <option value="Refund">Refund</option>
-                  </select>
-                </div>
-
-                <div className="field field-full">
-                  <label>
-                    Issue Description <span>*</span>
-                  </label>
-                  <textarea
-                    name="issueDescription"
-                    required
-                    rows={5}
-                    placeholder="Describe the problem clearly (symptoms, error messages, when it happens, etc.)"
-                    value={inputData.issueDescription}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="agree">
-                <input id="agree" name="agree" type="checkbox" required />
-                <label htmlFor="agree">
-                  I confirm the details above are accurate. <span>*</span>
-                </label>
-              </div>
-            </section>
-
-            <div className="actions">
-              <button type="reset" className="btn btn-ghost">
-                Clear
-              </button>
-              <button type="submit" className="btn btn-primary" typeof="submit">
-                Submit RMA
-              </button>
-            </div>
-          </form>
+        <div className="submit-placeholder">
+          <h1>RMA Submission</h1>
+          <p>The submission form has been removed.</p>
         </div>
       </main>
 
@@ -368,4 +133,5 @@ function Submit() {
     </div>
   );
 }
+
 export default Submit;
