@@ -1,91 +1,16 @@
-import "./submit.css";
-import { useEffect, useState } from "react";
+import "./profile.css";
+import { useState } from "react";
 import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
-function Submit() {
-  const account = (() => {
-    try {
-      const rawAccount = window.localStorage.getItem("account");
-      return rawAccount ? JSON.parse(rawAccount) : null;
-    } catch {
-      return null;
-    }
-  })();
-  const accountId = account?.account_id ? Number(account.account_id) : null;
-  const isAuthenticated = Boolean(accountId);
+function Profile() {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      window.location.hash = "#login";
-    }
-  }, [isAuthenticated]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const generateRandomString = () => {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < 8; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      result += chars[randomIndex];
-    }
-  
-    setRandomString(result);
-    return result;
-  };
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setInputData({ ...inputData, [name]: value });
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const ticketNumber = randomString || generateRandomString();
-    const dataToSend = { ...inputData, ticketNumber };
-    const form = e.currentTarget;
-
-
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    } else {
-      const response = await fetch("http://192.168.254.131:3001/api/hyw", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
-      });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        console.error("Server responded with error:", errData);
-        alert("❌ Submission failed: " + (errData.error || response.statusText));
-        return;
-      }
-/*
-      setInputData({
-        fullName: "",
-        emailAddress: "",
-        phoneNumber: "",
-        productModel: "",
-        serialNumber: "",
-        issueType: "",
-        purchaseDate: "",
-        preferredResolution: "",
-        issueDescription: "",
-        ticketNumber: "",
-
-      });
-      */
-    }
-
-    alert("✅ RMA request submitted!");
-    form.reset();
-  };
+  const [companyName, setCompanyName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
 
   return (
     <div className="submit-container">
@@ -130,9 +55,67 @@ function Submit() {
       </header>
 
       <main className="submit-main">
-        <div className="submit-placeholder">
-          <h1>RMA Submission</h1>
-          <p>The submission form has been removed.</p>
+        <div className="profile-card">
+
+          <h1>Account Settings</h1>
+
+          <form className="profile-form">
+
+            <div className="form-group">
+              <label>Company Name</label>
+              <input
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="Enter company name"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Contact Person / Full Name</label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter full name"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                value={companyEmail}
+                onChange={(e) => setCompanyEmail(e.target.value)}
+                placeholder="Enter email"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Contact Number</label>
+              <input
+                type="text"
+                value={companyPhone}
+                onChange={(e) => setCompanyPhone(e.target.value)}
+                placeholder="Enter contact number"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Company Address</label>
+              <textarea
+                value={companyAddress}
+                onChange={(e) => setCompanyAddress(e.target.value)}
+                placeholder="Enter company address"
+              />
+            </div>
+
+            <button className="save-button">
+              Save Changes
+            </button>
+
+          </form>
+
         </div>
       </main>
 
@@ -195,4 +178,4 @@ function Submit() {
   );
 }
 
-export default Submit;
+export default Profile;

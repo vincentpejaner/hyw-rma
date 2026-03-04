@@ -6,6 +6,7 @@ import About from "./about";
 import Login from "./login.jsx";
 import MyRma from "./my-rma.jsx";
 import Submit from "./submit.jsx";
+import Profile from "./profile.jsx";
 
 const API_BASE = "http://192.168.254.130:3001";
 
@@ -347,6 +348,7 @@ export default function App() {
   if (page === "login") return <Login />;
   if (page === "my-rma") return <MyRma />;
   if (page === "submit") return <Submit />;
+  if (page === "profile") return <Profile />;
 
   return <Home />;
 }
