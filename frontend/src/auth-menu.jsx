@@ -89,8 +89,9 @@ export default function AuthMenu() {
           </div>
 
           <div className="account-menu-list">
-            <button type="button" className="account-menu-item">
-              Account Settings
+            <button type="button" className="account-menu-item"
+              onClick={() => {window.location.hash = "#profile"; setMenuOpen(false)}}>
+              Account Profile 
             </button>
 
             <a

@@ -7,6 +7,7 @@ import Login from "./login.jsx";
 import MyRma from "./my-rma.jsx";
 import Submit from "./submit.jsx";
 import Track from "./track.jsx";
+import Profile from "./profile.jsx";
 
 function isAuthenticated() {
   return Boolean(window.localStorage.getItem("account"));
@@ -188,6 +189,7 @@ export default function App() {
   if (page === "my-rma") return <MyRma />;
   if (page === "submit") return <Submit />;
   if (page === "track") return <Track />;
+  if (page === "profile") return <Profile />;
 
   return <Home />;
 }
