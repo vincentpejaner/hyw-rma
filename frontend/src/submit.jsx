@@ -56,14 +56,14 @@ function Submit() {
     e.preventDefault();
     const ticketNumber = randomString || generateRandomString();
     const dataToSend = { ...inputData, ticketNumber };
-    const form = e.currentTarget;
+    const form = e.currentTarget; 
 
 
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     } else {
-      const response = await fetch("http://192.168.254.131:3001/api/hyw", {
+      const response = await fetch(`http://${window.location.hostname}:3001/api/hyw`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),

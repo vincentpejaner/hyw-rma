@@ -26,11 +26,14 @@ function Login() {
     }
 
     try {
-      const response = await fetch(`http://${window.location.hostname}:3001/api/hyw/login`, {
-        method: "POST", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({...credential}),
-      });
+      const response = await fetch(
+        `http://${window.location.hostname}:3001/api/hyw/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...credential }),
+        },
+      );
 
       const data = await response.json();
 

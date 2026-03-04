@@ -4,7 +4,7 @@ import "./submit.css";
 import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
-const API_BASE = "http://192.168.254.130:3001";
+const API_BASE = `http://${window.location.hostname}:3001`;
 
 function getStoredAccount() {
   try {
