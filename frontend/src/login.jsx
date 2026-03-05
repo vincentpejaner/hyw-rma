@@ -27,7 +27,7 @@ function Login() {
 
     try {
       const response = await fetch(
-        `http://${window.location.hostname}:3001/api/hyw/login`,
+        "http://192.168.254.131:3001/api/hyw/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
