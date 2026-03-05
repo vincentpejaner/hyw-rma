@@ -4,10 +4,11 @@ const router = express.Router();
 const {
   getHYW,
   insertHYW,
- // trackHYWByTicket,
+  // trackHYWByTicket,
   getMyRmaRequests,
   getAccount,
   insertProfile,
+  selectProfile,
 } = require("../controller/hywController.js");
 
 router.route("/").get(getHYW).post(insertHYW);
@@ -16,5 +17,6 @@ router.post("/login", getAccount);
 //router.get("/track/:ticket", trackHYWByTicket);
 router.get("/mine/:email", getMyRmaRequests);
 router.post("/profile", insertProfile);
+router.get("/selectprofile/:id", selectProfile);
 
 module.exports = router;

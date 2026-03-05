@@ -1,11 +1,11 @@
 import "./profile.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
 function Profile() {
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const [editing, setEditing] = useState(false);
   const [data, setData] = useState({
     companyName: "",
     fullName: "",
@@ -14,15 +14,59 @@ function Profile() {
     companyAddress: "",
   });
 
+  const storedAccount = JSON.parse(localStorage.getItem("account"));
+
   function handleChange(e) {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
   }
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/hyw/selectprofile/${storedAccount.account_id}`,
+        );
+
+        const data = await res.json();
+
+        if (res.ok && data.profile) {
+          setData({
+            fullName: data.profile.db_fullname || "",
+            companyPhone: data.profile.db_phone_number || "",
+            companyEmail: data.profile.db_companyEmail || "",
+            companyName: data.profile.db_companyName || "",
+            companyAddress: data.profile.db_companyAddress || "",   
+          });
+          setEditing(true)
+        } else {
+          setData({
+            fullName: storedAccount.account_name || "",
+            companyPhone: "",
+            companyEmail: storedAccount.account_email || "",
+            companyName: "",
+            companyAddress: "",
+          });
+          setEditing(false)
+        }
+      } catch (err) {
+        console.error(err);
+
+        setData({
+          fullName: storedAccount.account_name || "",
+          companyPhone  : "",
+          companyEmail: storedAccount.account_email || "",
+          companyName: "",
+          companyAddress: "",
+        });
+      }
+    }
+
+    loadProfile();
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const storedAccount = JSON.parse(localStorage.getItem("account"));
     const accountId = storedAccount?.account_id;
 
     const dataToSend = {
@@ -46,7 +90,14 @@ function Profile() {
         console.log(result.message || "Failed to update profile.");
       } else {
         console.log("Profile updated successfully!");
-        console.log(result); // ✅ use result, not response.json()
+        console.log(result);
+        setData({
+          companyName: "",
+          fullName: "",
+          companyEmail: "",
+          companyPhone: "",
+          companyAddress: "",
+        });
       }
     } catch (error) {
       console.log("Server error:", error);
@@ -159,7 +210,7 @@ function Profile() {
               className="save-button"
               onClick={handleSubmit}
             >
-              Save Changes
+             {editing ? "Update" : "Save changes"}
             </button>
           </form>
         </div>

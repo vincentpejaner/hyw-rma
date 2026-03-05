@@ -263,10 +263,10 @@ function insertProfile(req, res) {
     ],
     (err, results) => {
       if (err) {
-        console.error(err); // 👈 very important
+        console.error(err);
         return res.status(500).json({
           message: "Failed to insert profile.",
-          error: err.message, // show real error
+          error: err.message,
         });
       }
 
@@ -274,9 +274,28 @@ function insertProfile(req, res) {
         message: "Profile inserted successfully.",
         results,
       });
-    }
+    },
   );
 }
+
+function selectProfile(req, res) {
+  const id = req.params.id;
+
+  const sql = "SELECT * FROM db_customer WHERE F_accountid = ?";
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+
+    if (result.length > 0) {
+      return res.json({ profile: result[0] });
+    }
+
+    res.json({ profile: null });
+  });
+}
+
 module.exports = {
   getHYW,
   insertHYW,
@@ -284,4 +303,5 @@ module.exports = {
   getMyRmaRequests,
   getAccount,
   insertProfile,
+  selectProfile,
 };

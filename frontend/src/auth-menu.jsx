@@ -17,6 +17,11 @@ function getStoredAccount() {
   }
 }
 
+function handleProfile() {
+  const account = JSON.parse(window.localStorage.getItem("account"));
+  window.location.hash = `#profile/${account.account_id}`;
+}
+
 export default function AuthMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -54,7 +59,10 @@ export default function AuthMenu() {
   }
 
   const accountName =
-    account.account_name || account.account_username || account.account_email || "Account";
+    account.account_name ||
+    account.account_username ||
+    account.account_email ||
+    "Account";
   const accountEmail = account.account_email || account.account_username || "";
 
   const handleLogout = () => {
@@ -89,9 +97,15 @@ export default function AuthMenu() {
           </div>
 
           <div className="account-menu-list">
-            <button type="button" className="account-menu-item"
-              onClick={() => {window.location.hash = "#profile"; setMenuOpen(false)}}>
-              Account Profile 
+            <button
+              type="button"
+              className="account-menu-item"
+              onClick={() => {
+                handleProfile();
+                setMenuOpen(false);
+              }}
+            >
+              Account Profile
             </button>
 
             <a
