@@ -58,7 +58,7 @@ function Login() {
 
       setLoading(false);
 
-      window.location.hash = "#submit";
+     window.location.hash = `#submit/${data.account.account_id}`;
     } catch (err) {
       console.error("Server error:", err);
       setError("Server error. Try again later.");

@@ -40,7 +40,9 @@ function Home() {
         </button>
 
         <div className="header-content">
-          <nav className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}>
+          <nav
+            className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}
+          >
             <a href="#home" onClick={() => setMenuOpen(false)}>
               Home
             </a>
@@ -53,7 +55,9 @@ function Home() {
             <img src={logo} alt="HYW Logo" />
           </div>
 
-          <nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>
+          <nav
+            className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}
+          >
             <a href="#track" onClick={() => setMenuOpen(false)}>
               Track RMA
             </a>
@@ -73,11 +77,13 @@ function Home() {
           <div className="hero-inner">
             <div className="hero-badge">HYW • RMA Management</div>
 
-            <h1>Fast, traceable RMA requests — from submission to resolution.</h1>
+            <h1>
+              Fast, traceable RMA requests — from submission to resolution.
+            </h1>
             <p>
-              Submit your return or warranty request online and track progress using your
-              Ticket ID. Clear status updates, organized details, and a better experience
-              for both clients and technicians.
+              Submit your return or warranty request online and track progress
+              using your Ticket ID. Clear status updates, organized details, and
+              a better experience for both clients and technicians.
             </p>
 
             <div className="hero-cta">
@@ -92,15 +98,21 @@ function Home() {
             <div className="hero-stats">
               <div className="stat-card">
                 <div className="stat-title">One Ticket ID</div>
-                <div className="stat-sub">Everything is traceable in one place.</div>
+                <div className="stat-sub">
+                  Everything is traceable in one place.
+                </div>
               </div>
               <div className="stat-card">
                 <div className="stat-title">Clear Summary</div>
-                <div className="stat-sub">Customer + product details shown instantly.</div>
+                <div className="stat-sub">
+                  Customer + product details shown instantly.
+                </div>
               </div>
               <div className="stat-card">
                 <div className="stat-title">Faster Handling</div>
-                <div className="stat-sub">Less back-and-forth, more action.</div>
+                <div className="stat-sub">
+                  Less back-and-forth, more action.
+                </div>
               </div>
             </div>
           </div>
@@ -111,7 +123,10 @@ function Home() {
         <div className="footer-content">
           <div className="footer-section">
             <h3>HYW</h3>
-            <p>HYW RMA Management System - Your trusted return and warranty solution.</p>
+            <p>
+              HYW RMA Management System - Your trusted return and warranty
+              solution.
+            </p>
           </div>
           <div className="footer-section">
             <h4>Quick Links</h4>
@@ -168,7 +183,8 @@ export default function App() {
 
   useEffect(() => {
     const onHash = () => {
-      const route = (window.location.hash || "#home").replace("#", "");
+      const hash = (window.location.hash || "#home").replace("#", "");
+      const route = hash.split("/")[0];
 
       if (route === "submit" && !isAuthenticated()) {
         window.location.hash = "#login";
