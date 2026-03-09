@@ -11,8 +11,7 @@ function getHYW(req, res) {
   });
 }
 
-
-//FUNCTION TO INSERT DATA 
+//FUNCTION TO INSERT DATA
 function insertHYW(req, res) {
   console.log("insertHYW received body:", req.body);
 
@@ -93,7 +92,7 @@ function insertHYW(req, res) {
 
 // FUNCTION TO HANDLE RMA TRACKING BY TICKET NUMBER FROM FRONTEND
 function getMyRmaRequests(req, res) {
-  const ticketId = (req.body || "").trim();
+  const ticketId = (req.params.id || "").trim();
 
   if (!ticketId) {
     return res.status(400).json({ message: "Ticket id is required." });
@@ -104,17 +103,18 @@ function getMyRmaRequests(req, res) {
       p.db_ticket,
       p.db_product_name,
       p.db_serial_number,
+      p.db_return_date,
       p.db_purchase_date,
       i.db_issue_type,
       i.db_resolution,
       i.db_description,
       c.db_fullname,
-      c.db_email,
+      c.db_companyEmail,
       c.db_phone_number
     FROM db_product p
     LEFT JOIN db_issue i ON p.db_productid = i.F_productid
-    LEFT JOIN db_customer c ON p.db_productid = c.F_productid
-    WHERE p.ticket_id = ?
+    LEFT JOIN db_customer c ON p.F_accountid = c.F_accountid
+    WHERE p.db_ticket = ?
     ORDER BY p.db_productid DESC;
   `;
 
@@ -131,16 +131,111 @@ function getMyRmaRequests(req, res) {
       productModel: row.db_product_name,
       serialNumber: row.db_serial_number,
       purchaseDate: row.db_purchase_date,
+      returnDate: row.db_return_date,
       issueType: row.db_issue_type,
       preferredResolution: row.db_resolution,
       issueDescription: row.db_description,
       fullName: row.db_fullname,
-      emailAddress: row.db_email,
+      emailAddress: row.db_companyEmail,
       phoneNumber: row.db_phone_number,
       status: "Submitted",
     }));
 
     return res.status(200).json({ requests });
+  });
+}
+
+// FUNCTION TO TRACK FULL RMA FORM BY TICKET ID
+function getRmaByTicket(req, res) {
+  const ticketId = (req.params.ticketId || "").trim();
+
+  if (!ticketId) {
+    return res.status(400).json({ message: "Ticket ID is required." });
+  }
+
+  const normalizedTicket = ticketId.replace(
+    /^RMA-(\d{4})-(\d{4})-(\d{6})-(\d{3})$/i,
+    "RMA-$1$2-$3-$4",
+  );
+  const ticketCandidates = [...new Set([ticketId, normalizedTicket])];
+
+  const placeholders = ticketCandidates.map(() => "?").join(", ");
+  const itemsSql = `
+    SELECT
+      p.db_productid,
+      p.db_ticket,
+      p.db_product_name,
+      p.db_serial_number,
+      p.db_purchase_date,
+      p.db_return_date,
+      p.F_accountid,
+      i.db_description,
+      i.db_resolution
+    FROM db_product p
+    LEFT JOIN db_issue i ON p.db_productid = i.F_productid
+    WHERE p.db_ticket IN (${placeholders})
+    ORDER BY p.db_productid ASC
+  `;
+
+  db.query(itemsSql, ticketCandidates, (itemsErr, itemRows) => {
+    if (itemsErr) {
+      console.error("Track query error:", itemsErr);
+      return res.status(500).json({ message: "Failed to fetch RMA details." });
+    }
+
+    if (!itemRows || itemRows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No RMA found for this Ticket ID." });
+    }
+
+    const accountId = itemRows[0].F_accountid;
+
+    const profileSql = `
+      SELECT
+        db_fullname,
+        db_phone_number,
+        db_companyEmail,
+        db_companyName,
+        db_companyAddress
+      FROM db_customer
+      WHERE F_accountid = ?
+      LIMIT 1
+    `;
+
+    db.query(profileSql, [accountId], (profileErr, profileRows) => {
+      if (profileErr) {
+        console.error("Track profile query error:", profileErr);
+        return res
+          .status(500)
+          .json({ message: "Failed to fetch customer profile." });
+      }
+
+      const profile = profileRows?.[0] || {};
+
+      const items = itemRows.map((row, index) => ({
+        itemNo: index + 1,
+        itemDescription: row.db_product_name || "",
+        serialNumber: row.db_serial_number || "",
+        dateOfPurchase: row.db_purchase_date || "",
+        returnDate: row.db_return_date || "",
+        problem: row.db_description || "",
+        status: row.db_resolution || "Submitted",
+      }));
+
+      return res.status(200).json({
+        ticketId,
+        status: items[0]?.status || "Submitted",
+        company: {
+          fullName: profile.db_fullname || "",
+          companyPhone: profile.db_phone_number || "",
+          companyEmail: profile.db_companyEmail || "",
+          companyName: profile.db_companyName || "",
+          companyAddress: profile.db_companyAddress || "",
+        },
+        items,
+      });
+    });
   });
 }
 
@@ -226,7 +321,6 @@ function insertProfile(req, res) {
   );
 }
 
-
 //FUNCTION TO SELECT PROFILE BASED ON ACCOUNT ID
 function selectProfile(req, res) {
   const id = req.params.id;
@@ -264,7 +358,7 @@ async function submitRmaRequest(req, res) {
     });
   }
 
-   if (!ticketId) {
+  if (!ticketId) {
     return res.status(400).json({
       message: "Ticket ID missing or invalid",
     });
@@ -285,7 +379,10 @@ async function submitRmaRequest(req, res) {
     });
 
   try {
-    const ticket = "RMA-" + Date.now();
+    const ticket =
+      typeof ticketId === "string" && ticketId.trim()
+        ? ticketId.trim()
+        : "RMA-" + Date.now();
 
     for (const item of items) {
       const itemDescription = String(item.itemDescription || "");
@@ -360,6 +457,7 @@ module.exports = {
   getHYW,
   insertHYW,
   getMyRmaRequests,
+  getRmaByTicket,
   getAccount,
   insertProfile,
   selectProfile,

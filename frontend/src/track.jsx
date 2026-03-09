@@ -73,7 +73,7 @@ function Home() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/hyw/track`,
+        `${API_BASE}/api/hyw/mine/${ticket}`,
       );
 
       const contentType = res.headers.get("content-type") || "";
