@@ -5,6 +5,7 @@ const {
   getHYW,
   insertHYW,
   getMyRmaRequests,
+  getRmaByTicket,
   getAccount,
   insertProfile,
   selectProfile,
@@ -15,6 +16,7 @@ router.route("/").get(getHYW).post(insertHYW);
 
 router.post("/login", getAccount);
 router.get("/mine/:email", getMyRmaRequests);
+router.get("/track/:ticketId", getRmaByTicket);
 router.post("/profile", insertProfile);
 router.get("/selectprofile/:id", selectProfile);
 router.post("/submit-rma", submitRmaRequest);
