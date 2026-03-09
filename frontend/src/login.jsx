@@ -2,6 +2,7 @@ import "./login.css";
 import { useState } from "react";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
+import logo from "./images/logo1.png";
 
 function Login() {
   const [credential, setCredential] = useState({ email: "", password: "" });
