@@ -93,10 +93,10 @@ function insertHYW(req, res) {
 
 // FUNCTION TO HANDLE RMA TRACKING BY TICKET NUMBER FROM FRONTEND
 function getMyRmaRequests(req, res) {
-  const accountEmail = (req.params.email || "").trim();
+  const ticketId = (req.body || "").trim();
 
-  if (!accountEmail) {
-    return res.status(400).json({ message: "Account email is required." });
+  if (!ticketId) {
+    return res.status(400).json({ message: "Ticket id is required." });
   }
 
   const query = `
@@ -114,11 +114,11 @@ function getMyRmaRequests(req, res) {
     FROM db_product p
     LEFT JOIN db_issue i ON p.db_productid = i.F_productid
     LEFT JOIN db_customer c ON p.db_productid = c.F_productid
-    WHERE c.db_email = ?
+    WHERE p.ticket_id = ?
     ORDER BY p.db_productid DESC;
   `;
 
-  db.query(query, [accountEmail], (err, results) => {
+  db.query(query, [ticketId], (err, results) => {
     if (err) {
       console.error("My RMA query error:", err);
       return res

@@ -8,8 +8,7 @@ import Profile from "./profile.jsx";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
-const API_BASE = "http://192.168.254.131:3001";
-
+const API_BASE = "http://localhost:3001";
 
 function SearchCard({
   query,
@@ -55,7 +54,6 @@ function SearchCard({
 }
 
 function Home() {
-
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -75,11 +73,13 @@ function Home() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/hyw/track/${encodeURIComponent(ticket)}`
+        `${API_BASE}/api/hyw/track`,
       );
 
       const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json") ? await res.json() : null;
+      const data = contentType.includes("application/json")
+        ? await res.json()
+        : null;
 
       if (!res.ok) {
         throw new Error(data?.message || "Failed to fetch RMA details.");
@@ -100,8 +100,6 @@ function Home() {
     setRma(null);
   };
 
-  
-
   return (
     <div className="site-container">
       <SiteHeader />
@@ -114,37 +112,43 @@ function Home() {
             <div className="track-left">
               <h1>Track Your RMA</h1>
               <p className="track-sub">
-                Stay informed every step of the way. Enter your Ticket ID to view your
-                current status, service progress, and the details we recorded for your
-                request—securely and in real time.
+                Stay informed every step of the way. Enter your Ticket ID to
+                view your current status, service progress, and the details we
+                recorded for your request—securely and in real time.
               </p>
 
               <div className="track-points">
                 <div className="track-point">
                   <div className="track-point-title">Fast status checks</div>
-                  <div className="track-point-sub">See updates instantly using your Ticket ID.</div>
+                  <div className="track-point-sub">
+                    See updates instantly using your Ticket ID.
+                  </div>
                 </div>
                 <div className="track-point">
                   <div className="track-point-title">Clear summary view</div>
-                  <div className="track-point-sub">Review customer and product details in one place.</div>
+                  <div className="track-point-sub">
+                    Review customer and product details in one place.
+                  </div>
                 </div>
                 <div className="track-point">
                   <div className="track-point-title">Secure and traceable</div>
-                  <div className="track-point-sub">Each request is tracked using a unique ticket number.</div>
+                  <div className="track-point-sub">
+                    Each request is tracked using a unique ticket number.
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="track-right">
-             <SearchCard
-  query={query}
-  setQuery={setQuery}
-  loading={loading}
-  rma={rma}
-  errorMsg={errorMsg}
-  handleSearch={handleSearch}
-  handleClear={handleClear}
-/>
+              <SearchCard
+                query={query}
+                setQuery={setQuery}
+                loading={loading}
+                rma={rma}
+                errorMsg={errorMsg}
+                handleSearch={handleSearch}
+                handleClear={handleClear}
+              />
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
           </div>
@@ -154,15 +158,15 @@ function Home() {
         {rma && (
           <>
             <div className="content">
-             <SearchCard
-  query={query}
-  setQuery={setQuery}
-  loading={loading}
-  rma={rma}
-  errorMsg={errorMsg}
-  handleSearch={handleSearch}
-  handleClear={handleClear}
-/>
+              <SearchCard
+                query={query}
+                setQuery={setQuery}
+                loading={loading}
+                rma={rma}
+                errorMsg={errorMsg}
+                handleSearch={handleSearch}
+                handleClear={handleClear}
+              />
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
 
@@ -176,7 +180,9 @@ function Home() {
                     </p>
                   </div>
 
-                  <span className="status-pill">{rma.status || "Submitted"}</span>
+                  <span className="status-pill">
+                    {rma.status || "Submitted"}
+                  </span>
                 </div>
 
                 <section className="summary-section">
@@ -185,23 +191,31 @@ function Home() {
                     <div className="summary-field">
                       <div className="label">Company Name</div>
                       <div className="value">
-                        {rma.company?.companyName || rma.company?.fullName || "-"}
+                        {rma.company?.companyName ||
+                          rma.company?.fullName ||
+                          "-"}
                       </div>
                     </div>
 
                     <div className="summary-field">
                       <div className="label">Company Email</div>
-                      <div className="value">{rma.company?.companyEmail || "-"}</div>
+                      <div className="value">
+                        {rma.company?.companyEmail || "-"}
+                      </div>
                     </div>
 
                     <div className="summary-field">
                       <div className="label">Company Phone</div>
-                      <div className="value">{rma.company?.companyPhone || "-"}</div>
+                      <div className="value">
+                        {rma.company?.companyPhone || "-"}
+                      </div>
                     </div>
 
                     <div className="summary-field full">
                       <div className="label">Company Address</div>
-                      <div className="value">{rma.company?.companyAddress || "-"}</div>
+                      <div className="value">
+                        {rma.company?.companyAddress || "-"}
+                      </div>
                     </div>
                   </div>
                 </section>
@@ -248,11 +262,12 @@ function Home() {
 
 export default function App() {
   const [page, setPage] = useState(() =>
-    (window.location.hash || "#home").replace("#", "")
+    (window.location.hash || "#home").replace("#", ""),
   );
 
   useEffect(() => {
-    const onHash = () => setPage((window.location.hash || "#home").replace("#", ""));
+    const onHash = () =>
+      setPage((window.location.hash || "#home").replace("#", ""));
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
