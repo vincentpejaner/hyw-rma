@@ -8,6 +8,8 @@ import Profile from "./profile.jsx";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
+const API_BASE = "http://192.168.254.131:3001";
+
 
 function SearchCard({
   query,
@@ -73,7 +75,7 @@ function Home() {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/hyw/track/${encodeURIComponent(ticket)}`
+        `${API_BASE}/api/hyw/track/${encodeURIComponent(ticket)}`
       );
 
       const contentType = res.headers.get("content-type") || "";
@@ -170,7 +172,7 @@ function Home() {
                   <div>
                     <h2>RMA Summary</h2>
                     <p className="summary-sub">
-                      Ticket ID: <span className="mono">{rma.ticketNumber}</span>
+                      Ticket ID: <span className="mono">{rma.ticketId}</span>
                     </p>
                   </div>
 
@@ -178,57 +180,59 @@ function Home() {
                 </div>
 
                 <section className="summary-section">
-                  <h3>Customer Information</h3>
+                  <h3>Company Information</h3>
                   <div className="summary-grid">
                     <div className="summary-field">
-                      <div className="label">Full Name</div>
-                      <div className="value">{rma.fullName || "-"}</div>
+                      <div className="label">Company Name</div>
+                      <div className="value">
+                        {rma.company?.companyName || rma.company?.fullName || "-"}
+                      </div>
                     </div>
 
                     <div className="summary-field">
-                      <div className="label">Email</div>
-                      <div className="value">{rma.emailAddress || "-"}</div>
+                      <div className="label">Company Email</div>
+                      <div className="value">{rma.company?.companyEmail || "-"}</div>
                     </div>
 
                     <div className="summary-field">
-                      <div className="label">Phone Number</div>
-                      <div className="value">{rma.phoneNumber || "-"}</div>
+                      <div className="label">Company Phone</div>
+                      <div className="value">{rma.company?.companyPhone || "-"}</div>
+                    </div>
+
+                    <div className="summary-field full">
+                      <div className="label">Company Address</div>
+                      <div className="value">{rma.company?.companyAddress || "-"}</div>
                     </div>
                   </div>
                 </section>
 
                 <section className="summary-section">
-                  <h3>Product Information</h3>
-                  <div className="summary-grid">
-                    <div className="summary-field">
-                      <div className="label">Product Name / Model</div>
-                      <div className="value">{rma.productModel || "-"}</div>
-                    </div>
-
-                    <div className="summary-field">
-                      <div className="label">Serial Number</div>
-                      <div className="value">{rma.serialNumber || "-"}</div>
-                    </div>
-
-                    <div className="summary-field">
-                      <div className="label">Purchase Date</div>
-                      <div className="value">{rma.purchaseDate || "-"}</div>
-                    </div>
-
-                    <div className="summary-field">
-                      <div className="label">Issue Type</div>
-                      <div className="value">{rma.issueType || "-"}</div>
-                    </div>
-
-                    <div className="summary-field">
-                      <div className="label">Preferred Resolution</div>
-                      <div className="value">{rma.preferredResolution || "-"}</div>
-                    </div>
-
-                    <div className="summary-field full">
-                      <div className="label">Issue Description</div>
-                      <div className="value">{rma.issueDescription || "-"}</div>
-                    </div>
+                  <h3>Submitted Items</h3>
+                  <div className="track-table-wrapper">
+                    <table className="track-table">
+                      <thead>
+                        <tr>
+                          <th>Item #</th>
+                          <th>Description</th>
+                          <th>Serial Number</th>
+                          <th>Date of Purchase</th>
+                          <th>Return Date</th>
+                          <th>Problem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(rma.items || []).map((item) => (
+                          <tr key={`track-item-${item.itemNo}`}>
+                            <td>{item.itemNo}</td>
+                            <td>{item.itemDescription || "-"}</td>
+                            <td>{item.serialNumber || "-"}</td>
+                            <td>{item.dateOfPurchase || "-"}</td>
+                            <td>{item.returnDate || "-"}</td>
+                            <td>{item.problem || "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </section>
               </div>
