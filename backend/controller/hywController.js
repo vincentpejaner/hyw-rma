@@ -304,9 +304,10 @@ async function submitRmaRequest(req, res) {
           db_purchase_date,
           db_return_date,
           db_ticket,
-          F_accountid
+          F_accountid,
+          F_ticketform_id
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
 
       const productResult = await query(productSql, [
@@ -316,6 +317,7 @@ async function submitRmaRequest(req, res) {
         returnDate,
         ticket,
         accountId,
+        1, // Assuming a default ticket form ID
       ]);
 
       const productId = productResult.insertId;
