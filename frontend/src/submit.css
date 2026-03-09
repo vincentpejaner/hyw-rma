@@ -141,6 +141,20 @@ body {
   border-radius: 14px;
   padding: 24px;
   box-shadow: 0 6px 20px rgba(17, 24, 39, 0.06);
+  position: relative;
+}
+
+.form-ticket-id {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #111827;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 5px 10px;
 }
 
 .submit-card h1 {
@@ -527,6 +541,12 @@ body {
 
   .submit-card {
     padding: 16px;
+  }
+
+  .form-ticket-id {
+    position: static;
+    display: inline-block;
+    margin-bottom: 10px;
   }
 
   .selection-row {
