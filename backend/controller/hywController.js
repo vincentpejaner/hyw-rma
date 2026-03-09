@@ -11,6 +11,8 @@ function getHYW(req, res) {
   });
 }
 
+
+//FUNCTION TO INSERT DATA 
 function insertHYW(req, res) {
   console.log("insertHYW received body:", req.body);
 
@@ -46,7 +48,6 @@ function insertHYW(req, res) {
       }
 
       const productId = productResult.insertId;
-
       const issueQuery =
         "INSERT INTO db_issue (db_issue_type, db_resolution, db_description, F_productid, F_accountid) VALUES (?, ?, ?, ?, ?)";
 
@@ -90,6 +91,7 @@ function insertHYW(req, res) {
   );
 }
 
+// FUNCTION TO HANDLE RMA TRACKING BY TICKET NUMBER FROM FRONTEND
 function getMyRmaRequests(req, res) {
   const accountEmail = (req.params.email || "").trim();
 
@@ -142,6 +144,7 @@ function getMyRmaRequests(req, res) {
   });
 }
 
+// FUNCTION TO HANDLE LOGIN REQUEST FROM FRONTEND
 function getAccount(req, res) {
   const { email, password } = req.body;
 
@@ -169,6 +172,8 @@ function getAccount(req, res) {
       .json({ message: "Login successful.", account: results[0] });
   });
 }
+
+//FUNCTION TO HANDLE INSERT DATA FOR PROFILE CREATION FROM FRONTEND
 function insertProfile(req, res) {
   const {
     fullName,
@@ -221,6 +226,8 @@ function insertProfile(req, res) {
   );
 }
 
+
+//FUNCTION TO SELECT PROFILE BASED ON ACCOUNT ID
 function selectProfile(req, res) {
   const id = req.params.id;
 
@@ -239,6 +246,7 @@ function selectProfile(req, res) {
   });
 }
 
+// FUNCTION TO HANDLE RMA SUBMISSION FROM FRONTEND
 async function submitRmaRequest(req, res) {
   let { items, accountId } = req.body;
 
