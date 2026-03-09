@@ -28,7 +28,6 @@ const createGeneratedItem = (itemNo, category = "Others") => ({
 });
 
 function Submit() {
-
   const account = (() => {
     try {
       const rawAccount = window.localStorage.getItem("account");
@@ -60,15 +59,12 @@ function Submit() {
   });
 
   useEffect(() => {
-
     if (!accountId) return;
 
     async function loadProfile() {
-
       try {
-
         const res = await fetch(
-          `http://localhost:3001/api/hyw/selectprofile/${accountId}`
+          `http://localhost:3001/api/hyw/selectprofile/${accountId}`,
         );
 
         const data = await res.json();
@@ -82,19 +78,15 @@ function Submit() {
           companyName: profile.db_companyName || "",
           companyAddress: profile.db_companyAddress || "",
         });
-
       } catch (err) {
         console.error(err);
       }
     }
 
     loadProfile();
-
   }, [accountId]);
 
-  // GENERATE ROWS
   const handleGenerateForm = () => {
-
     if (!category || quantity <= 0) {
       setGeneratedFormError("Please select category and quantity.");
       return;
@@ -103,9 +95,7 @@ function Submit() {
     const items = [];
 
     for (let i = 0; i < quantity; i++) {
-
       items.push(createGeneratedItem(i + 1, category));
-
     }
 
     setGeneratedItems(items);
@@ -117,15 +107,13 @@ function Submit() {
         dateOfPurchase: "",
         returnDate: "",
         problem: "",
-      }))
+      })),
     );
 
     setGeneratedFormError("");
   };
 
-  // EDIT ROW
   const handleChange = (index, e) => {
-
     const { name, value } = e.target;
 
     const updated = [...generatedItems];
@@ -135,9 +123,7 @@ function Submit() {
     setGeneratedItems(updated);
   };
 
-  // VALIDATE
   const validateGeneratedItems = (items) => {
-
     const rowErrors = items.map(() => ({
       itemDescription: "",
       serialNumber: "",
@@ -149,7 +135,6 @@ function Submit() {
     let isValid = true;
 
     items.forEach((item, index) => {
-
       if (!item.itemDescription) {
         rowErrors[index].itemDescription = "Required";
         isValid = false;
@@ -174,16 +159,12 @@ function Submit() {
         rowErrors[index].problem = "Required";
         isValid = false;
       }
-
     });
 
     return { isValid, rowErrors };
-
   };
 
-  // SUBMIT
   const handleSubmitGeneratedForm = async () => {
-
     if (!generatedItems.length) {
       setGeneratedFormError("Generate form first.");
       return;
@@ -199,18 +180,14 @@ function Submit() {
     }
 
     try {
-
-      const response = await fetch(
-        "http://localhost:3001/api/hyw/submit-rma",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId: accountId,
-            items: generatedItems,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:3001/api/hyw/submit-rma", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId: accountId,
+          items: generatedItems,
+        }),
+      });
 
       const data = await response.json();
 
@@ -227,25 +204,16 @@ function Submit() {
       });
 
       setIsSubmitted(true);
-
     } catch (error) {
-
       console.error(error);
       setGeneratedFormError("Submission failed.");
-
     }
-
   };
 
   return (
     <div className="submit-container">
-
       <header className="page-header">
-
-        <button
-          className="menu-toggle"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
+        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
           ☰
         </button>
 
@@ -256,38 +224,31 @@ function Submit() {
         <div className="header-actions">
           <AuthMenu />
         </div>
-
       </header>
 
       <main className="submit-main">
-
         {!isSubmitted && (
-
           <div className="submit-card">
-
             <h2>RMA Request Form</h2>
 
             <div>
-
               <label>Category</label>
 
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
-
                 <option value="">Select Category</option>
 
                 {CATEGORY_OPTIONS.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
-
               </select>
-
             </div>
 
             <div>
-
               <label>Quantity</label>
 
               <input
@@ -296,25 +257,18 @@ function Submit() {
                 min="1"
                 onChange={(e) => setQuantity(Number(e.target.value))}
               />
-
             </div>
 
-            <button onClick={handleGenerateForm}>
-              Generate Form
-            </button>
+            <button onClick={handleGenerateForm}>Generate Form</button>
 
             {generatedFormError && (
               <p className="form-error">{generatedFormError}</p>
             )}
-
           </div>
-
         )}
 
         {generatedItems.length > 0 && !isSubmitted && (
-
           <table className="preview-table">
-
             <thead>
               <tr>
                 <th>#</th>
@@ -327,11 +281,8 @@ function Submit() {
             </thead>
 
             <tbody>
-
               {generatedItems.map((item, index) => (
-
                 <tr key={index}>
-
                   <td>{index + 1}</td>
 
                   <td>
@@ -375,40 +326,33 @@ function Submit() {
                       onChange={(e) => handleChange(index, e)}
                     />
                   </td>
-
                 </tr>
-
               ))}
-
             </tbody>
-
           </table>
-
         )}
 
         {generatedItems.length > 0 && !isSubmitted && (
-
           <button
             className="primary-button"
             onClick={handleSubmitGeneratedForm}
           >
             Submit RMA
           </button>
-
         )}
 
         {isSubmitted && submissionSnapshot && (
-
           <div className="submission-summary">
-
             <h2>RMA Submitted</h2>
 
-            <p>Submitted: {new Date(submissionSnapshot.submittedAt).toLocaleString()}</p>
+            <p>
+              Submitted:{" "}
+              {new Date(submissionSnapshot.submittedAt).toLocaleString()}
+            </p>
 
             <p>Total Items: {submissionSnapshot.totalItems}</p>
 
             <table className="preview-table">
-
               <thead>
                 <tr>
                   <th>#</th>
@@ -421,9 +365,7 @@ function Submit() {
               </thead>
 
               <tbody>
-
                 {submissionSnapshot.items.map((item, index) => (
-
                   <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{item.itemDescription}</td>
@@ -432,22 +374,14 @@ function Submit() {
                     <td>{item.returnDate}</td>
                     <td>{item.problem}</td>
                   </tr>
-
                 ))}
-
               </tbody>
-
             </table>
-
           </div>
-
         )}
-
       </main>
-
     </div>
   );
-
 }
 
 export default Submit;

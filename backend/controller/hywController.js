@@ -22,6 +22,7 @@ function insertHYW(req, res) {
     serialNumber,
     issueType,
     purchaseDate,
+    returnDate,
     preferredResolution,
     issueDescription,
     ticketNumber,
@@ -32,12 +33,13 @@ function insertHYW(req, res) {
     return res.status(400).json({ error: "Account ID is missing" });
   }
 
+  // Fixed: Added db_return_date column to the INSERT query and included returnDate in the values array to save the return date
   const queryProduct =
-    "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_ticket) VALUES (?, ?, ?, ?)";
+    "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket) VALUES (?, ?, ?, ?, ?)";
 
   db.query(
     queryProduct,
-    [productModel, serialNumber, purchaseDate, ticketNumber],
+    [productModel, serialNumber, purchaseDate, returnDate, ticketNumber],
     (err, productResult) => {
       if (err) {
         console.error("Product insert failed:", err);
@@ -296,50 +298,117 @@ function selectProfile(req, res) {
   });
 }
 
+
 async function submitRmaRequest(req, res) {
-  const { items } = req.body;
+  let { items, accountId } = req.body;
+
+  console.log("Incoming request:", req.body);
+
+  // ensure accountId is number
+  if (typeof accountId === "object" && accountId !== null) {
+    accountId = accountId.account_id;
+  }
+
+  accountId = Number(accountId);
+
+  if (!accountId) {
+    return res.status(400).json({
+      message: "Account ID missing or invalid",
+    });
+  }
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({
+      message: "No items submitted",
+    });
+  }
+
+  const query = (sql, params) =>
+    new Promise((resolve, reject) => {
+      db.query(sql, params, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
   try {
+    const ticket = "RMA-" + Date.now();
 
-    for (let item of items) {
+    for (const item of items) {
+
+      const itemDescription = String(item.itemDescription || "");
+      const serialNumber = String(item.serialNumber || "");
+      const purchaseDate = item.dateOfPurchase || null;
+      const returnDate = item.returnDate || null;
+      const problem = String(item.problem || "");
+
+      console.log("Saving item:", {
+        itemDescription,
+        serialNumber,
+        purchaseDate,
+        returnDate,
+        problem,
+      });
 
       const productSql = `
         INSERT INTO db_product
-        (db_product_name, db_serial_number, db_purchase_date, db_ticket)
-        VALUES (?, ?, ?, ?)
+        (
+          db_product_name,
+          db_serial_number,
+          db_purchase_date,
+          db_return_date,
+          db_ticket,
+          F_accountid
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
 
-      const [productResult] = await db.promise().query(productSql, [
-        item.itemDescription,
-        item.serialNumber,
-        item.dateOfPurchase,
-        "RMA-" + Date.now()
+      const productResult = await query(productSql, [
+        itemDescription,
+        serialNumber,
+        purchaseDate,
+        returnDate,
+        ticket,
+        accountId,
       ]);
 
       const productId = productResult.insertId;
 
       const issueSql = `
         INSERT INTO db_issue
-        (db_issue_type, db_resolution, db_description, F_productid)
+        (
+          db_issue_type,
+          db_resolution,
+          db_description,
+          F_productid
+        )
         VALUES (?, ?, ?, ?)
       `;
 
-      await db.promise().query(issueSql, [
+      await query(issueSql, [
         "Hardware Issue",
         "Pending",
-        item.problem,
-        productId
+        problem,
+        productId,
       ]);
-
     }
 
-    res.json({ message: "RMA submitted successfully" });
+    res.json({
+      message: "RMA submitted successfully",
+      ticket: ticket,
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Database error" });
+    console.error("Database error:", error);
+
+    res.status(500).json({
+      message: "Database error",
+      error: error.message,
+    });
   }
 }
+
+
 
 module.exports = {
   getHYW,
@@ -349,5 +418,5 @@ module.exports = {
   getAccount,
   insertProfile,
   selectProfile,
-  submitRmaRequest
+  submitRmaRequest,
 };
