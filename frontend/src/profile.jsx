@@ -35,28 +35,28 @@ function Profile() {
             companyPhone: data.profile.db_phone_number || "",
             companyEmail: data.profile.db_companyEmail || "",
             companyName: data.profile.db_companyName || "",
-            companyAddress: data.profile.db_companyAddress || "",   
+            companyAddress: data.profile.db_companyAddress || "",
           });
-          setEditing(true)
+          setEditing(true);
         } else {
           setData({
-            fullName: storedAccount.account_name || "",
-            companyPhone: "",
-            companyEmail: storedAccount.account_email || "",
-            companyName: "",
-            companyAddress: "",
+            fullName: data.db_fullname || "",
+            companyPhone: data.db_phone_number || "",
+            companyEmail: data.db_companyEmail || "",
+            companyName: data.db_companyName || "",
+            companyAddress: data.db_companyAddress || "",
           });
-          setEditing(false)
+          setEditing(false);
         }
       } catch (err) {
         console.error(err);
 
         setData({
-          fullName: storedAccount.account_name || "",
-          companyPhone  : "",
-          companyEmail: storedAccount.account_email || "",
-          companyName: "",
-          companyAddress: "",
+          fullName: data.db_fullname || "",
+          companyPhone: data.db_phone_number || "",
+          companyEmail: data.db_companyEmail || "",
+          companyName: data.db_companyName || "",
+          companyAddress: data.db_companyAddress || "",
         });
       }
     }
@@ -210,7 +210,7 @@ function Profile() {
               className="save-button"
               onClick={handleSubmit}
             >
-             {editing ? "Update" : "Save changes"}
+              {editing ? "Update" : "Save changes"}
             </button>
           </form>
         </div>

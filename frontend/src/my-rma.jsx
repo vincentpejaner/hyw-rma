@@ -21,7 +21,8 @@ export default function MyRma() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const account = getStoredAccount();
-  const accountEmail = account?.account_email || account?.account_username || "";
+  const accountEmail =
+    account?.account_email || account?.account_username || "";
 
   useEffect(() => {
     if (!accountEmail) {
@@ -72,7 +73,9 @@ export default function MyRma() {
         </button>
 
         <div className="header-content">
-          <nav className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}>
+          <nav
+            className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}
+          >
             <a href="#home" onClick={() => setMenuOpen(false)}>
               Home
             </a>
@@ -85,7 +88,9 @@ export default function MyRma() {
             <img src={logo} alt="HYW Logo" />
           </div>
 
-          <nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>
+          <nav
+            className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}
+          >
             <a href="#track" onClick={() => setMenuOpen(false)}>
               Track RMA
             </a>
@@ -106,12 +111,16 @@ export default function MyRma() {
           <p>View all RMA requests submitted using your signed-in account.</p>
         </section>
 
-        {loading && <div className="my-rma-state">Loading your RMA requests...</div>}
+        {loading && (
+          <div className="my-rma-state">Loading your RMA requests...</div>
+        )}
 
         {!loading && error && <div className="my-rma-state">{error}</div>}
 
         {!loading && !error && requests.length === 0 && (
-          <div className="my-rma-state">No RMA requests found for this account yet.</div>
+          <div className="my-rma-state">
+            No RMA requests found for this account yet.
+          </div>
         )}
 
         {!loading && !error && requests.length > 0 && (
@@ -121,35 +130,49 @@ export default function MyRma() {
                 <div className="my-rma-card-header">
                   <div>
                     <h2>{request.productModel || "Unnamed Product"}</h2>
-                    <p className="my-rma-ticket">Ticket ID: {request.ticketNumber}</p>
+                    <p className="my-rma-ticket">
+                      Ticket ID: {request.ticketNumber}
+                    </p>
                   </div>
-                  <span className="my-rma-status">{request.status || "Submitted"}</span>
+                  <span className="my-rma-status">
+                    {request.status || "Submitted"}
+                  </span>
                 </div>
 
                 <div className="my-rma-grid">
                   <div className="my-rma-field">
                     <div className="my-rma-label">Issue Type</div>
-                    <div className="my-rma-value">{request.issueType || "-"}</div>
+                    <div className="my-rma-value">
+                      {request.issueType || "-"}
+                    </div>
                   </div>
 
                   <div className="my-rma-field">
                     <div className="my-rma-label">Preferred Resolution</div>
-                    <div className="my-rma-value">{request.preferredResolution || "-"}</div>
+                    <div className="my-rma-value">
+                      {request.preferredResolution || "-"}
+                    </div>
                   </div>
 
                   <div className="my-rma-field">
                     <div className="my-rma-label">Serial Number</div>
-                    <div className="my-rma-value">{request.serialNumber || "-"}</div>
+                    <div className="my-rma-value">
+                      {request.serialNumber || "-"}
+                    </div>
                   </div>
 
                   <div className="my-rma-field">
                     <div className="my-rma-label">Purchase Date</div>
-                    <div className="my-rma-value">{request.purchaseDate || "-"}</div>
+                    <div className="my-rma-value">
+                      {request.purchaseDate || "-"}
+                    </div>
                   </div>
 
                   <div className="my-rma-field full">
                     <div className="my-rma-label">Issue Description</div>
-                    <div className="my-rma-value">{request.issueDescription || "-"}</div>
+                    <div className="my-rma-value">
+                      {request.issueDescription || "-"}
+                    </div>
                   </div>
                 </div>
               </article>
