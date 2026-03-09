@@ -33,7 +33,7 @@ function insertHYW(req, res) {
     return res.status(400).json({ error: "Account ID is missing" });
   }
 
-  // Fixed: Added db_return_date column to the INSERT query and included returnDate in the values array to save the return date
+  
   const queryProduct =
     "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket) VALUES (?, ?, ?, ?, ?)";
 
@@ -90,65 +90,8 @@ function insertHYW(req, res) {
     },
   );
 }
-/*
-function trackHYWByTicket(req, res) {
-  const ticket = (req.params.ticket || "").trim();
 
-  if (!ticket) {
-    return res.status(400).json({ message: "Ticket is required." });
-  }
 
-  const query = `
-    SELECT 
-      p.db_ticket,
-      p.db_product_name,
-      p.db_serial_number,
-      p.db_purchase_date,
-
-      i.db_issue_type,
-      i.db_resolution,
-      i.db_description,
-
-      c.db_fullname,
-      c.db_email,
-      c.db_phone_number
-
-    FROM db_product p
-    LEFT JOIN db_issue i ON p.db_productid = i.F_productid
-    LEFT JOIN db_customer c ON p.db_productid = c.F_productid
-    WHERE p.db_ticket = ?
-    LIMIT 1;
-  `;
-
-  db.query(query, [ticket], (err, results) => {
-    if (err) {
-      console.error("Track query error:", err);
-      return res.status(500).json({ message: "Failed to fetch RMA details." });
-    }
-
-    if (!results || results.length === 0) {
-      return res.status(404).json({ message: "Ticket not found." });
-    }
-
-    const row = results[0];
-
-    return res.status(200).json({
-      ticketNumber: row.db_ticket,
-      productModel: row.db_product_name,
-      serialNumber: row.db_serial_number,
-      purchaseDate: row.db_purchase_date,
-
-      issueType: row.db_issue_type,
-      preferredResolution: row.db_resolution,
-      issueDescription: row.db_description,
-
-      fullName: row.db_fullname,
-      emailAddress: row.db_email,
-      phoneNumber: row.db_phone_number,
-    });
-  });
-}
-*/
 function getMyRmaRequests(req, res) {
   const accountEmail = (req.params.email || "").trim();
 
@@ -304,7 +247,7 @@ async function submitRmaRequest(req, res) {
 
   console.log("Incoming request:", req.body);
 
-  // ensure accountId is number
+
   if (typeof accountId === "object" && accountId !== null) {
     accountId = accountId.account_id;
   }
