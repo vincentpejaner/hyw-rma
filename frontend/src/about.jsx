@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "./login.css";
 import "./about.css";
-import AuthMenu from "./auth-menu.jsx";
-import logo from "./images/logo1.png";
+import SiteHeader from "./site-header.jsx";
+import SiteFooter from "./site-footer.jsx";
 
 export default function About() {
-	const [menuOpen, setMenuOpen] = useState(false);
 
 	useEffect(() => {
 		const opts = { threshold: 0.15, rootMargin: "0px 0px -5% 0px" };
@@ -27,41 +26,7 @@ export default function About() {
 
 	return (
 		<div>
-			<header className="page-header">
-				<button
-					className="menu-toggle"
-					onClick={() => setMenuOpen(!menuOpen)}
-					aria-label="Toggle menu"
-				>
-					<span></span>
-					<span></span>
-					<span></span>
-				</button>
-				<div className="header-content">
-					<nav className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}>
-						<a href="#home" onClick={() => setMenuOpen(false)}>
-							Home
-						</a>
-						<a href="#submit" onClick={() => setMenuOpen(false)}>
-							Submit RMA
-						</a>
-					</nav>
-					<div className="header-logo">
-						<img src={logo} alt="HYW Logo" />
-					</div>
-					<nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>
-						<a href="#track" onClick={() => setMenuOpen(false)}>
-							Track RMA
-						</a>
-						<a href="#about" onClick={() => setMenuOpen(false)}>
-							About Us
-						</a>
-					</nav>
-				</div>
-				<div className="header-actions">
-					<AuthMenu />
-				</div>
-			</header>
+			<SiteHeader />
 
 			<section className="about-hero">
 				<div className="container">
@@ -163,67 +128,16 @@ export default function About() {
 				</div>
 			</main>
 
-			<footer className="page-footer">
-				<div className="footer-content">
-					<div className="footer-section">
-						<h3>HYW</h3>
-						<p>
-							HYW RMA Management System - Your trusted return and warranty
-							solution.
-						</p>
-					</div>
-					<div className="footer-section">
-						<h4>Quick Links</h4>
-						<ul>
-							<li>
-								<a href="#home">Home</a>
-							</li>
-							<li>
-								<a href="#about">About Us</a>
-							</li>
-							<li>
-								<a href="#rma">RMA Services</a>
-							</li>
-							<li>
-								<a href="#support">Support</a>
-							</li>
-						</ul>
-					</div>
-					<div className="footer-section">
-						<h4>Contact</h4>
-						<p>
-							Email: <a href="mailto:support@hyw.com">hywcebu.corporate@gmail.com</a>
-						</p>
-						<p>
-							Phone: <a href="tel:+1234567890">032-415-1014</a>
-						</p>
-						<p>Address: Unit 3 Ang-Atillo Bldg.,
-
-Legaspi St. cor. Plaridel Extn.
-
-Brgy. Sto. Nino, Cebu City,
-
-Cebu, Philippines</p>
-					</div>
-					<div className="footer-section">
-						<h4>Follow Us</h4>
-						<ul>
-							<li>
-								<a href="#facebook">Facebook</a>
-							</li>
-							<li>
-								<a href="#twitter">Twitter</a>
-							</li>
-							<li>
-								<a href="#linkedin">LinkedIn</a>
-							</li>
-						</ul>
-					</div>
-				</div>
-				<div className="footer-bottom">
-					<p>&copy; 2026 HYW IT DISTRIBUTOR. All rights reserved.</p>
-				</div>
-			</footer>
+			<SiteFooter
+				email="hywcebu.corporate@gmail.com"
+				emailHref="hywcebu.corporate@gmail.com"
+				phoneLabel="032-415-1014"
+				phoneHref="0324151014"
+				address="Unit 3 Ang-Atillo Bldg., Legaspi St. cor. Plaridel Extn., Brgy. Sto. Nino, Cebu City, Cebu, Philippines"
+				companyLabel="HYW"
+				description="HYW RMA Management System - Your trusted return and warranty solution."
+				copyright="© 2026 HYW IT DISTRIBUTOR. All rights reserved."
+			/>
 		</div>
 	);
 }

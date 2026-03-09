@@ -25,6 +25,7 @@
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
+  z-index: 2000;
   min-width: 220px;
   padding: 12px;
   border: 1px solid rgba(17, 24, 39, 0.12);
@@ -262,4 +263,27 @@ body.dark-mode .account-toggle-row {
 body.dark-mode .account-menu-item:hover,
 body.dark-mode .account-menu-item:focus-visible {
   background: #273449;
+}
+
+@media (max-width: 768px) {
+  .account-button {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .account-avatar-small {
+    width: 20px;
+    height: 20px;
+  }
+
+  .account-dropdown {
+    position: fixed;
+    top: 76px;
+    right: 10px;
+    left: 10px;
+    min-width: 0;
+    max-height: calc(100dvh - 92px);
+    overflow-y: auto;
+    border-radius: 12px;
+  }
 }
