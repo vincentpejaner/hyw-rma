@@ -33,7 +33,6 @@ function insertHYW(req, res) {
     return res.status(400).json({ error: "Account ID is missing" });
   }
 
-  
   const queryProduct =
     "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket) VALUES (?, ?, ?, ?, ?)";
 
@@ -90,7 +89,6 @@ function insertHYW(req, res) {
     },
   );
 }
-
 
 function getMyRmaRequests(req, res) {
   const accountEmail = (req.params.email || "").trim();
@@ -241,12 +239,10 @@ function selectProfile(req, res) {
   });
 }
 
-
 async function submitRmaRequest(req, res) {
   let { items, accountId } = req.body;
 
   console.log("Incoming request:", req.body);
-
 
   if (typeof accountId === "object" && accountId !== null) {
     accountId = accountId.account_id;
@@ -278,7 +274,6 @@ async function submitRmaRequest(req, res) {
     const ticket = "RMA-" + Date.now();
 
     for (const item of items) {
-
       const itemDescription = String(item.itemDescription || "");
       const serialNumber = String(item.serialNumber || "");
       const purchaseDate = item.dateOfPurchase || null;
@@ -328,19 +323,13 @@ async function submitRmaRequest(req, res) {
         VALUES (?, ?, ?, ?)
       `;
 
-      await query(issueSql, [
-        "Hardware Issue",
-        "Pending",
-        problem,
-        productId,
-      ]);
+      await query(issueSql, ["Hardware Issue", "Pending", problem, productId]);
     }
 
     res.json({
       message: "RMA submitted successfully",
       ticket: ticket,
     });
-
   } catch (error) {
     console.error("Database error:", error);
 
@@ -351,12 +340,9 @@ async function submitRmaRequest(req, res) {
   }
 }
 
-
-
 module.exports = {
   getHYW,
   insertHYW,
-  //trackHYWByTicket,
   getMyRmaRequests,
   getAccount,
   insertProfile,
