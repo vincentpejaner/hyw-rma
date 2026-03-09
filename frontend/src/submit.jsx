@@ -39,6 +39,14 @@ const createGeneratedItemError = () => ({
   problem: "",
 });
 
+const createTicketId = () => {
+  const now = new Date();
+  const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const timePart = `${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`;
+  const randomPart = Math.floor(100 + Math.random() * 900);
+  return `RMA-${datePart}-${timePart}-${randomPart}`;
+};
+
 function Submit() {
   const account = (() => {
     try {
@@ -56,6 +64,7 @@ function Submit() {
   const [generatedItems, setGeneratedItems] = useState([]);
   const [generatedItemErrors, setGeneratedItemErrors] = useState([]);
   const [generatedFormError, setGeneratedFormError] = useState("");
+  const [formTicketId, setFormTicketId] = useState("");
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionSnapshot, setSubmissionSnapshot] = useState(null);
@@ -143,6 +152,7 @@ function Submit() {
       setGeneratedFormError("Complete all category rows with quantity 1 or higher.");
       return;
     }
+    const nextTicketId = createTicketId();
 
     const items = [];
     let itemNo = 1;
@@ -157,6 +167,7 @@ function Submit() {
 
     setGeneratedItems(items);
     setGeneratedItemErrors(items.map(() => createGeneratedItemError()));
+    setFormTicketId(nextTicketId);
     setGeneratedFormError("");
     setIsSubmitted(false);
     setSubmissionSnapshot(null);
@@ -249,8 +260,11 @@ function Submit() {
       return;
     }
 
+    const ticketIdToUse = formTicketId || createTicketId();
+
     const snapshot = {
       submittedAt: new Date().toISOString(),
+      ticketId: ticketIdToUse,
       totalItems: generatedItems.length,
       items: generatedItems.map((item) => ({ ...item })),
     };
@@ -265,6 +279,7 @@ function Submit() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           accountId,
+          ticketId: ticketIdToUse,
           items: generatedItems,
         }),
       });
@@ -284,6 +299,11 @@ function Submit() {
 
       <main className="submit-main">
         <section className="submit-card">
+          {(submissionSnapshot?.ticketId || formTicketId) && (
+            <div className="form-ticket-id">
+              Ticket ID: {submissionSnapshot?.ticketId || formTicketId}
+            </div>
+          )}
           {!isSubmitted && (
             <>
               {generatedItems.length === 0 && (
