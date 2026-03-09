@@ -125,7 +125,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  max-width: 1400px;
+  max-width: 1720px;
   margin: 0 auto;
   width: 100%;
 }
@@ -135,7 +135,7 @@ body {
 }
 
 .submit-card {
-  width: min(1120px, 100%);
+  width: min(1420px, 100%);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -271,7 +271,7 @@ body {
 .preview-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1180px;
+  min-width: 1080px;
 }
 
 .preview-table th,
@@ -302,6 +302,13 @@ body {
   font-size: 0.86rem;
 }
 
+.table-field-error {
+  margin: 4px 0 0;
+  color: var(--danger);
+  font-size: 0.74rem;
+  line-height: 1.2;
+}
+
 .table-delete-button {
   background: #fff;
   border-color: #ef4444;
@@ -315,6 +322,53 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.submission-summary {
+  margin-top: 18px;
+}
+
+.submission-summary h2 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
+
+.summary-meta {
+  margin: 4px 0;
+  color: #1f2937;
+  font-size: 0.92rem;
+}
+
+.summary-breakdown {
+  margin-top: 14px;
+}
+
+.summary-breakdown h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.summary-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.summary-chip {
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.summary-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .page-footer {
@@ -467,6 +521,15 @@ body {
     width: 100%;
   }
 
+  .summary-actions {
+    justify-content: stretch;
+  }
+
+  .summary-actions .secondary-button,
+  .summary-actions .primary-button {
+    width: 100%;
+  }
+
   .footer-content {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -474,5 +537,32 @@ body {
 
   .page-footer {
     padding: 30px 16px;
+  }
+}
+
+@media print {
+  .page-header,
+  .page-footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .submit-main,
+  .submit-card {
+    max-width: 100%;
+    width: 100%;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .preview-table-wrapper {
+    overflow: visible;
+    border: 0;
+  }
+
+  .preview-table {
+    min-width: 0;
   }
 }

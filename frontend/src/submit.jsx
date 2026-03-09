@@ -16,15 +16,6 @@ const CATEGORY_OPTIONS = [
   "Others",
 ];
 
-const STATUS_OPTIONS = [
-  "Submitted",
-  "Received",
-  "Diagnosing",
-  "Repairing",
-  "Replaced",
-  "Released",
-];
-
 const createEmptySelection = () => ({
   category: "",
   quantity: "1",
@@ -38,8 +29,6 @@ const createGeneratedItem = (itemNo, category = "Others") => ({
   dateOfPurchase: "",
   returnDate: "",
   problem: "",
-  status: "Submitted",
-  remark: "",
 });
 
 function Submit() {
@@ -62,7 +51,11 @@ function Submit() {
 
   // generatedItems contains editable row data for the generated RMA table.
   const [generatedItems, setGeneratedItems] = useState([]);
+  const [generatedItemErrors, setGeneratedItemErrors] = useState([]);
+  const [generatedFormError, setGeneratedFormError] = useState("");
   const [isFormGenerated, setIsFormGenerated] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionSnapshot, setSubmissionSnapshot] = useState(null);
 
   const [errors, setErrors] = useState({
     rows: [{ category: "", quantity: "" }],
@@ -182,7 +175,19 @@ function Submit() {
     });
 
     setGeneratedItems(nextGeneratedItems);
+    setGeneratedItemErrors(
+      nextGeneratedItems.map(() => ({
+        itemDescription: "",
+        serialNumber: "",
+        dateOfPurchase: "",
+        returnDate: "",
+        problem: "",
+      })),
+    );
+    setGeneratedFormError("");
     setIsFormGenerated(true);
+    setIsSubmitted(false);
+    setSubmissionSnapshot(null);
   };
 
   const resequenceGeneratedItems = (items) =>
@@ -194,6 +199,12 @@ function Submit() {
         rowIndex === index ? { ...item, [field]: value } : item,
       ),
     );
+    setGeneratedItemErrors((prev) =>
+      prev.map((rowError, rowIndex) =>
+        rowIndex === index ? { ...rowError, [field]: "" } : rowError,
+      ),
+    );
+    setGeneratedFormError("");
   };
 
   const handleAddGeneratedRow = () => {
@@ -202,18 +213,149 @@ function Submit() {
       const nextRow = createGeneratedItem(prev.length + 1, fallbackCategory);
       return [...prev, nextRow];
     });
+    setGeneratedItemErrors((prev) => [
+      ...prev,
+      {
+        itemDescription: "",
+        serialNumber: "",
+        dateOfPurchase: "",
+        returnDate: "",
+        problem: "",
+      },
+    ]);
   };
 
   const handleDeleteGeneratedRow = (index) => {
     setGeneratedItems((prev) => {
       const filtered = prev.filter((_, rowIndex) => rowIndex !== index);
+      if (filtered.length === 0) {
+        setIsFormGenerated(false);
+      }
       return resequenceGeneratedItems(filtered);
     });
+    setGeneratedItemErrors((prev) =>
+      prev.filter((_, rowIndex) => rowIndex !== index),
+    );
+    setGeneratedFormError("");
+  };
+
+  const validateGeneratedItems = (items) => {
+    const rowErrors = items.map(() => ({
+      itemDescription: "",
+      serialNumber: "",
+      dateOfPurchase: "",
+      returnDate: "",
+      problem: "",
+    }));
+
+    let isValid = true;
+
+    items.forEach((item, index) => {
+      if (!String(item.itemDescription || "").trim()) {
+        rowErrors[index].itemDescription = "Item description is required.";
+        isValid = false;
+      }
+      if (!String(item.serialNumber || "").trim()) {
+        rowErrors[index].serialNumber = "Serial number is required.";
+        isValid = false;
+      }
+      if (!item.dateOfPurchase) {
+        rowErrors[index].dateOfPurchase = "Date of purchase is required.";
+        isValid = false;
+      }
+      if (!item.returnDate) {
+        rowErrors[index].returnDate = "Return date is required.";
+        isValid = false;
+      }
+      if (!String(item.problem || "").trim()) {
+        rowErrors[index].problem = "Problem is required.";
+        isValid = false;
+      }
+    });
+
+    return {
+      isValid,
+      rowErrors,
+    };
   };
 
   const handleSubmitGeneratedForm = () => {
-    // Stage 2 will replace this with actual submission logic.
-    window.alert("RMA form is ready for submission flow.");
+    if (!generatedItems.length) {
+      return;
+    }
+
+    const validation = validateGeneratedItems(generatedItems);
+    setGeneratedItemErrors(validation.rowErrors);
+
+    if (!validation.isValid) {
+      setGeneratedFormError("Please complete all required item details before submitting.");
+      return;
+    }
+
+    setGeneratedFormError("");
+
+    setSubmissionSnapshot({
+      submittedAt: new Date().toISOString(),
+      totalItems: generatedItems.length,
+      items: generatedItems.map((item) => ({ ...item })),
+    });
+    setIsSubmitted(true);
+  };
+
+  const handleEditSubmittedForm = () => {
+    setIsSubmitted(false);
+    setIsFormGenerated(true);
+  };
+
+  const escapeCsvField = (value) => {
+    const normalized = String(value ?? "");
+    if (
+      normalized.includes(",") ||
+      normalized.includes('"') ||
+      normalized.includes("\n")
+    ) {
+      return `"${normalized.replaceAll('"', '""')}"`;
+    }
+    return normalized;
+  };
+
+  const handleExtractExcel = () => {
+    if (!submissionSnapshot?.items?.length) {
+      return;
+    }
+
+    const headers = [
+      "Item #",
+      "Item Description",
+      "Serial Number",
+      "Date of Purchase",
+      "Return Date",
+      "Problem",
+    ];
+
+    const rows = submissionSnapshot.items.map((item) => [
+      item.itemNo,
+      item.itemDescription,
+      item.serialNumber,
+      item.dateOfPurchase,
+      item.returnDate,
+      item.problem,
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map(escapeCsvField).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateSuffix = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `rma-summary-${dateSuffix}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   };
 
   const hasDraftData =
@@ -240,6 +382,16 @@ function Submit() {
   }, [hasDraftData]);
 
   const totalItems = generatedItems.length;
+  const submittedItems = submissionSnapshot?.items ?? [];
+  const submittedTotal = submissionSnapshot?.totalItems ?? 0;
+  const submittedAtText = submissionSnapshot?.submittedAt
+    ? new Date(submissionSnapshot.submittedAt).toLocaleString()
+    : "";
+  const submittedCategorySummary = submittedItems.reduce((acc, item) => {
+    const key = item.category || "Others";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="submit-container">
@@ -290,7 +442,7 @@ function Submit() {
             Add category entries and quantities, then generate editable RMA rows.
           </p>
 
-          {!isFormGenerated && (
+          {!isSubmitted && !isFormGenerated && (
             <>
               <div className="selection-list">
                 {selections.map((row, index) => {
@@ -379,9 +531,9 @@ function Submit() {
             </>
           )}
 
-          <div className="summary-row">Total Items: {totalItems}</div>
+          {!isSubmitted && <div className="summary-row">Total Items: {totalItems}</div>}
 
-          {generatedItems.length > 0 && (
+          {!isSubmitted && generatedItems.length > 0 && (
             <>
               <div className="preview-table-wrapper">
                 <table className="preview-table">
@@ -393,8 +545,6 @@ function Submit() {
                       <th>Date of Purchase</th>
                       <th>Return Date</th>
                       <th>Problem</th>
-                      <th>Status</th>
-                      <th>Remark</th>
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -415,6 +565,11 @@ function Submit() {
                             }
                             placeholder="Product model or name"
                           />
+                          {generatedItemErrors[index]?.itemDescription && (
+                            <p className="table-field-error">
+                              {generatedItemErrors[index].itemDescription}
+                            </p>
+                          )}
                         </td>
                         <td>
                           <input
@@ -429,6 +584,11 @@ function Submit() {
                             }
                             placeholder="Serial number"
                           />
+                          {generatedItemErrors[index]?.serialNumber && (
+                            <p className="table-field-error">
+                              {generatedItemErrors[index].serialNumber}
+                            </p>
+                          )}
                         </td>
                         <td>
                           <input
@@ -442,6 +602,11 @@ function Submit() {
                               )
                             }
                           />
+                          {generatedItemErrors[index]?.dateOfPurchase && (
+                            <p className="table-field-error">
+                              {generatedItemErrors[index].dateOfPurchase}
+                            </p>
+                          )}
                         </td>
                         <td>
                           <input
@@ -455,6 +620,11 @@ function Submit() {
                               )
                             }
                           />
+                          {generatedItemErrors[index]?.returnDate && (
+                            <p className="table-field-error">
+                              {generatedItemErrors[index].returnDate}
+                            </p>
+                          )}
                         </td>
                         <td>
                           <input
@@ -465,30 +635,11 @@ function Submit() {
                             }
                             placeholder="Issue description"
                           />
-                        </td>
-                        <td>
-                          <select
-                            value={item.status}
-                            onChange={(event) =>
-                              handleGeneratedItemChange(index, "status", event.target.value)
-                            }
-                          >
-                            {STATUS_OPTIONS.map((status) => (
-                              <option key={status} value={status}>
-                                {status}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={item.remark}
-                            onChange={(event) =>
-                              handleGeneratedItemChange(index, "remark", event.target.value)
-                            }
-                            placeholder="Technician comments"
-                          />
+                          {generatedItemErrors[index]?.problem && (
+                            <p className="table-field-error">
+                              {generatedItemErrors[index].problem}
+                            </p>
+                          )}
                         </td>
                         <td>
                           <button
@@ -521,7 +672,78 @@ function Submit() {
                   Submit Form
                 </button>
               </div>
+              {generatedFormError && <p className="form-error">{generatedFormError}</p>}
             </>
+          )}
+
+          {isSubmitted && submissionSnapshot && (
+            <div className="submission-summary">
+              <h2>RMA Form Summary</h2>
+              <p className="summary-meta">Submitted: {submittedAtText}</p>
+              <p className="summary-meta">Total Items: {submittedTotal}</p>
+
+              <div className="summary-breakdown">
+                <h3>Category Breakdown</h3>
+                <div className="summary-chip-list">
+                  {Object.entries(submittedCategorySummary).map(([category, count]) => (
+                    <span key={category} className="summary-chip">
+                      {category}: {count}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="preview-table-wrapper">
+                <table className="preview-table">
+                  <thead>
+                    <tr>
+                      <th>Item #</th>
+                      <th>Item Description</th>
+                      <th>Serial Number</th>
+                      <th>Date of Purchase</th>
+                      <th>Return Date</th>
+                      <th>Problem</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {submittedItems.map((item) => (
+                      <tr key={`submitted-item-${item.itemNo}`}>
+                        <td>{item.itemNo}</td>
+                        <td>{item.itemDescription || "-"}</td>
+                        <td>{item.serialNumber || "-"}</td>
+                        <td>{item.dateOfPurchase || "-"}</td>
+                        <td>{item.returnDate || "-"}</td>
+                        <td>{item.problem || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="summary-actions no-print">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={handleEditSubmittedForm}
+                >
+                  Edit Form
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => window.print()}
+                >
+                  Print Form (PDF)
+                </button>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={handleExtractExcel}
+                >
+                  Extract in Excel
+                </button>
+              </div>
+            </div>
           )}
         </section>
       </main>
