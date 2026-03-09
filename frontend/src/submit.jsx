@@ -1,5 +1,6 @@
-﻿import "./submit.css";
+import "./submit.css";
 import { useEffect, useState } from "react";
+import ExcelJS from "exceljs";
 import AuthMenu from "./auth-menu.jsx";
 import logo from "./images/logo1.png";
 
@@ -56,6 +57,13 @@ function Submit() {
   const [isFormGenerated, setIsFormGenerated] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionSnapshot, setSubmissionSnapshot] = useState(null);
+  const [profileData, setProfileData] = useState({
+    fullName: "",
+    companyPhone: "",
+    companyEmail: "",
+    companyName: "",
+    companyAddress: "",
+  });
 
   const [errors, setErrors] = useState({
     rows: [{ category: "", quantity: "" }],
@@ -67,6 +75,44 @@ function Submit() {
       window.location.hash = "#login";
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!accountId) {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadProfileData() {
+      try {
+        const response = await fetch(
+          `http://192.168.254.148:3001/api/hyw/selectprofile/${accountId}`,
+        );
+        const responseData = await response.json();
+
+        if (!response.ok || !isActive) {
+          return;
+        }
+
+        const profile = responseData?.profile || responseData || {};
+        setProfileData({
+          fullName: profile.db_fullname || "",
+          companyPhone: profile.db_phone_number || "",
+          companyEmail: profile.db_companyEmail || "",
+          companyName: profile.db_companyName || "",
+          companyAddress: profile.db_companyAddress || "",
+        });
+      } catch (error) {
+        console.error("Failed to load profile data:", error);
+      }
+    }
+
+    loadProfileData();
+
+    return () => {
+      isActive = false;
+    };
+  }, [accountId]);
 
   if (!isAuthenticated) {
     return null;
@@ -307,24 +353,85 @@ function Submit() {
     setIsFormGenerated(true);
   };
 
-  const escapeCsvField = (value) => {
-    const normalized = String(value ?? "");
-    if (
-      normalized.includes(",") ||
-      normalized.includes('"') ||
-      normalized.includes("\n")
-    ) {
-      return `"${normalized.replaceAll('"', '""')}"`;
-    }
-    return normalized;
+  const handlePrintPdf = () => {
+    const rowCount = submissionSnapshot?.items?.length || 0;
+    const computedScale = Math.max(0.35, 1 - Math.max(0, rowCount - 6) * 0.022);
+    const computedFontSize = rowCount > 36 ? 6.5 : rowCount > 26 ? 7.5 : 9;
+    const computedCellPadding = rowCount > 36 ? 1 : rowCount > 26 ? 2 : 3;
+
+    document.body.classList.add("single-page-print");
+    document.body.style.setProperty("--print-scale", String(computedScale));
+    document.body.style.setProperty("--print-font-size", `${computedFontSize}px`);
+    document.body.style.setProperty("--print-cell-padding", `${computedCellPadding}px`);
+
+    const cleanupPrintMode = () => {
+      document.body.classList.remove("single-page-print");
+      document.body.style.removeProperty("--print-scale");
+      document.body.style.removeProperty("--print-font-size");
+      document.body.style.removeProperty("--print-cell-padding");
+      window.removeEventListener("afterprint", cleanupPrintMode);
+    };
+
+    window.addEventListener("afterprint", cleanupPrintMode);
+    window.print();
   };
 
-  const handleExtractExcel = () => {
+  const handleExtractExcel = async () => {
     if (!submissionSnapshot?.items?.length) {
       return;
     }
 
-    const headers = [
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "HYW RMA System";
+    workbook.lastModifiedBy = "HYW RMA System";
+    workbook.created = new Date();
+    workbook.modified = new Date();
+
+    const sheet = workbook.addWorksheet("RMA Summary", {
+      views: [{ state: "frozen", ySplit: 8 }],
+    });
+
+    sheet.columns = [
+      { key: "itemNo", width: 10 },
+      { key: "itemDescription", width: 30 },
+      { key: "serialNumber", width: 24 },
+      { key: "dateOfPurchase", width: 18 },
+      { key: "returnDate", width: 18 },
+      { key: "problem", width: 42 },
+    ];
+
+    sheet.mergeCells("A1:F1");
+    const titleCell = sheet.getCell("A1");
+    titleCell.value = "HYW RMA FORM SUMMARY";
+    titleCell.font = { bold: true, size: 16, color: { argb: "FFFFFFFF" } };
+    titleCell.alignment = { vertical: "middle", horizontal: "center" };
+    titleCell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF1F2937" },
+    };
+    sheet.getRow(1).height = 28;
+
+    const metadataRows = [
+      ["Company", profileData.companyName || profileData.fullName || "-"],
+      ["Address", profileData.companyAddress || "-"],
+      ["Email", profileData.companyEmail || "-"],
+      ["Phone", profileData.companyPhone || "-"],
+      ["Submitted", submittedAtText || "-"],
+      ["Total Items", submittedTotal],
+    ];
+
+    metadataRows.forEach((row, index) => {
+      const rowNumber = index + 2;
+      sheet.getCell(`A${rowNumber}`).value = row[0];
+      sheet.getCell(`B${rowNumber}`).value = row[1];
+      sheet.getCell(`A${rowNumber}`).font = { bold: true };
+      sheet.mergeCells(`B${rowNumber}:F${rowNumber}`);
+    });
+
+    const headerRowNumber = 8;
+    const headerRow = sheet.getRow(headerRowNumber);
+    headerRow.values = [
       "Item #",
       "Item Description",
       "Serial Number",
@@ -332,26 +439,78 @@ function Submit() {
       "Return Date",
       "Problem",
     ];
+    headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    headerRow.alignment = { vertical: "middle", horizontal: "center" };
+    headerRow.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF111827" },
+    };
+    headerRow.height = 22;
 
-    const rows = submissionSnapshot.items.map((item) => [
-      item.itemNo,
-      item.itemDescription,
-      item.serialNumber,
-      item.dateOfPurchase,
-      item.returnDate,
-      item.problem,
-    ]);
+    submissionSnapshot.items.forEach((item) => {
+      sheet.addRow([
+        item.itemNo,
+        item.itemDescription || "-",
+        item.serialNumber || "-",
+        item.dateOfPurchase || "-",
+        item.returnDate || "-",
+        item.problem || "-",
+      ]);
+    });
 
-    const csv = [headers, ...rows]
-      .map((row) => row.map(escapeCsvField).join(","))
-      .join("\n");
+    const dataStart = headerRowNumber + 1;
+    const dataEnd = sheet.lastRow?.number || dataStart;
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    for (let row = headerRowNumber; row <= dataEnd; row += 1) {
+      for (let col = 1; col <= 6; col += 1) {
+        const cell = sheet.getRow(row).getCell(col);
+        cell.border = {
+          top: { style: "thin", color: { argb: "FFD1D5DB" } },
+          left: { style: "thin", color: { argb: "FFD1D5DB" } },
+          bottom: { style: "thin", color: { argb: "FFD1D5DB" } },
+          right: { style: "thin", color: { argb: "FFD1D5DB" } },
+        };
+        if (row >= dataStart) {
+          cell.alignment = {
+            vertical: "top",
+            horizontal: col === 1 ? "center" : "left",
+            wrapText: true,
+          };
+        }
+      }
+    }
+
+    for (let row = dataStart; row <= dataEnd; row += 1) {
+      const fillColor = row % 2 === 0 ? "FFF9FAFB" : "FFFFFFFF";
+      for (let col = 1; col <= 6; col += 1) {
+        sheet.getRow(row).getCell(col).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: fillColor },
+        };
+      }
+    }
+
+    const summaryTextRow = dataEnd + 2;
+    sheet.mergeCells(`A${summaryTextRow}:F${summaryTextRow}`);
+    const footerCell = sheet.getCell(`A${summaryTextRow}`);
+    footerCell.value = "Generated by HYW RMA Management System";
+    footerCell.font = { italic: true, color: { argb: "FF6B7280" } };
+    footerCell.alignment = { horizontal: "right" };
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob(
+      [buffer],
+      {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+    );
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     const dateSuffix = new Date().toISOString().slice(0, 10);
     link.href = url;
-    link.download = `rma-summary-${dateSuffix}.csv`;
+    link.download = `rma-summary-${dateSuffix}.xlsx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -437,10 +596,14 @@ function Submit() {
 
       <main className="submit-main">
         <section className="submit-card">
-          <h1>RMA Item Generator</h1>
-          <p className="submit-card-subtitle">
-            Add category entries and quantities, then generate editable RMA rows.
-          </p>
+          {!isSubmitted && (
+            <>
+              <h1>RMA Item Generator</h1>
+              <p className="submit-card-subtitle">
+                Add category entries and quantities, then generate editable RMA rows.
+              </p>
+            </>
+          )}
 
           {!isSubmitted && !isFormGenerated && (
             <>
@@ -679,6 +842,14 @@ function Submit() {
           {isSubmitted && submissionSnapshot && (
             <div className="submission-summary">
               <h2>RMA Form Summary</h2>
+              <div className="summary-company-block">
+                <p className="summary-company-name">
+                  {profileData.companyName || profileData.fullName || "-"}
+                </p>
+                <p>{profileData.companyAddress || "-"}</p>
+                <p>{profileData.companyEmail || "-"}</p>
+                <p>{profileData.companyPhone || "-"}</p>
+              </div>
               <p className="summary-meta">Submitted: {submittedAtText}</p>
               <p className="summary-meta">Total Items: {submittedTotal}</p>
 
@@ -731,9 +902,16 @@ function Submit() {
                 <button
                   type="button"
                   className="secondary-button"
-                  onClick={() => window.print()}
+                  onClick={handlePrintPdf}
                 >
                   Print Form (PDF)
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled
+                >
+                  Save
                 </button>
                 <button
                   type="button"
@@ -808,3 +986,6 @@ function Submit() {
 }
 
 export default Submit;
+
+
+

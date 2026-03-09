@@ -330,13 +330,28 @@ body {
 
 .submission-summary h2 {
   margin: 0 0 10px;
-  font-size: 1.2rem;
+  font-size: 2rem;
 }
 
 .summary-meta {
   margin: 4px 0;
   color: #1f2937;
-  font-size: 0.92rem;
+  font-size: 1.08rem;
+}
+
+.summary-company-block {
+  margin: 10px 0 14px;
+}
+
+.summary-company-block p {
+  margin: 3px 0;
+  color: #111827;
+  font-size: 1.08rem;
+}
+
+.summary-company-name {
+  font-weight: 700;
+  font-size: 1.35rem;
 }
 
 .summary-breakdown {
@@ -541,6 +556,11 @@ body {
 }
 
 @media print {
+  @page {
+    size: A2 landscape;
+    margin: 3mm;
+  }
+
   .page-header,
   .page-footer,
   .no-print {
@@ -564,5 +584,44 @@ body {
 
   .preview-table {
     min-width: 0;
+    table-layout: fixed;
+    width: 100%;
+    font-size: var(--print-font-size, 9px);
+  }
+
+  .preview-table th,
+  .preview-table td {
+    padding: var(--print-cell-padding, 3px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .summary-chip,
+  .summary-breakdown h3 {
+    font-size: var(--print-font-size, 9px) !important;
+    margin: 2px 0;
+  }
+
+  .submission-summary h2 {
+    font-size: 20px !important;
+    margin: 0 0 6px;
+  }
+
+  .summary-company-block p,
+  .summary-meta {
+    font-size: 13px !important;
+    margin: 1px 0;
+  }
+
+  .summary-company-name {
+    font-size: 16px !important;
+  }
+
+  .single-page-print .submit-card {
+    --print-scale-safe: var(--print-scale, 1);
+    transform: scale(var(--print-scale-safe));
+    transform-origin: top left;
+    width: calc(100% / var(--print-scale-safe));
   }
 }

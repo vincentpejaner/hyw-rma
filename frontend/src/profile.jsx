@@ -24,7 +24,7 @@ function Profile() {
     async function loadProfile() {
       try {
         const res = await fetch(
-          `http://192.168.254.131:3001/api/hyw/selectprofile/${storedAccount.account_id}`,
+          `http://192.168.254.148:3001/api/hyw/selectprofile/${storedAccount.account_id}`,
         );
 
         const data = await res.json();
