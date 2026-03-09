@@ -248,7 +248,7 @@ function selectProfile(req, res) {
 
 // FUNCTION TO HANDLE RMA SUBMISSION FROM FRONTEND
 async function submitRmaRequest(req, res) {
-  let { items, accountId } = req.body;
+  let { items, accountId, ticketId } = req.body;
 
   console.log("Incoming request:", req.body);
 
@@ -261,6 +261,12 @@ async function submitRmaRequest(req, res) {
   if (!accountId) {
     return res.status(400).json({
       message: "Account ID missing or invalid",
+    });
+  }
+
+   if (!ticketId) {
+    return res.status(400).json({
+      message: "Ticket ID missing or invalid",
     });
   }
 
@@ -305,7 +311,7 @@ async function submitRmaRequest(req, res) {
           db_return_date,
           db_ticket,
           F_accountid,
-          F_ticketform_id
+          ticket_id
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
@@ -317,7 +323,7 @@ async function submitRmaRequest(req, res) {
         returnDate,
         ticket,
         accountId,
-        1, // Assuming a default ticket form ID
+        ticketId,
       ]);
 
       const productId = productResult.insertId;

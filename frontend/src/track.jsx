@@ -8,7 +8,6 @@ import Profile from "./profile.jsx";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
-const API_BASE = "http://192.168.254.130:3001";
 
 function SearchCard({
   query,
@@ -74,7 +73,7 @@ function Home() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/hyw/track/${encodeURIComponent(ticket)}`
+        `http://localhost:3001/api/hyw/track/${encodeURIComponent(ticket)}`
       );
 
       const contentType = res.headers.get("content-type") || "";
