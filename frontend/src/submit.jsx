@@ -1,4 +1,4 @@
-import "./submit.css";
+﻿import "./submit.css";
 import { useEffect, useState } from "react";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
@@ -60,20 +60,13 @@ function Submit() {
   });
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      window.location.hash = "#login";
-    }
-  }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (!accountId) {
-      return;
-    }
+    if (!accountId) return;
 
     async function loadProfile() {
       try {
         const res = await fetch(
-          `http://192.168.254.148:3001/api/hyw/selectprofile/${accountId}`,
+          `http://localhost:3001/api/hyw/selectprofile/${accountId}`
         );
 
         const data = await res.json();
@@ -94,54 +87,21 @@ function Submit() {
     loadProfile();
   }, [accountId]);
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const generatedCategorySummary = generatedItems.reduce((acc, item) => {
-    const key = item.category || "Others";
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
-
-  const handleSelectionChange = (index, field, value) => {
-    setSelections((prev) =>
-      prev.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, [field]: value } : row,
-      ),
-    );
-  };
-
-  const handleAddCategory = () => {
-    setSelections((prev) => [...prev, createSelectionRow()]);
-  };
-
-  const handleRemoveCategory = (index) => {
-    if (selections.length === 1) {
-      return;
-    }
-    setSelections((prev) => prev.filter((_, rowIndex) => rowIndex !== index));
-  };
-
+  // GENERATE ROWS
   const handleGenerateForm = () => {
-    const hasInvalidRow = selections.some(
-      (row) => !row.category || Number(row.quantity) < 1 || Number.isNaN(Number(row.quantity)),
-    );
 
-    if (hasInvalidRow) {
-      setGeneratedFormError("Complete all category rows with quantity 1 or higher.");
+    if (!category || quantity <= 0) {
+      setGeneratedFormError("Please select category and quantity.");
       return;
     }
 
     const items = [];
-    let itemNo = 1;
-    selections.forEach((row) => {
-      const quantity = Number(row.quantity);
-      for (let i = 0; i < quantity; i += 1) {
-        items.push(createGeneratedItem(itemNo, row.category));
-        itemNo += 1;
-      }
-    });
+
+    for (let i = 0; i < quantity; i++) {
+
+      items.push(createGeneratedItem(i + 1, category));
+
+    }
 
     setGeneratedItems(items);
     setGeneratedItemErrors(
@@ -154,12 +114,12 @@ function Submit() {
       })),
     );
     setGeneratedFormError("");
-    setIsSubmitted(false);
-    setSubmissionSnapshot(null);
   };
 
-  const handleChange = (index, event) => {
-    const { name, value } = event.target;
+  // EDIT ROW
+  const handleChange = (index, e) => {
+
+    const { name, value } = e.target;
 
     setGeneratedItems((prev) =>
       prev.map((item, rowIndex) =>
@@ -167,13 +127,10 @@ function Submit() {
       ),
     );
 
-    setGeneratedItemErrors((prev) =>
-      prev.map((rowError, rowIndex) =>
-        rowIndex === index ? { ...rowError, [name]: "" } : rowError,
-      ),
-    );
+    setGeneratedItems(updated);
   };
 
+  // VALIDATE
   const validateGeneratedItems = (items) => {
     const rowErrors = items.map(() => ({
       itemDescription: "",
@@ -186,7 +143,8 @@ function Submit() {
     let isValid = true;
 
     items.forEach((item, index) => {
-      if (!String(item.itemDescription || "").trim()) {
+
+      if (!item.itemDescription) {
         rowErrors[index].itemDescription = "Required";
         isValid = false;
       }
@@ -209,37 +167,10 @@ function Submit() {
     });
 
     return { isValid, rowErrors };
+
   };
 
-  const handleAddGeneratedRow = () => {
-    const fallbackCategory = selections[0]?.category || generatedItems[0]?.category || "Others";
-    setGeneratedItems((prev) => [
-      ...prev,
-      createGeneratedItem(prev.length + 1, fallbackCategory),
-    ]);
-    setGeneratedItemErrors((prev) => [
-      ...prev,
-      {
-        itemDescription: "",
-        serialNumber: "",
-        dateOfPurchase: "",
-        returnDate: "",
-        problem: "",
-      },
-    ]);
-  };
-
-  const handleDeleteGeneratedRow = (index) => {
-    setGeneratedItems((prev) =>
-      prev
-        .filter((_, rowIndex) => rowIndex !== index)
-        .map((item, rowIndex) => ({ ...item, itemNo: rowIndex + 1 })),
-    );
-    setGeneratedItemErrors((prev) =>
-      prev.filter((_, rowIndex) => rowIndex !== index),
-    );
-  };
-
+  // SUBMIT
   const handleSubmitGeneratedForm = async () => {
     if (!generatedItems.length) {
       setGeneratedFormError("Generate form first.");
@@ -254,311 +185,250 @@ function Submit() {
       return;
     }
 
-    const snapshot = {
-      submittedAt: new Date().toISOString(),
-      totalItems: generatedItems.length,
-      items: generatedItems.map((item) => ({ ...item })),
-    };
-
-    // Show summary view immediately after successful validation.
-    setSubmissionSnapshot(snapshot);
-    setGeneratedFormError("");
-    setIsSubmitted(true);
-
     try {
-      const response = await fetch("http://192.168.254.148:3001/api/hyw/submit-rma", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId,
-          items: generatedItems,
-        }),
-      });
+
+      const response = await fetch(
+        "http://localhost:3001/api/hyw/submit-rma",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountId: accountId,
+            items: generatedItems,
+          }),
+        }
+      );
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || "Submission failed.");
+        throw new Error(data.message);
       }
+
+      console.log("Saved:", data);
+
+      setSubmissionSnapshot({
+        submittedAt: new Date().toISOString(),
+        totalItems: generatedItems.length,
+        items: generatedItems,
+      });
+
+      setIsSubmitted(true);
+
     } catch (error) {
       console.error(error);
+      setGeneratedFormError("Submission failed.");
+
     }
   };
 
   return (
     <div className="submit-container">
-      <SiteHeader />
+
+      <header className="page-header">
+
+        <button
+          className="menu-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          ☰
+        </button>
+
+        <div className="header-logo">
+          <img src={logo} alt="HYW Logo" />
+        </div>
+
+        <div className="header-actions">
+          <AuthMenu />
+        </div>
+
+      </header>
 
       <main className="submit-main">
-        <section className="submit-card">
-          {!isSubmitted && (
-            <>
-              {generatedItems.length === 0 && (
-                <>
-                  <h1>RMA Item Generator</h1>
-                  <p className="submit-card-subtitle">
-                    Select a category and quantity, then complete each generated item row.
-                  </p>
 
-                  <div className="selection-list">
-                    {selections.map((row, index) => (
-                      <div className="selection-row" key={`selection-${index}`}>
-                        <div className="field-group">
-                          <label htmlFor={`category-${index}`}>Category</label>
-                          <select
-                            id={`category-${index}`}
-                            value={row.category}
-                            onChange={(event) =>
-                              handleSelectionChange(index, "category", event.target.value)
-                            }
-                          >
-                            <option value="">Select Category</option>
-                            {CATEGORY_OPTIONS.map((option) => (
-                              <option key={option} value={option}>
-                                {option}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+        {!isSubmitted && (
 
-                        <div className="field-group quantity-group">
-                          <label htmlFor={`quantity-${index}`}>Quantity</label>
-                          <input
-                            id={`quantity-${index}`}
-                            type="number"
-                            value={row.quantity}
-                            min="1"
-                            onChange={(event) =>
-                              handleSelectionChange(index, "quantity", event.target.value)
-                            }
-                          />
-                        </div>
+          <div className="submit-card">
 
-                        <div className="row-action">
-                          <button
-                            type="button"
-                            className="remove-button"
-                            onClick={() => handleRemoveCategory(index)}
-                            disabled={selections.length === 1}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+            <h2>RMA Request Form</h2>
 
-                  <div className="submit-actions">
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={handleAddCategory}
-                    >
-                      Add Category
-                    </button>
-                    <button
-                      type="button"
-                      className="primary-button"
-                      onClick={handleGenerateForm}
-                    >
-                      Generate Form
-                    </button>
-                  </div>
-                </>
-              )}
+            <div>
 
-              {generatedItems.length > 0 && (
-                <>
-                  <div className="generated-form-info">
-                    <div>
-                      <strong>Category Mix:</strong>{" "}
-                      {Object.entries(generatedCategorySummary)
-                        .map(([name, count]) => `${name} (${count})`)
-                        .join(", ")}
-                    </div>
-                    <div>
-                      <strong>Generated Items:</strong> {generatedItems.length}
-                    </div>
-                    <div className="generated-form-note">
-                      Complete all fields below before submitting your RMA request.
-                    </div>
-                  </div>
-                  <div className="summary-row">Total Items: {generatedItems.length}</div>
-                </>
-              )}
+              <label>Category</label>
 
-              {generatedItems.length > 0 && (
-                <>
-                  <div className="preview-table-wrapper">
-                    <table className="preview-table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Description</th>
-                          <th>Serial</th>
-                          <th>Purchase</th>
-                          <th>Return</th>
-                          <th>Problem</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {generatedItems.map((item, index) => (
-                          <tr key={`generated-${item.itemNo}`}>
-                            <td>{index + 1}</td>
-                            <td>
-                              <input
-                                name="itemDescription"
-                                value={item.itemDescription}
-                                onChange={(event) => handleChange(index, event)}
-                                placeholder="Product model/name"
-                              />
-                              {generatedItemErrors[index]?.itemDescription && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].itemDescription}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                name="serialNumber"
-                                value={item.serialNumber}
-                                onChange={(event) => handleChange(index, event)}
-                                placeholder="Serial number"
-                              />
-                              {generatedItemErrors[index]?.serialNumber && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].serialNumber}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                type="date"
-                                name="dateOfPurchase"
-                                value={item.dateOfPurchase}
-                                onChange={(event) => handleChange(index, event)}
-                              />
-                              {generatedItemErrors[index]?.dateOfPurchase && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].dateOfPurchase}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                type="date"
-                                name="returnDate"
-                                value={item.returnDate}
-                                onChange={(event) => handleChange(index, event)}
-                              />
-                              {generatedItemErrors[index]?.returnDate && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].returnDate}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                name="problem"
-                                value={item.problem}
-                                onChange={(event) => handleChange(index, event)}
-                                placeholder="Issue description"
-                              />
-                              {generatedItemErrors[index]?.problem && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].problem}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className="table-delete-button"
-                                onClick={() => handleDeleteGeneratedRow(index)}
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
 
-                  <div className="generated-actions">
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={handleAddGeneratedRow}
-                    >
-                      Add Item Row
-                    </button>
-                    <button
-                      type="button"
-                      className="primary-button"
-                      onClick={handleSubmitGeneratedForm}
-                    >
-                      Submit RMA
-                    </button>
-                  </div>
-                </>
-              )}
+                <option value="">Select Category</option>
 
-              {generatedFormError && <p className="form-error">{generatedFormError}</p>}
-            </>
-          )}
+                {CATEGORY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
 
-          {isSubmitted && submissionSnapshot && (
-            <div className="submission-summary">
-              <h2>RMA Form Summary</h2>
+              </select>
 
-              <div className="summary-company-block">
-                <p className="summary-company-name">
-                  {profileData.companyName || profileData.fullName || "-"}
-                </p>
-                <p>{profileData.companyAddress || "-"}</p>
-                <p>{profileData.companyEmail || "-"}</p>
-                <p>{profileData.companyPhone || "-"}</p>
-              </div>
-
-              <p className="summary-meta">
-                Submitted: {new Date(submissionSnapshot.submittedAt).toLocaleString()}
-              </p>
-              <p className="summary-meta">Total Items: {submissionSnapshot.totalItems}</p>
-
-              <div className="preview-table-wrapper">
-                <table className="preview-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Description</th>
-                      <th>Serial</th>
-                      <th>Purchase</th>
-                      <th>Return</th>
-                      <th>Problem</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {submissionSnapshot.items.map((item, index) => (
-                      <tr key={`submitted-${index + 1}`}>
-                        <td>{index + 1}</td>
-                        <td>{item.itemDescription || "-"}</td>
-                        <td>{item.serialNumber || "-"}</td>
-                        <td>{item.dateOfPurchase || "-"}</td>
-                        <td>{item.returnDate || "-"}</td>
-                        <td>{item.problem || "-"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </div>
-          )}
-        </section>
+
+            <div>
+
+              <label>Quantity</label>
+
+              <input
+                type="number"
+                value={quantity}
+                min="1"
+                onChange={(e) => setQuantity(Number(e.target.value))}
+              />
+
+            </div>
+
+            <button onClick={handleGenerateForm}>
+              Generate Form
+            </button>
+
+            {generatedFormError && (
+              <p className="form-error">{generatedFormError}</p>
+            )}
+
+          </div>
+
+        )}
+
+        {generatedItems.length > 0 && !isSubmitted && (
+
+          <table className="preview-table">
+
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th>Serial</th>
+                <th>Purchase</th>
+                <th>Return</th>
+                <th>Problem</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {generatedItems.map((item, index) => (
+
+                <tr key={index}>
+
+                  <td>{index + 1}</td>
+
+                  <td>
+                    <input
+                      name="itemDescription"
+                      value={item.itemDescription}
+                      onChange={(e) => handleChange(index, e)}
+                    />
+                  </td>
+
+                  <td>
+                    <input
+                      name="serialNumber"
+                      value={item.serialNumber}
+                      onChange={(e) => handleChange(index, e)}
+                    />
+                  </td>
+
+                  <td>
+                    <input
+                      type="date"
+                      name="dateOfPurchase"
+                      value={item.dateOfPurchase}
+                      onChange={(e) => handleChange(index, e)}
+                    />
+                  </td>
+
+                  <td>
+                    <input
+                      type="date"
+                      name="returnDate"
+                      value={item.returnDate}
+                      onChange={(e) => handleChange(index, e)}
+                    />
+                  </td>
+
+                  <td>
+                    <input
+                      name="problem"
+                      value={item.problem}
+                      onChange={(e) => handleChange(index, e)}
+                    />
+                  </td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        )}
+
+        {generatedItems.length > 0 && !isSubmitted && (
+
+          <button
+            className="primary-button"
+            onClick={handleSubmitGeneratedForm}
+          >
+            Submit RMA
+          </button>
+
+        )}
+
+        {isSubmitted && submissionSnapshot && (
+
+          <div className="submission-summary">
+
+            <h2>RMA Submitted</h2>
+
+            <p>Submitted: {new Date(submissionSnapshot.submittedAt).toLocaleString()}</p>
+
+            <p>Total Items: {submissionSnapshot.totalItems}</p>
+
+            <table className="preview-table">
+
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Description</th>
+                  <th>Serial</th>
+                  <th>Purchase</th>
+                  <th>Return</th>
+                  <th>Problem</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                {submissionSnapshot.items.map((item, index) => (
+
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{item.itemDescription}</td>
+                    <td>{item.serialNumber}</td>
+                    <td>{item.dateOfPurchase}</td>
+                    <td>{item.returnDate}</td>
+                    <td>{item.problem}</td>
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        )}
+
       </main>
 
-      <SiteFooter />
     </div>
   );
 }

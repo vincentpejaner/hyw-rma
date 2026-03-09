@@ -23,6 +23,7 @@ export default function MyRma() {
   const accountEmail =
     account?.account_email || account?.account_username || "";
 
+  /*
   useEffect(() => {
     if (!accountEmail) {
       window.location.hash = "#login";
@@ -53,6 +54,8 @@ export default function MyRma() {
 
     fetchRequests();
   }, [accountEmail]);
+
+  */
 
   if (!accountEmail) {
     return null;
