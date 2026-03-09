@@ -296,6 +296,51 @@ function selectProfile(req, res) {
   });
 }
 
+async function submitRmaRequest(req, res) {
+  const { items } = req.body;
+
+  try {
+
+    for (let item of items) {
+
+      const productSql = `
+        INSERT INTO db_product
+        (db_product_name, db_serial_number, db_purchase_date, db_ticket)
+        VALUES (?, ?, ?, ?)
+      `;
+
+      const [productResult] = await db.promise().query(productSql, [
+        item.itemDescription,
+        item.serialNumber,
+        item.dateOfPurchase,
+        "RMA-" + Date.now()
+      ]);
+
+      const productId = productResult.insertId;
+
+      const issueSql = `
+        INSERT INTO db_issue
+        (db_issue_type, db_resolution, db_description, F_productid)
+        VALUES (?, ?, ?, ?)
+      `;
+
+      await db.promise().query(issueSql, [
+        "Hardware Issue",
+        "Pending",
+        item.problem,
+        productId
+      ]);
+
+    }
+
+    res.json({ message: "RMA submitted successfully" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Database error" });
+  }
+}
+
 module.exports = {
   getHYW,
   insertHYW,
@@ -304,4 +349,5 @@ module.exports = {
   getAccount,
   insertProfile,
   selectProfile,
+  submitRmaRequest
 };
