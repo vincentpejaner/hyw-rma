@@ -184,6 +184,61 @@ h1, h2, h3, h4 {
   transition-delay: calc(var(--delay, 0s) + 0s);
 }
 
+/* ============================= */
+/* ABOUT PAGE DARK MODE */
+/* ============================= */
+body.dark-mode .about-hero {
+  background:
+    linear-gradient(rgba(2, 4, 10, 0.7), rgba(2, 4, 10, 0.72)),
+    url("./images/banner_image1.jpg") center center / cover no-repeat;
+}
+
+body.dark-mode .about-content {
+  background: linear-gradient(180deg, #06080e 0%, #090d17 100%);
+  color: #e6ebff;
+}
+
+body.dark-mode .about-content h2,
+body.dark-mode .about-content h3,
+body.dark-mode .about-content h4 {
+  color: #f5f8ff;
+}
+
+body.dark-mode .lead,
+body.dark-mode .about-content p,
+body.dark-mode .timeline .event .desc {
+  color: rgba(226, 232, 240, 0.88);
+}
+
+body.dark-mode .section-block {
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+body.dark-mode .card {
+  background: linear-gradient(180deg, #0f1320 0%, #121827 100%);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.34);
+}
+
+body.dark-mode .feature-box {
+  background: linear-gradient(180deg, #121a2c 0%, #111827 100%);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+body.dark-mode .timeline .event .date {
+  color: #f87171;
+}
+
+body.dark-mode .brand-badge {
+  background: #151b2b;
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #e7ebff;
+}
+
+body.dark-mode .btn-primary {
+  box-shadow: 0 10px 20px rgba(224, 64, 64, 0.22);
+}
+
 /* Responsive tweaks */
 @media (max-width: 768px) {
   .about-hero { padding: 80px 16px; }
