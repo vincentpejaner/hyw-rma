@@ -57,7 +57,7 @@ function Home() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [rma, setRma] = useState("");
+  const [rma, setRma] = useState([]);
 
   const handleSearch = async () => {
     const ticket = query.trim();
@@ -83,7 +83,14 @@ function Home() {
         throw new Error(data?.message || "Failed to fetch RMA details.");
       }
 
-      setRma(data);
+      const requests = Array.isArray(data?.requests) ? data.requests : null;
+
+      if (!requests || requests.length === 0) {
+        throw new Error("No RMA found for that Ticket ID.");
+      }
+
+      setRma(requests);
+      console.log("Fetched RMA:", requests);
     } catch (err) {
       setRma(null);
       setErrorMsg(err?.message || "Something went wrong.");
@@ -174,7 +181,10 @@ function Home() {
                   <div>
                     <h2>RMA Summary</h2>
                     <p className="summary-sub">
-                      Ticket ID: <span className="mono">{rma.ticketId}</span>
+                      Ticket ID:{" "}
+                      <span className="mono">
+                        {rma.ticketId || "-"}
+                      </span>
                     </p>
                   </div>
 
@@ -184,36 +194,21 @@ function Home() {
                 </div>
 
                 <section className="summary-section">
-                  <h3>Company Information</h3>
+                  <h3>Customer Information</h3>
                   <div className="summary-grid">
                     <div className="summary-field">
-                      <div className="label">Company Name</div>
-                      <div className="value">
-                        {rma.company?.companyName ||
-                          rma.company?.fullName ||
-                          "-"}
-                      </div>
+                      <div className="label">Full Name</div>
+                      <div className="value">{rma.fullName || "-"}</div>
                     </div>
 
                     <div className="summary-field">
-                      <div className="label">Company Email</div>
-                      <div className="value">
-                        {rma.company?.companyEmail || "-"}
-                      </div>
+                      <div className="label">Email</div>
+                      <div className="value">{rma.emailAddress || "-"}</div>
                     </div>
 
                     <div className="summary-field">
-                      <div className="label">Company Phone</div>
-                      <div className="value">
-                        {rma.company?.companyPhone || "-"}
-                      </div>
-                    </div>
-
-                    <div className="summary-field full">
-                      <div className="label">Company Address</div>
-                      <div className="value">
-                        {rma.company?.companyAddress || "-"}
-                      </div>
+                      <div className="label">Phone</div>
+                      <div className="value">{rma.phoneNumber || "-"}</div>
                     </div>
                   </div>
                 </section>
@@ -233,16 +228,14 @@ function Home() {
                         </tr>
                       </thead>
                       <tbody>
-                        {(rma.items || []).map((item) => (
-                          <tr key={`track-item-${item.itemNo}`}>
-                            <td>{item.itemNo}</td>
-                            <td>{item.itemDescription || "-"}</td>
-                            <td>{item.serialNumber || "-"}</td>
-                            <td>{item.dateOfPurchase || "-"}</td>
-                            <td>{item.returnDate || "-"}</td>
-                            <td>{item.problem || "-"}</td>
-                          </tr>
-                        ))}
+                        <tr>
+                          <td>{rma.items?.[0]?.itemNo || 1}</td>
+                          <td>{rma.productModel || "-"}</td>
+                          <td>{rma.serialNumber || "-"}</td>
+                          <td>{rma.purchaseDate || "-"}</td>
+                          <td>{rma.returnDate || "-"}</td>
+                          <td>{rma.issueDescription || "-"}</td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>

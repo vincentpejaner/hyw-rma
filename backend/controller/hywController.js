@@ -131,12 +131,11 @@ function getMyRmaRequests(req, res) {
   }
 
   const query = `
-   SELECT * FROM db_customer c 
-   LEFT JOIN db_account a ON c.F_accountid = a.account_id
-   LEFT JOIN db_product p ON c.F_accountid = a.account_id
-   LEFT JOIN db_issue i ON p.db_productid = i.F_productid
-    WHERE p.ticket_id = ?
-    
+   SELECT * FROM db_customer 
+   RIGHT JOIN db_account  ON F_accountid = account_id
+   RIGHT JOIN db_product  ON db_customerid = F_customerid
+   RIGHT JOIN db_issue i ON db_productid = F_productid
+    WHERE ticket_id = ?
   `;
 
   db.query(query, [ticketId], (err, results) => {
