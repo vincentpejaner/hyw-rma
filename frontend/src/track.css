@@ -253,6 +253,47 @@
   overflow: hidden;
 }
 
+.track-summary-card {
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.track-summary-top h2 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  color: var(--rma-text);
+}
+
+.track-summary-ticket {
+  margin: 0.4rem 0 0;
+  color: var(--rma-muted);
+  font-size: 0.95rem;
+}
+
+.track-company-block {
+  margin: 0.95rem 0 1rem;
+}
+
+.track-company-block p {
+  margin: 4px 0;
+  color: var(--rma-text);
+  font-size: 1rem;
+}
+
+.track-company-name {
+  margin: 0 0 8px;
+  font-weight: 800;
+  font-size: 1.95rem;
+  line-height: 1.1;
+}
+
+.track-summary-meta {
+  margin: 4px 0;
+  color: #1f2937;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .summary-header {
   display: flex;
   align-items: flex-start;

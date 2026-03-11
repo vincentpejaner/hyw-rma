@@ -218,86 +218,59 @@ function Home() {
             </div>
 
             <div className="track-result">
-              <div className="summary-card">
-                <div className="summary-header">
-                  <div>
-                    <h2>RMA Summary</h2>
-                    <p className="summary-sub">
-                      Ticket ID:{" "}
-                      <span className="mono">
-                        {rma.ticketId || "-"}
-                      </span>
-                    </p>
-                  </div>
-
-                  <span className="status-pill">
-                    {rma.status || "Submitted"}
-                  </span>
+              <div className="summary-card track-summary-card">
+                <div className="track-summary-top">
+                  <h2>RMA Form Summary</h2>
+                  <p className="track-summary-ticket">
+                    Ticket ID:{" "}
+                    <span className="mono">{rma.ticketId || "-"}</span>
+                  </p>
                 </div>
 
-                <section className="summary-section">
-                  <h3>Customer Information</h3>
-                  <div className="summary-grid">
-                    <div className="summary-field">
-                      <div className="label">Full Name</div>
-                      <div className="value">{rma.company?.fullName || "-"}</div>
-                    </div>
+                <div className="track-company-block">
+                  <p className="track-company-name">
+                    {rma.company?.companyName || rma.company?.fullName || "-"}
+                  </p>
+                  <p>{rma.company?.companyAddress || "-"}</p>
+                  <p>{rma.company?.companyEmail || "-"}</p>
+                  <p>{rma.company?.companyPhone || "-"}</p>
+                </div>
 
-                    <div className="summary-field">
-                      <div className="label">Email</div>
-                      <div className="value">{rma.company?.companyEmail || "-"}</div>
-                    </div>
+                <p className="track-summary-meta">
+                  Status: {rma.status || "Submitted"}
+                </p>
+                <p className="track-summary-meta">
+                  Total Items: {(rma.items || []).length}
+                </p>
 
-                    <div className="summary-field">
-                      <div className="label">Phone</div>
-                      <div className="value">{rma.company?.companyPhone || "-"}</div>
-                    </div>
-
-                    <div className="summary-field">
-                      <div className="label">Company Name</div>
-                      <div className="value">{rma.company?.companyName || "-"}</div>
-                    </div>
-
-                    <div className="summary-field">
-                      <div className="label">Company Address</div>
-                      <div className="value">{rma.company?.companyAddress || "-"}</div>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="summary-section">
-                  <h3>Submitted Items</h3>
-                  <div className="track-table-wrapper">
-                    <table className="track-table">
-                      <thead>
-                        <tr>
-                          <th>Item #</th>
-                          <th>Category</th>
-                          <th>Description</th>
-                          <th>Serial Number</th>
-                          <th>Date of Purchase</th>
-                          <th>Return Date</th>
-                          <th>Problem</th>
-                          <th>Status</th>
+                <div className="track-table-wrapper">
+                  <table className="track-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Item Category</th>
+                        <th>Description</th>
+                        <th>Serial Number</th>
+                        <th>Date of Purchase</th>
+                        <th>Return Date</th>
+                        <th>Problem</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(rma.items || []).map((item) => (
+                        <tr key={`track-item-${item.itemNo}`}>
+                          <td>{item.itemNo}</td>
+                          <td>{item.category || "-"}</td>
+                          <td>{item.itemDescription || "-"}</td>
+                          <td>{item.serialNumber || "-"}</td>
+                          <td>{item.dateOfPurchase || "-"}</td>
+                          <td>{item.returnDate || "-"}</td>
+                          <td>{item.problem || "-"}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {(rma.items || []).map((item) => (
-                          <tr key={`track-item-${item.itemNo}`}>
-                            <td>{item.itemNo}</td>
-                            <td>{item.category || "-"}</td>
-                            <td>{item.itemDescription || "-"}</td>
-                            <td>{item.serialNumber || "-"}</td>
-                            <td>{item.dateOfPurchase || "-"}</td>
-                            <td>{item.returnDate || "-"}</td>
-                            <td>{item.problem || "-"}</td>
-                            <td>{item.status || "-"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </>
