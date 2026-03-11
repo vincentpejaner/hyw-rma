@@ -1,10 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthMenu from "./auth-menu.jsx";
-import logo from "./images/logo1.png";
+import logoLight from "./images/logo1.png";
+import logoDark from "./images/logo2.png";
 import "./site-header.css";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() =>
+    document.body.classList.contains("dark-mode"),
+  );
+
+  useEffect(() => {
+    const syncTheme = () => {
+      setIsDarkMode(document.body.classList.contains("dark-mode"));
+    };
+
+    syncTheme();
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <header className="page-header">
@@ -29,7 +48,7 @@ export default function SiteHeader() {
         </nav>
 
         <div className="header-logo">
-          <img src={logo} alt="HYW Logo" />
+          <img src={isDarkMode ? logoDark : logoLight} alt="HYW Logo" />
         </div>
 
         <nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>

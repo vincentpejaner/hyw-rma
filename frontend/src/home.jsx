@@ -8,6 +8,9 @@ import Track from "./track.jsx";
 import Profile from "./profile.jsx";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
+import esGamingDark from "./images/ESGAMING001.png";
+import esGamingLight from "./images/ESGAMING002.png";
+const PAGE_TRANSITION_MS = 240;
 
 function isAuthenticated() {
   return Boolean(window.localStorage.getItem("account"));
@@ -24,54 +27,50 @@ function getCurrentPage() {
 }
 
 function Home() {
-
   return (
     <div className="site-container">
       <SiteHeader />
 
-      <main className="home-main">
-        <section className="hero">
-          <div className="hero-inner">
-            <div className="hero-badge">HYW • RMA Management</div>
+      <main className="home-hero-page">
+        <section className="home-hero">
+          <div className="home-hero-text">
+            <div className="hero-pill">INTRODUCING</div>
 
-            <h1>
-              Fast, traceable RMA requests — from submission to resolution.
+            <h1 className="hero-animate-title">
+              RMA
+              <br />
+             SYSTEM
             </h1>
-            <p>
-              Submit your return or warranty request online and track progress
-              using your Ticket ID. Clear status updates, organized details, and
-              a better experience for both clients and technicians.
+
+            <p className="hero-animate-desc">
+              The best way to manage RMA requests instead of email backlogs.
+              Handle product returns, status updates, and service records at
+              scale.
             </p>
 
-            <div className="hero-cta">
-              <a href="#submit" className="btn primary">
-                Submit RMA
+            <div className="home-hero-actions">
+              <a href="#track" className="hero-btn hero-btn-outline">
+                Track RMA &gt;
               </a>
-              <a href="#track" className="btn">
-                Track RMA
+              <a href="#submit" className="hero-btn hero-btn-solid">
+                Submit RMA &gt;
               </a>
             </div>
+          </div>
 
-            <div className="hero-stats">
-              <div className="stat-card">
-                <div className="stat-title">One Ticket ID</div>
-                <div className="stat-sub">
-                  Everything is traceable in one place.
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-title">Clear Summary</div>
-                <div className="stat-sub">
-                  Customer + product details shown instantly.
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-title">Faster Handling</div>
-                <div className="stat-sub">
-                  Less back-and-forth, more action.
-                </div>
-              </div>
-            </div>
+          <div className="home-hero-visual">
+            <span className="hero-floating hero-floating-front">ESGAMING</span>
+            <span className="hero-floating hero-floating-end">CASING</span>
+            <img
+              className="hero-image hero-image-dark"
+              src={esGamingDark}
+              alt="RMA dark hero visual"
+            />
+            <img
+              className="hero-image hero-image-light"
+              src={esGamingLight}
+              alt="RMA light hero visual"
+            />
           </div>
         </section>
       </main>
@@ -82,33 +81,53 @@ function Home() {
 }
 
 export default function App() {
-  const [page, setPage] = useState(() => getCurrentPage());
+  const [displayPage, setDisplayPage] = useState(() => getCurrentPage());
+  const [transitionClass, setTransitionClass] = useState("page-transition-enter");
 
   useEffect(() => {
+    let transitionTimeout;
+
     const onHash = () => {
       const hash = (window.location.hash || "#home").replace("#", "");
       const route = hash.split("/")[0];
+      const targetRoute =
+        route === "submit" && !isAuthenticated() ? "login" : route;
 
       if (route === "submit" && !isAuthenticated()) {
         window.location.hash = "#login";
-        setPage("login");
+      }
+
+      if (targetRoute === displayPage) {
         return;
       }
 
-      setPage(route);
+      setTransitionClass("page-transition-exit");
+      clearTimeout(transitionTimeout);
+      transitionTimeout = window.setTimeout(() => {
+        setDisplayPage(targetRoute);
+        setTransitionClass("page-transition-enter");
+      }, PAGE_TRANSITION_MS);
     };
 
     onHash();
     window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      clearTimeout(transitionTimeout);
+    };
+  }, [displayPage]);
 
-  if (page === "about") return <About />;
-  if (page === "login") return <Login />;
-  if (page === "my-rma") return <MyRma />;
-  if (page === "submit") return <Submit />;
-  if (page === "track") return <Track />;
-  if (page === "profile") return <Profile />;
+  let pageComponent = <Home />;
+  if (displayPage === "about") pageComponent = <About />;
+  if (displayPage === "login") pageComponent = <Login />;
+  if (displayPage === "my-rma") pageComponent = <MyRma />;
+  if (displayPage === "submit") pageComponent = <Submit />;
+  if (displayPage === "track") pageComponent = <Track />;
+  if (displayPage === "profile") pageComponent = <Profile />;
 
-  return <Home />;
+  return (
+    <div className={`page-transition-layer ${transitionClass}`}>
+      {pageComponent}
+    </div>
+  );
 }
