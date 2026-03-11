@@ -46,9 +46,9 @@ function insertHYW(req, res) {
       return res.status(500).json({ error: "Customer check failed" });
     }
 
-    const processRma = () => {
+    const processRma = (customerId) => {
       const queryProduct =
-        "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket, ticket_id) VALUES (?, ?, ?, ?, ?, ?)";
+        "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket, ticket_id, F_customerid) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
       db.query(
         queryProduct,
@@ -59,6 +59,7 @@ function insertHYW(req, res) {
           returnDate,
           ticketNumber,
           ticketNumber,
+          customerId,
         ],
         (err, productResult) => {
           if (err) {
@@ -68,7 +69,7 @@ function insertHYW(req, res) {
 
           const productId = productResult.insertId;
           const issueQuery =
-            "INSERT INTO db_issue (db_issue_type, db_resolution, db_description, F_productid, F_accountid) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO db_issue (db_issue_type, db_resolution, db_description, F_productid) VALUES (?, ?, ?, ?)";
 
           db.query(
             issueQuery,
@@ -77,7 +78,6 @@ function insertHYW(req, res) {
               preferredResolution,
               issueDescription,
               productId,
-              Number(accountid),
             ],
             (err) => {
               if (err) {
@@ -108,16 +108,17 @@ function insertHYW(req, res) {
           companyAddress || "",
           Number(accountid),
         ],
-        (err) => {
+        (err, createResult) => {
           if (err) {
             console.error("Customer creation failed:", err);
             return res.status(500).json({ error: "Customer creation failed" });
           }
-          processRma();
+          // Newly created customer; use the insertId from this insert
+          processRma(createResult.insertId);
         },
       );
     } else {
-      processRma();
+      processRma(checkResult[0].db_customerid);
     }
   });
 }
@@ -131,11 +132,11 @@ function getMyRmaRequests(req, res) {
   }
 
   const query = `
-   SELECT * FROM db_customer 
-   RIGHT JOIN db_account  ON F_accountid = account_id
-   RIGHT JOIN db_product  ON db_customerid = F_customerid
-   RIGHT JOIN db_issue i ON db_productid = F_productid
-    WHERE ticket_id = ?
+   SELECT * FROM db_customer c
+   RIGHT JOIN db_account a ON c.F_accountid = a.account_id
+   RIGHT JOIN db_product p ON c.db_customerid = p.F_customerid
+   RIGHT JOIN db_issue i ON p.db_productid = i.F_productid
+   WHERE p.ticket_id = ?
   `;
 
   db.query(query, [ticketId], (err, results) => {
@@ -193,13 +194,14 @@ function getRmaByTicket(req, res) {
       p.db_serial_number,
       p.db_purchase_date,
       p.db_return_date,
-      p.F_accountid,
+      c.F_accountid AS account_id,
       i.db_issue_type,
       i.db_description,
       i.db_resolution
     FROM db_product p
     LEFT JOIN db_issue i ON p.db_productid = i.F_productid
-    WHERE p.db_ticket IN (${placeholders})
+    LEFT JOIN db_customer c ON p.F_customerid = c.db_customerid
+    WHERE p.ticket_id IN (${placeholders})
     ORDER BY p.db_productid ASC
   `;
 
@@ -215,7 +217,7 @@ function getRmaByTicket(req, res) {
         .json({ message: "No RMA found for this Ticket ID." });
     }
 
-    const accountId = itemRows[0].F_accountid;
+    const accountId = itemRows[0].account_id;
 
     const profileSql = `
       SELECT
@@ -412,11 +414,16 @@ async function submitRmaRequest(req, res) {
       [accountId],
     );
 
+    let customerId;
+
     if (!customerCheck || customerCheck.length === 0) {
-      await query(
+      const insertResult = await query(
         "INSERT INTO db_customer (db_fullname, db_phone_number, db_companyEmail, db_companyName, db_companyAddress, F_accountid) VALUES (?, ?, ?, ?, ?, ?)",
         ["", "", "", "", "", accountId],
       );
+      customerId = insertResult.insertId;
+    } else {
+      customerId = customerCheck[0].db_customerid;
     }
 
     const ticket =
@@ -448,7 +455,7 @@ async function submitRmaRequest(req, res) {
           db_purchase_date,
           db_return_date,
           db_ticket,
-          F_accountid,
+          F_customerid,
           ticket_id
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -460,7 +467,7 @@ async function submitRmaRequest(req, res) {
         purchaseDate,
         returnDate,
         ticket,
-        accountId,
+        customerId,
         ticketId,
       ]);
 

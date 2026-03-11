@@ -72,7 +72,7 @@ function Home() {
     setErrorMsg("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/hyw/mine/${ticket}`);
+      const res = await fetch(`${API_BASE}/api/hyw/track/${ticket}`);
 
       const contentType = res.headers.get("content-type") || "";
       const data = contentType.includes("application/json")
@@ -83,14 +83,8 @@ function Home() {
         throw new Error(data?.message || "Failed to fetch RMA details.");
       }
 
-      const requests = Array.isArray(data?.requests) ? data.requests : null;
-
-      if (!requests || requests.length === 0) {
-        throw new Error("No RMA found for that Ticket ID.");
-      }
-
-      setRma(requests);
-      console.log("Fetched RMA:", requests);
+      setRma(data);
+      console.log("Fetched RMA:", data);
     } catch (err) {
       setRma(null);
       setErrorMsg(err?.message || "Something went wrong.");
@@ -108,10 +102,8 @@ function Home() {
   return (
     <div className="site-container">
       <SiteHeader />
-
-      {/* Track Page */}
-      <div className={`track-wrapper ${rma ? "has-result" : ""}`}>
-        {/* NO RESULT: Left text content + Right search card */}
+ 
+      <div className={`track-wrapper ${rma ? "has-result" : ""}`}> 
         {!rma && (
           <div className="track-hero">
             <div className="track-left">
@@ -198,17 +190,27 @@ function Home() {
                   <div className="summary-grid">
                     <div className="summary-field">
                       <div className="label">Full Name</div>
-                      <div className="value">{rma.fullName || "-"}</div>
+                      <div className="value">{rma.company?.fullName || "-"}</div>
                     </div>
 
                     <div className="summary-field">
                       <div className="label">Email</div>
-                      <div className="value">{rma.emailAddress || "-"}</div>
+                      <div className="value">{rma.company?.companyEmail || "-"}</div>
                     </div>
 
                     <div className="summary-field">
                       <div className="label">Phone</div>
-                      <div className="value">{rma.phoneNumber || "-"}</div>
+                      <div className="value">{rma.company?.companyPhone || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Company Name</div>
+                      <div className="value">{rma.company?.companyName || "-"}</div>
+                    </div>
+
+                    <div className="summary-field">
+                      <div className="label">Company Address</div>
+                      <div className="value">{rma.company?.companyAddress || "-"}</div>
                     </div>
                   </div>
                 </section>
@@ -220,23 +222,26 @@ function Home() {
                       <thead>
                         <tr>
                           <th>Item #</th>
-                          <th>Item Category</th>
+                          <th>Category</th>
                           <th>Description</th>
                           <th>Serial Number</th>
                           <th>Date of Purchase</th>
                           <th>Return Date</th>
                           <th>Problem</th>
+                          <th>Status</th>
                         </tr>
                       </thead>
                       <tbody>
                         {(rma.items || []).map((item) => (
                           <tr key={`track-item-${item.itemNo}`}>
                             <td>{item.itemNo}</td>
+                            <td>{item.category || "-"}</td>
                             <td>{item.itemDescription || "-"}</td>
                             <td>{item.serialNumber || "-"}</td>
                             <td>{item.dateOfPurchase || "-"}</td>
                             <td>{item.returnDate || "-"}</td>
                             <td>{item.problem || "-"}</td>
+                            <td>{item.status || "-"}</td>
                           </tr>
                         ))}
                       </tbody>
