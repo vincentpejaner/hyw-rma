@@ -225,6 +225,7 @@ function Home() {
                       <thead>
                         <tr>
                           <th>Item #</th>
+                          <th>Item Category</th>
                           <th>Description</th>
                           <th>Serial Number</th>
                           <th>Date of Purchase</th>
@@ -236,6 +237,7 @@ function Home() {
                         {(rma.items || []).map((item) => (
                           <tr key={`track-item-${item.itemNo}`}>
                             <td>{item.itemNo}</td>
+                            <td>{item.category || "-"}</td>
                             <td>{item.itemDescription || "-"}</td>
                             <td>{item.serialNumber || "-"}</td>
                             <td>{item.dateOfPurchase || "-"}</td>

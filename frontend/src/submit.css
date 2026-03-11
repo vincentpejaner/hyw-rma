@@ -119,6 +119,88 @@ body {
   background: #fff;
 }
 
+.submit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.submit-overlay.success {
+  background: rgba(17, 24, 39, 0.35);
+}
+
+.submit-modal {
+  width: min(430px, calc(100% - 24px));
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
+  padding: 18px 18px 16px;
+  text-align: center;
+}
+
+.submit-modal h3 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.submit-modal p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.94rem;
+}
+
+.submit-modal.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.submit-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #111827;
+  margin-bottom: 12px;
+  animation: submit-spin 0.85s linear infinite;
+}
+
+@keyframes submit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.submit-modal-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-close-button {
+  margin-top: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  border-radius: 8px;
+  height: 36px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .submit-main {
   flex: 1;
   padding: 32px 16px;
@@ -209,6 +291,107 @@ body {
   padding: 0 12px;
   font-family: inherit;
   font-size: 0.94rem;
+}
+
+.category-select-wrapper {
+  position: relative;
+}
+
+.category-select-trigger {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 0.94rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+}
+
+.category-select-trigger.is-placeholder {
+  color: #6b7280;
+}
+
+.category-select-trigger:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.category-caret {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.category-select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.12);
+  padding: 8px;
+}
+
+.category-search-input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.category-search-input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.category-option-list {
+  margin-top: 8px;
+  max-height: 190px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-option {
+  width: 100%;
+  border: 0;
+  background: #fff;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #111827;
+  cursor: pointer;
+}
+
+.category-option:hover {
+  background: #f3f4f6;
+}
+
+.category-option.active {
+  background: #111827;
+  color: #fff;
+}
+
+.category-option-empty {
+  padding: 8px 10px;
+  color: #6b7280;
+  font-size: 0.88rem;
 }
 
 .field-group select:focus,
@@ -436,18 +619,20 @@ body {
 }
 
 .summary-company-block {
-  margin: 10px 0 14px;
+  margin: 10px 0 16px;
 }
 
 .summary-company-block p {
-  margin: 3px 0;
+  margin: 4px 0;
   color: #111827;
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 .summary-company-name {
-  font-weight: 700;
-  font-size: 1.35rem;
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1.1;
+  margin-bottom: 8px;
 }
 
 .summary-breakdown {
@@ -480,6 +665,42 @@ body {
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.summary-edit-button,
+.summary-submit-button {
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.summary-edit-button {
+  background: #111827;
+  color: #fff;
+}
+
+.summary-edit-button:hover {
+  background: #0b1220;
+}
+
+.summary-submit-button {
+  color: #fff;
+  background: linear-gradient(135deg, #e04040 0%, #e46475 100%);
+}
+
+.summary-submit-button:hover {
+  opacity: 0.95;
+}
+
+.summary-edit-button:disabled,
+.summary-submit-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .page-footer {
@@ -674,6 +895,8 @@ body {
 
   .page-header,
   .page-footer,
+  .submit-overlay,
+  .summary-actions,
   .no-print {
     display: none !important;
   }

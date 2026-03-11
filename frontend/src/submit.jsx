@@ -1,5 +1,6 @@
-﻿import "./submit.css";
+import "./submit.css";
 import { useEffect, useRef, useState } from "react";
+import ExcelJS from "exceljs";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
@@ -65,9 +66,14 @@ function Submit() {
   const [generatedItemErrors, setGeneratedItemErrors] = useState([]);
   const [generatedFormError, setGeneratedFormError] = useState("");
   const [formTicketId, setFormTicketId] = useState("");
+  const [openCategoryIndex, setOpenCategoryIndex] = useState(null);
+  const [categorySearchValues, setCategorySearchValues] = useState({});
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionSnapshot, setSubmissionSnapshot] = useState(null);
+  const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
+  const [isFinalSubmitted, setIsFinalSubmitted] = useState(false);
+  const [showSubmissionSuccess, setShowSubmissionSuccess] = useState(false);
 
   const [profileData, setProfileData] = useState({
     fullName: "",
@@ -153,14 +159,13 @@ function Submit() {
           `http://192.168.254.131:3001/api/hyw/selectprofile/${accountId}`,
         );
         const data = await res.json();
-        const profile = data?.profile || data || {};
 
         setProfileData({
-          fullName: profile.db_fullname || "",
-          companyPhone: profile.db_phone_number || "",
-          companyEmail: profile.db_companyEmail || "",
-          companyName: profile.db_companyName || "",
-          companyAddress: profile.db_companyAddress || "",
+          fullName: data?.profile?.db_fullname || "",
+          companyPhone: data?.profile?.db_phone_number || "",
+          companyEmail: data?.profile?.db_companyEmail || "",
+          companyName: data?.profile?.db_companyName || "",
+          companyAddress: data?.profile?.db_companyAddress || "",
         });
       } catch (err) {
         console.error(err);
@@ -169,6 +174,30 @@ function Submit() {
 
     loadProfile();
   }, [accountId]);
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (!event.target.closest(".category-select-wrapper")) {
+        setOpenCategoryIndex(null);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setOpenCategoryIndex(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   if (!isAuthenticated) {
     return null;
@@ -190,7 +219,36 @@ function Submit() {
     if (selections.length === 1) {
       return;
     }
+    setOpenCategoryIndex(null);
     setSelections((prev) => prev.filter((_, rowIndex) => rowIndex !== index));
+  };
+
+  const handleOpenCategoryMenu = (index) => {
+    setOpenCategoryIndex((prev) => (prev === index ? null : index));
+    setCategorySearchValues((prev) => ({
+      ...prev,
+      [index]: selections[index]?.category || "",
+    }));
+  };
+
+  const handleCategorySearchChange = (index, value) => {
+    setCategorySearchValues((prev) => ({ ...prev, [index]: value }));
+  };
+
+  const handleCategorySelect = (index, category) => {
+    handleSelectionChange(index, "category", category);
+    setCategorySearchValues((prev) => ({ ...prev, [index]: category }));
+    setOpenCategoryIndex(null);
+  };
+
+  const getFilteredCategories = (index) => {
+    const query = String(categorySearchValues[index] || "").trim().toLowerCase();
+    if (!query) {
+      return CATEGORY_OPTIONS;
+    }
+    return CATEGORY_OPTIONS.filter((option) =>
+      option.toLowerCase().includes(query),
+    );
   };
 
   const handleGenerateForm = () => {
@@ -221,8 +279,11 @@ function Submit() {
     setGeneratedItems(items);
     setGeneratedItemErrors(items.map(() => createGeneratedItemError()));
     setFormTicketId(nextTicketId);
+    setOpenCategoryIndex(null);
     setGeneratedFormError("");
     setIsSubmitted(false);
+    setIsFinalSubmitted(false);
+    setShowSubmissionSuccess(false);
     setSubmissionSnapshot(null);
   };
 
@@ -290,6 +351,14 @@ function Submit() {
         rowErrors[index].returnDate = "Required";
         isValid = false;
       }
+      if (
+        item.dateOfPurchase &&
+        item.returnDate &&
+        item.returnDate < item.dateOfPurchase
+      ) {
+        rowErrors[index].returnDate = "Return date must be the same as or after purchase date.";
+        isValid = false;
+      }
       if (!String(item.problem || "").trim()) {
         rowErrors[index].problem = "Required";
         isValid = false;
@@ -321,10 +390,25 @@ function Submit() {
       totalItems: generatedItems.length,
       items: generatedItems.map((item) => ({ ...item })),
     };
-
-    setSubmissionSnapshot(snapshot);
     setGeneratedFormError("");
+    setSubmissionSnapshot(snapshot);
     setIsSubmitted(true);
+    setIsFinalSubmitted(false);
+  };
+
+  const handleEditSummary = () => {
+    setIsSubmitted(false);
+    setGeneratedFormError("");
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!submissionSnapshot?.items?.length || !submissionSnapshot?.ticketId) {
+      setGeneratedFormError("Missing submission details.");
+      return;
+    }
+
+    setIsSubmittingFinal(true);
+    setGeneratedFormError("");
 
     try {
       const response = await fetch("http://192.168.254.131:3001/api/hyw/submit-rma", {
@@ -332,8 +416,8 @@ function Submit() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           accountId,
-          ticketId: ticketIdToUse,
-          items: generatedItems,
+          ticketId: submissionSnapshot.ticketId,
+          items: submissionSnapshot.items,
         }),
       });
 
@@ -341,13 +425,199 @@ function Submit() {
       if (!response.ok) {
         throw new Error(data.message || "Submission failed.");
       }
+
+      setIsFinalSubmitted(true);
+      setShowSubmissionSuccess(true);
     } catch (error) {
-      console.error(error);
+      setGeneratedFormError(error?.message || "Submission failed.");
+      setIsFinalSubmitted(false);
+    } finally {
+      setIsSubmittingFinal(false);
     }
+  };
+
+  const handlePrintRmaPdf = () => {
+    const onAfterPrint = () => {
+      document.body.classList.remove("single-page-print");
+      window.removeEventListener("afterprint", onAfterPrint);
+    };
+
+    document.body.classList.add("single-page-print");
+    window.addEventListener("afterprint", onAfterPrint);
+    window.print();
+  };
+
+    const handleExportExcel = async () => {
+    if (!submissionSnapshot) {
+      return;
+    }
+
+    const companyName = profileData.companyName || profileData.fullName || "-";
+    const companyAddress = profileData.companyAddress || "-";
+    const companyEmail = profileData.companyEmail || "-";
+    const companyPhone = profileData.companyPhone || "-";
+    const submittedAt = new Date(submissionSnapshot.submittedAt).toLocaleString();
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("RMA Form");
+
+    worksheet.columns = [
+      { key: "index", width: 7 },
+      { key: "category", width: 22 },
+      { key: "description", width: 34 },
+      { key: "serial", width: 22 },
+      { key: "purchase", width: 18 },
+      { key: "return", width: 18 },
+      { key: "problem", width: 44 },
+    ];
+
+    worksheet.mergeCells("A1:G1");
+    worksheet.getCell("A1").value = "RMA Submission Report";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FF111827" } };
+    worksheet.getCell("A1").alignment = { horizontal: "left", vertical: "middle" };
+
+    worksheet.getCell("A3").value = "Ticket ID:";
+    worksheet.getCell("B3").value = submissionSnapshot.ticketId || "-";
+    worksheet.getCell("A4").value = "Submitted:";
+    worksheet.getCell("B4").value = submittedAt;
+    worksheet.getCell("A5").value = "Total Items:";
+    worksheet.getCell("B5").value = submissionSnapshot.totalItems;
+
+    ["A3", "A4", "A5"].forEach((cell) => {
+      worksheet.getCell(cell).font = { bold: true, color: { argb: "FF1F2937" } };
+    });
+
+    worksheet.mergeCells("A7:G7");
+    worksheet.getCell("A7").value = companyName;
+    worksheet.getCell("A7").font = { size: 15, bold: true, color: { argb: "FF111827" } };
+    worksheet.mergeCells("A8:G8");
+    worksheet.getCell("A8").value = companyAddress;
+    worksheet.mergeCells("A9:G9");
+    worksheet.getCell("A9").value = companyEmail;
+    worksheet.mergeCells("A10:G10");
+    worksheet.getCell("A10").value = companyPhone;
+
+    const headerRowIndex = 12;
+    worksheet.getRow(headerRowIndex).values = [
+      "#",
+      "Item Category",
+      "Description",
+      "Serial Number",
+      "Date of Purchase",
+      "Return Date",
+      "Problem",
+    ];
+
+    worksheet.getRow(headerRowIndex).eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF111827" },
+      };
+      cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD1D5DB" } },
+        left: { style: "thin", color: { argb: "FFD1D5DB" } },
+        bottom: { style: "thin", color: { argb: "FFD1D5DB" } },
+        right: { style: "thin", color: { argb: "FFD1D5DB" } },
+      };
+    });
+
+    submissionSnapshot.items.forEach((item, index) => {
+      const row = worksheet.addRow([
+        index + 1,
+        item.category || "-",
+        item.itemDescription || "-",
+        item.serialNumber || "-",
+        item.dateOfPurchase || "-",
+        item.returnDate || "-",
+        item.problem || "-",
+      ]);
+
+      row.eachCell((cell, colNumber) => {
+        cell.alignment = {
+          horizontal: "left",
+          vertical: "top",
+          wrapText: colNumber === 3 || colNumber === 7,
+        };
+        cell.border = {
+          top: { style: "thin", color: { argb: "FFE5E7EB" } },
+          left: { style: "thin", color: { argb: "FFE5E7EB" } },
+          bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+          right: { style: "thin", color: { argb: "FFE5E7EB" } },
+        };
+        if (index % 2 === 1) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF9FAFB" },
+          };
+        }
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `RMA-${submissionSnapshot.ticketId || "report"}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="submit-container">
+      {isSubmittingFinal && (
+        <div className="submit-overlay" role="status" aria-live="polite">
+          <div className="submit-modal loading">
+            <div className="submit-spinner" aria-hidden="true"></div>
+            <h3>Uploading RMA...</h3>
+            <p>Please wait while we save your request.</p>
+          </div>
+        </div>
+      )}
+
+      {showSubmissionSuccess && (
+        <div className="submit-overlay success" role="dialog" aria-modal="true">
+          <div className="submit-modal">
+            <h3>RMA Submitted</h3>
+            <p>Your RMA has been uploaded successfully.</p>
+            <div className="submit-modal-actions">
+              <button
+                type="button"
+                className="summary-edit-button"
+                onClick={handlePrintRmaPdf}
+              >
+                Print RMA (PDF)
+              </button>
+              <button
+                type="button"
+                className="summary-submit-button"
+                onClick={handleExportExcel}
+              >
+                Export to Excel
+              </button>
+            </div>
+            <button
+              type="button"
+              className="modal-close-button"
+              onClick={() => {
+                setShowSubmissionSuccess(false);
+                window.location.hash = "#home";
+              }}
+            >
+              Return to Home
+            </button>
+          </div>
+        </div>
+      )}
+
       <SiteHeader />
 
       <main className="submit-main">
@@ -370,21 +640,53 @@ function Submit() {
                     {selections.map((row, index) => (
                       <div className="selection-row" key={`selection-${index}`}>
                         <div className="field-group">
-                          <label htmlFor={`category-${index}`}>Category</label>
-                          <select
-                            id={`category-${index}`}
-                            value={row.category}
-                            onChange={(event) =>
-                              handleSelectionChange(index, "category", event.target.value)
-                            }
-                          >
-                            <option value="">Select Category</option>
-                            {CATEGORY_OPTIONS.map((option) => (
-                              <option key={option} value={option}>
-                                {option}
-                              </option>
-                            ))}
-                          </select>
+                          <label>Category</label>
+                          <div className="category-select-wrapper">
+                            <button
+                              type="button"
+                              className={`category-select-trigger ${row.category ? "" : "is-placeholder"}`}
+                              onClick={() => handleOpenCategoryMenu(index)}
+                              aria-haspopup="listbox"
+                              aria-expanded={openCategoryIndex === index}
+                            >
+                              <span>{row.category || "Select Category"}</span>
+                              <span className="category-caret" aria-hidden="true">
+                                v
+                              </span>
+                            </button>
+
+                            {openCategoryIndex === index && (
+                              <div className="category-select-menu">
+                                <input
+                                  type="text"
+                                  className="category-search-input"
+                                  placeholder="Search category..."
+                                  value={categorySearchValues[index] || ""}
+                                  onChange={(event) =>
+                                    handleCategorySearchChange(index, event.target.value)
+                                  }
+                                  autoFocus
+                                />
+                                <div className="category-option-list" role="listbox">
+                                  {getFilteredCategories(index).map((option) => (
+                                    <button
+                                      type="button"
+                                      key={option}
+                                      className={`category-option ${row.category === option ? "active" : ""}`}
+                                      onClick={() => handleCategorySelect(index, option)}
+                                    >
+                                      {option}
+                                    </button>
+                                  ))}
+                                  {getFilteredCategories(index).length === 0 && (
+                                    <div className="category-option-empty">
+                                      No category found.
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         <div className="field-group quantity-group">
@@ -574,6 +876,7 @@ function Submit() {
                                 type="date"
                                 name="returnDate"
                                 value={item.returnDate}
+                                min={item.dateOfPurchase || undefined}
                                 onChange={(event) => handleGeneratedItemChange(index, event)}
                               />
                               {generatedItemErrors[index]?.returnDate && (
@@ -623,7 +926,7 @@ function Submit() {
                       className="primary-button"
                       onClick={handleSubmitGeneratedForm}
                     >
-                      Submit RMA
+                      Review Summary
                     </button>
                   </div>
                 </>
@@ -745,6 +1048,29 @@ function Submit() {
                   </tbody>
                 </table>
               </div>
+
+              <div className="summary-actions">
+                <button
+                  type="button"
+                  className="summary-edit-button"
+                  onClick={handleEditSummary}
+                  disabled={isSubmittingFinal}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="summary-submit-button"
+                  onClick={handleFinalSubmit}
+                  disabled={isSubmittingFinal || isFinalSubmitted}
+                >
+                  {isFinalSubmitted
+                    ? "Submitted"
+                    : isSubmittingFinal
+                      ? "Submitting..."
+                      : "Submit"}
+                </button>
+              </div>
             </div>
           )}
         </section>
@@ -756,3 +1082,6 @@ function Submit() {
 }
 
 export default Submit;
+
+
+

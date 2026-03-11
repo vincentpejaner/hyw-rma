@@ -195,6 +195,7 @@ function getRmaByTicket(req, res) {
       p.db_purchase_date,
       p.db_return_date,
       p.F_accountid,
+      i.db_issue_type,
       i.db_description,
       i.db_resolution
     FROM db_product p
@@ -241,6 +242,7 @@ function getRmaByTicket(req, res) {
 
       const items = itemRows.map((row, index) => ({
         itemNo: index + 1,
+        category: row.db_issue_type || "",
         itemDescription: row.db_product_name || "",
         serialNumber: row.db_serial_number || "",
         dateOfPurchase: row.db_purchase_date || "",
@@ -424,6 +426,7 @@ async function submitRmaRequest(req, res) {
         : "RMA-" + Date.now();
 
     for (const item of items) {
+      const category = String(item.category || "Others");
       const itemDescription = String(item.itemDescription || "");
       const serialNumber = String(item.serialNumber || "");
       const purchaseDate = item.dateOfPurchase || null;
@@ -475,7 +478,7 @@ async function submitRmaRequest(req, res) {
         VALUES (?, ?, ?, ?)
       `;
 
-      await query(issueSql, ["Hardware Issue", "Pending", problem, productId]);
+      await query(issueSql, [category, "Pending", problem, productId]);
     }
 
     res.json({
