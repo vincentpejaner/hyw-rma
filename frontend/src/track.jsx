@@ -18,26 +18,24 @@ function SearchCard({
   errorMsg,
   handleSearch,
   handleClear,
-  disabled = false,
 }) {
   return (
     <div className="search-container">
       <input
         type="text"
         className="search-input"
-        placeholder={disabled ? "Please log in to search" : "Enter Ticket ID..."}
+        placeholder="Enter Ticket ID..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && !disabled) handleSearch();
+          if (e.key === "Enter") handleSearch();
         }}
-        disabled={disabled}
       />
 
       <button
         className="search-button"
         onClick={handleSearch}
-        disabled={loading || disabled}
+        disabled={loading}
       >
         {loading ? "Searching..." : "Search"}
       </button>
@@ -46,7 +44,7 @@ function SearchCard({
         <button
           className="clear-button"
           onClick={handleClear}
-          disabled={loading || disabled}
+          disabled={loading}
         >
           Clear
         </button>
@@ -60,14 +58,7 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [rma, setRma] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const hasResult = Boolean(rma && rma.ticketId);
-
-  useEffect(() => {
-    // Check if user is logged in
-    const accountData = localStorage.getItem("account");
-    setIsLoggedIn(!!accountData);
-  }, []);
 
   const handleSearch = async () => {
     const ticket = query.trim();
@@ -78,28 +69,11 @@ function Home() {
       return;
     }
 
-    // Get account ID from localStorage
-    const accountData = localStorage.getItem("account");
-    if (!accountData) {
-      setErrorMsg("Please log in to track RMAs.");
-      setRma(null);
-      return;
-    }
-
-    const account = JSON.parse(accountData);
-    const accountId = account.account_id;
-
-    if (!accountId) {
-      setErrorMsg("Account information is invalid. Please log in again.");
-      setRma(null);
-      return;
-    }
-
     setLoading(true);
     setErrorMsg("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/hyw/track/${ticket}?accountId=${accountId}`);
+      const res = await fetch(`${API_BASE}/api/hyw/track/${ticket}`);
 
       const contentType = res.headers.get("content-type") || "";
       const data = contentType.includes("application/json")
@@ -141,28 +115,6 @@ function Home() {
                 recorded for your request—securely and in real time.
               </p>
 
-              {!isLoggedIn && (
-                <div className="login-notice">
-                  <p style={{ color: "#ff6b6b", fontWeight: "bold", marginTop: "20px" }}>
-                    Please log in to track your RMAs.
-                  </p>
-                  <button 
-                    onClick={() => window.location.hash = "#login"}
-                    style={{ 
-                      marginTop: "10px", 
-                      padding: "10px 20px", 
-                      backgroundColor: "#007bff", 
-                      color: "white", 
-                      border: "none", 
-                      borderRadius: "5px", 
-                      cursor: "pointer" 
-                    }}
-                  >
-                    Go to Login
-                  </button>
-                </div>
-              )}
-
               <div className="track-points">
                 <div className="track-point">
                   <div className="track-point-title">Fast status checks</div>
@@ -194,7 +146,6 @@ function Home() {
                 errorMsg={errorMsg}
                 handleSearch={handleSearch}
                 handleClear={handleClear}
-                disabled={!isLoggedIn}
               />
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
@@ -213,7 +164,6 @@ function Home() {
                 errorMsg={errorMsg}
                 handleSearch={handleSearch}
                 handleClear={handleClear}
-                disabled={!isLoggedIn}
               />
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
