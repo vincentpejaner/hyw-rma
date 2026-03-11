@@ -174,9 +174,14 @@ function getMyRmaRequests(req, res) {
 // FUNCTION TO TRACK FULL RMA FORM BY TICKET ID
 function getRmaByTicket(req, res) {
   const ticketId = (req.params.ticketId || "").trim();
+  const accountId = req.query.accountId;
 
   if (!ticketId) {
     return res.status(400).json({ message: "Ticket ID is required." });
+  }
+
+  if (!accountId) {
+    return res.status(400).json({ message: "Account ID is required." });
   }
 
   const normalizedTicket = ticketId.replace(
@@ -217,7 +222,12 @@ function getRmaByTicket(req, res) {
         .json({ message: "No RMA found for this Ticket ID." });
     }
 
-    const accountId = itemRows[0].account_id;
+    const rmaAccountId = itemRows[0].account_id;
+
+    // Verify that the requesting account owns this RMA
+    if (rmaAccountId != accountId) {
+      return res.status(403).json({ message: "Access denied. You can only view your own RMAs." });
+    }
 
     const profileSql = `
       SELECT
