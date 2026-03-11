@@ -57,7 +57,7 @@ function Home() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [rma, setRma] = useState(null);
+  const [rma, setRma] = useState("");
 
   const handleSearch = async () => {
     const ticket = query.trim();
@@ -72,9 +72,7 @@ function Home() {
     setErrorMsg("");
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/hyw/mine/${ticket}`,
-      );
+      const res = await fetch(`${API_BASE}/api/hyw/mine/${ticket}`);
 
       const contentType = res.headers.get("content-type") || "";
       const data = contentType.includes("application/json")

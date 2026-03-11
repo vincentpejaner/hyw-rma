@@ -28,55 +28,61 @@ function insertHYW(req, res) {
     issueDescription,
     ticketNumber,
     accountid,
+    companyName,
+    companyAddress,
+    companyPhone,
   } = req.body;
 
   if (!accountid) {
     return res.status(400).json({ error: "Account ID is missing" });
   }
 
-  const queryProduct =
-    "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket) VALUES (?, ?, ?, ?, ?)";
+  // Check if customer profile exists, if not create one
+  const checkCustomerSql =
+    "SELECT db_customerid FROM db_customer WHERE F_accountid = ? LIMIT 1";
+  db.query(checkCustomerSql, [accountid], (checkErr, checkResult) => {
+    if (checkErr) {
+      console.error("Error checking customer:", checkErr);
+      return res.status(500).json({ error: "Customer check failed" });
+    }
 
-  db.query(
-    queryProduct,
-    [productModel, serialNumber, purchaseDate, returnDate, ticketNumber],
-    (err, productResult) => {
-      if (err) {
-        console.error("Product insert failed:", err);
-        return res.status(500).json({ error: "Product insert failed" });
-      }
-
-      const productId = productResult.insertId;
-      const issueQuery =
-        "INSERT INTO db_issue (db_issue_type, db_resolution, db_description, F_productid, F_accountid) VALUES (?, ?, ?, ?, ?)";
+    const processRma = () => {
+      const queryProduct =
+        "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket, ticket_id) VALUES (?, ?, ?, ?, ?, ?)";
 
       db.query(
-        issueQuery,
+        queryProduct,
         [
-          issueType,
-          preferredResolution,
-          issueDescription,
-          productId,
-          Number(accountid),
+          productModel,
+          serialNumber,
+          purchaseDate,
+          returnDate,
+          ticketNumber,
+          ticketNumber,
         ],
-        (err) => {
+        (err, productResult) => {
           if (err) {
-            console.error("Issue insert failed:", err);
-            return res.status(500).json({ error: "Issue insert failed" });
+            console.error("Product insert failed:", err);
+            return res.status(500).json({ error: "Product insert failed" });
           }
 
-          const customerQuery =
-            "INSERT INTO db_customer (db_fullname, db_email, db_phone_number, F_productid, F_accountid) VALUES (?, ?, ?, ?, ?)";
+          const productId = productResult.insertId;
+          const issueQuery =
+            "INSERT INTO db_issue (db_issue_type, db_resolution, db_description, F_productid, F_accountid) VALUES (?, ?, ?, ?, ?)";
 
           db.query(
-            customerQuery,
-            [fullName, emailAddress, phoneNumber, productId, Number(accountid)],
+            issueQuery,
+            [
+              issueType,
+              preferredResolution,
+              issueDescription,
+              productId,
+              Number(accountid),
+            ],
             (err) => {
               if (err) {
-                console.error("Customer insert failed:", err);
-                return res
-                  .status(500)
-                  .json({ error: "Customer insert failed" });
+                console.error("Issue insert failed:", err);
+                return res.status(500).json({ error: "Issue insert failed" });
               }
 
               res.status(200).json({
@@ -86,8 +92,34 @@ function insertHYW(req, res) {
           );
         },
       );
-    },
-  );
+    };
+
+    // If customer doesn't exist, create one first
+    if (!checkResult || checkResult.length === 0) {
+      const createCustomerSql =
+        "INSERT INTO db_customer (db_fullname, db_phone_number, db_companyEmail, db_companyName, db_companyAddress, F_accountid) VALUES (?, ?, ?, ?, ?, ?)";
+      db.query(
+        createCustomerSql,
+        [
+          fullName || "",
+          companyPhone || phoneNumber || "",
+          emailAddress || "",
+          companyName || "",
+          companyAddress || "",
+          Number(accountid),
+        ],
+        (err) => {
+          if (err) {
+            console.error("Customer creation failed:", err);
+            return res.status(500).json({ error: "Customer creation failed" });
+          }
+          processRma();
+        },
+      );
+    } else {
+      processRma();
+    }
+  });
 }
 
 // FUNCTION TO HANDLE RMA TRACKING BY TICKET NUMBER FROM FRONTEND
@@ -99,23 +131,12 @@ function getMyRmaRequests(req, res) {
   }
 
   const query = `
-    SELECT
-      p.db_ticket,
-      p.db_product_name,
-      p.db_serial_number,
-      p.db_return_date,
-      p.db_purchase_date,
-      i.db_issue_type,
-      i.db_resolution,
-      i.db_description,
-      c.db_fullname,
-      c.db_companyEmail,
-      c.db_phone_number
-    FROM db_product p
-    LEFT JOIN db_issue i ON p.db_productid = i.F_productid
-    LEFT JOIN db_customer c ON p.F_accountid = c.F_accountid
-    WHERE p.db_ticket = ?
-    ORDER BY p.db_productid DESC;
+   SELECT * FROM db_customer c 
+   LEFT JOIN db_account a ON c.F_accountid = a.account_id
+   LEFT JOIN db_product p ON c.F_accountid = a.account_id
+   LEFT JOIN db_issue i ON p.db_productid = i.F_productid
+    WHERE p.ticket_id = ?
+    
   `;
 
   db.query(query, [ticketId], (err, results) => {
@@ -126,21 +147,26 @@ function getMyRmaRequests(req, res) {
         .json({ message: "Failed to fetch your RMA requests." });
     }
 
-    const requests = (results || []).map((row) => ({
-      ticketNumber: row.db_ticket,
-      productModel: row.db_product_name,
-      serialNumber: row.db_serial_number,
-      purchaseDate: row.db_purchase_date,
-      returnDate: row.db_return_date,
-      issueType: row.db_issue_type,
-      preferredResolution: row.db_resolution,
-      issueDescription: row.db_description,
-      fullName: row.db_fullname,
-      emailAddress: row.db_companyEmail,
-      phoneNumber: row.db_phone_number,
-      status: "Submitted",
-    }));
+    console.log("Raw results for ticket", ticketId, ":", results);
 
+    const requests = (results || [])
+      .filter((row) => row.db_issue_type)
+      .map((row) => ({
+        ticketNumber: row.db_ticket,
+        productModel: row.db_product_name,
+        serialNumber: row.db_serial_number,
+        purchaseDate: row.db_purchase_date,
+        returnDate: row.db_return_date,
+        issueType: row.db_issue_type,
+        preferredResolution: row.db_resolution,
+        issueDescription: row.db_description,
+        fullName: row.db_fullname || "",
+        emailAddress: row.db_companyEmail || "",
+        phoneNumber: row.db_phone_number || "",
+        status: "Submitted",
+      }));
+
+    console.log("Filtered RMA requests for ticket", ticketId, ":", requests);
     return res.status(200).json({ requests });
   });
 }
@@ -379,6 +405,19 @@ async function submitRmaRequest(req, res) {
     });
 
   try {
+    // Check if customer profile exists, if not create one
+    const customerCheck = await query(
+      "SELECT db_customerid FROM db_customer WHERE F_accountid = ? LIMIT 1",
+      [accountId],
+    );
+
+    if (!customerCheck || customerCheck.length === 0) {
+      await query(
+        "INSERT INTO db_customer (db_fullname, db_phone_number, db_companyEmail, db_companyName, db_companyAddress, F_accountid) VALUES (?, ?, ?, ?, ?, ?)",
+        ["", "", "", "", "", accountId],
+      );
+    }
+
     const ticket =
       typeof ticketId === "string" && ticketId.trim()
         ? ticketId.trim()
