@@ -47,6 +47,13 @@ function insertHYW(req, res) {
     }
 
     const processRma = (customerId) => {
+      // Generate randomized ticket for db_ticket
+      const randomTicket =
+        "RMA-" +
+        Date.now() +
+        "-" +
+        Math.random().toString(36).substr(2, 9).toUpperCase();
+
       const queryProduct =
         "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket, ticket_id, F_customerid) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
@@ -57,7 +64,7 @@ function insertHYW(req, res) {
           serialNumber,
           purchaseDate,
           returnDate,
-          ticketNumber,
+          randomTicket,
           ticketNumber,
           customerId,
         ],
@@ -73,12 +80,7 @@ function insertHYW(req, res) {
 
           db.query(
             issueQuery,
-            [
-              issueType,
-              preferredResolution,
-              issueDescription,
-              productId,
-            ],
+            [issueType, preferredResolution, issueDescription, productId],
             (err) => {
               if (err) {
                 console.error("Issue insert failed:", err);
@@ -195,6 +197,7 @@ function getRmaByTicket(req, res) {
     SELECT
       p.db_productid,
       p.db_ticket,
+      p.ticket_id,
       p.db_product_name,
       p.db_serial_number,
       p.db_purchase_date,
@@ -226,7 +229,9 @@ function getRmaByTicket(req, res) {
 
     // Verify that the requesting account owns this RMA
     if (rmaAccountId != accountId) {
-      return res.status(403).json({ message: "Access denied. You can only view your own RMAs." });
+      return res
+        .status(403)
+        .json({ message: "Access denied. You can only view your own RMAs." });
     }
 
     const profileSql = `
@@ -260,6 +265,8 @@ function getRmaByTicket(req, res) {
         returnDate: row.db_return_date || "",
         problem: row.db_description || "",
         status: row.db_resolution || "Submitted",
+        productTicket: row.db_ticket || "",
+        formTicket: row.ticket_id || "",
       }));
 
       return res.status(200).json({
@@ -441,6 +448,12 @@ async function submitRmaRequest(req, res) {
         ? ticketId.trim()
         : "RMA-" + Date.now();
 
+    function generateProductTicket() {
+      const timestamp = Date.now().toString().slice(-6); // last 6 digits
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+      return `RMA-${timestamp}-${random}`;
+    }
+
     for (const item of items) {
       const category = String(item.category || "Others");
       const itemDescription = String(item.itemDescription || "");
@@ -449,12 +462,15 @@ async function submitRmaRequest(req, res) {
       const returnDate = item.returnDate || null;
       const problem = String(item.problem || "");
 
+    const productTicket = generateProductTicket();
+
       console.log("Saving item:", {
         itemDescription,
         serialNumber,
         purchaseDate,
         returnDate,
         problem,
+        productTicket,
       });
 
       const productSql = `
@@ -476,7 +492,7 @@ async function submitRmaRequest(req, res) {
         serialNumber,
         purchaseDate,
         returnDate,
-        ticket,
+        productTicket,
         customerId,
         ticketId,
       ]);

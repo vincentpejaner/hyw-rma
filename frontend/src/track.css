@@ -412,6 +412,61 @@
 }
 
 /* ============================= */
+/* PRODUCT FILTER SECTION */
+/* ============================= */
+.product-filter-section {
+  margin: 1rem 0 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.product-filter-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rma-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--rma-card);
+  color: var(--rma-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.product-filter-input:focus {
+  outline: none;
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+}
+
+.product-filter-input::placeholder {
+  color: var(--rma-muted);
+}
+
+.product-filter-clear {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  background: rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--rma-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--rma-text);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.product-filter-clear:hover {
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.filter-results-count {
+  margin: 0;
+  padding: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--rma-muted);
+  font-style: italic;
+}
+
+/* ============================= */
 /* Responsive */
 /* ============================= */
 @media (max-width: 980px) {

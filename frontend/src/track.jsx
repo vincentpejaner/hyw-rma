@@ -61,7 +61,20 @@ function Home() {
   const [errorMsg, setErrorMsg] = useState("");
   const [rma, setRma] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [productFilter, setProductFilter] = useState("");
   const hasResult = Boolean(rma && rma.ticketId);
+
+  const filteredItems = (rma?.items || []).filter((item) => {
+    const searchTerm = productFilter.toLowerCase();
+    return (
+      item.itemDescription?.toLowerCase().includes(searchTerm) ||
+      item.serialNumber?.toLowerCase().includes(searchTerm) ||
+      item.category?.toLowerCase().includes(searchTerm) ||
+      item.problem?.toLowerCase().includes(searchTerm) ||
+      item.productTicket?.toLowerCase().includes(searchTerm) ||
+      item.formTicket?.toLowerCase().includes(searchTerm)
+    );
+  });
 
   useEffect(() => {
     // Check if user is logged in
@@ -99,7 +112,9 @@ function Home() {
     setErrorMsg("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/hyw/track/${ticket}?accountId=${accountId}`);
+    const res = await fetch(
+  `${API_BASE}/api/hyw/track/${ticket}?accountId=${accountId}`
+);
 
       const contentType = res.headers.get("content-type") || "";
       const data = contentType.includes("application/json")
@@ -124,6 +139,11 @@ function Home() {
     setQuery("");
     setErrorMsg("");
     setRma(null);
+    setProductFilter("");
+  };
+
+  const handleProductFilterClear = () => {
+    setProductFilter("");
   };
 
   return (
@@ -223,7 +243,7 @@ function Home() {
                 <div className="track-summary-top">
                   <h2>RMA Form Summary</h2>
                   <p className="track-summary-ticket">
-                    Ticket ID:{" "}
+                    Form Ticket ID:{" "}
                     <span className="mono">{rma.ticketId || "-"}</span>
                   </p>
                 </div>
@@ -244,11 +264,35 @@ function Home() {
                   Total Items: {(rma.items || []).length}
                 </p>
 
+                <div className="product-filter-section">
+                  <input
+                    type="text"
+                    className="product-filter-input"
+                    placeholder="Search by product ticket, form ticket, description, serial number, category, or problem..."
+                    value={productFilter}
+                    onChange={(e) => setProductFilter(e.target.value)}
+                  />
+                  {productFilter && (
+                    <button
+                      className="product-filter-clear"
+                      onClick={handleProductFilterClear}
+                    >
+                      Clear Filter
+                    </button>
+                  )}
+                  {productFilter && (
+                    <p className="filter-results-count">
+                      Showing {filteredItems.length} of {rma.items?.length || 0} items
+                    </p>
+                  )}
+                </div>
+
                 <div className="track-table-wrapper">
                   <table className="track-table">
                     <thead>
                       <tr>
                         <th>#</th>
+                        <th>Product Ticket</th>
                         <th>Item Category</th>
                         <th>Description</th>
                         <th>Serial Number</th>
@@ -258,17 +302,26 @@ function Home() {
                       </tr>
                     </thead>
                     <tbody>
-                      {(rma.items || []).map((item) => (
-                        <tr key={`track-item-${item.itemNo}`}>
-                          <td>{item.itemNo}</td>
-                          <td>{item.category || "-"}</td>
-                          <td>{item.itemDescription || "-"}</td>
-                          <td>{item.serialNumber || "-"}</td>
-                          <td>{item.dateOfPurchase || "-"}</td>
-                          <td>{item.returnDate || "-"}</td>
-                          <td>{item.problem || "-"}</td>
+                      {filteredItems.length > 0 ? (
+                        filteredItems.map((item) => (
+                          <tr key={`track-item-${item.itemNo}`}>
+                            <td>{item.itemNo}</td>
+                            <td>{item.productTicket || "-"}</td>
+                            <td>{item.category || "-"}</td>
+                            <td>{item.itemDescription || "-"}</td>
+                            <td>{item.serialNumber || "-"}</td>
+                            <td>{item.dateOfPurchase || "-"}</td>
+                            <td>{item.returnDate || "-"}</td>
+                            <td>{item.problem || "-"}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="8" style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                            {productFilter ? "No products match your search" : "No items found"}
+                          </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
