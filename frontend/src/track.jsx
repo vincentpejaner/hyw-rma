@@ -59,8 +59,9 @@ function Home() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [rma, setRma] = useState([]);
+  const [rma, setRma] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const hasResult = Boolean(rma && rma.ticketId);
 
   useEffect(() => {
     // Check if user is logged in
@@ -129,8 +130,8 @@ function Home() {
     <div className="site-container">
       <SiteHeader />
  
-      <div className={`track-wrapper ${rma ? "has-result" : ""}`}> 
-        {!rma && (
+      <div className={`track-wrapper ${hasResult ? "has-result" : ""}`}> 
+        {!hasResult && (
           <div className="track-hero">
             <div className="track-left">
               <h1>Track Your RMA</h1>
@@ -201,7 +202,7 @@ function Home() {
         )}
 
         {/* WITH RESULT: Search on left + Summary on right */}
-        {rma && (
+        {hasResult && (
           <>
             <div className="content">
               <SearchCard
