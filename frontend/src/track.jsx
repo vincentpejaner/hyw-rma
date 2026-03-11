@@ -220,6 +220,7 @@ function Home() {
                       <thead>
                         <tr>
                           <th>Item #</th>
+                          <th>Item Category</th>
                           <th>Description</th>
                           <th>Serial Number</th>
                           <th>Date of Purchase</th>
@@ -228,14 +229,16 @@ function Home() {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <td>{rma.items?.[0]?.itemNo || 1}</td>
-                          <td>{rma.productModel || "-"}</td>
-                          <td>{rma.serialNumber || "-"}</td>
-                          <td>{rma.purchaseDate || "-"}</td>
-                          <td>{rma.returnDate || "-"}</td>
-                          <td>{rma.issueDescription || "-"}</td>
-                        </tr>
+                        {(rma.items || []).map((item) => (
+                          <tr key={`track-item-${item.itemNo}`}>
+                            <td>{item.itemNo}</td>
+                            <td>{item.itemDescription || "-"}</td>
+                            <td>{item.serialNumber || "-"}</td>
+                            <td>{item.dateOfPurchase || "-"}</td>
+                            <td>{item.returnDate || "-"}</td>
+                            <td>{item.problem || "-"}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
