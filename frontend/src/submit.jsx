@@ -1,5 +1,5 @@
 ﻿import "./submit.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
@@ -76,12 +76,71 @@ function Submit() {
     companyName: "",
     companyAddress: "",
   });
+  const previousHashRef = useRef(window.location.hash || "#submit");
+  const suppressHashPromptRef = useRef(false);
+
+  const hasUnsavedChanges =
+    !isSubmitted &&
+    (generatedItems.length > 0 ||
+      selections.some(
+        (row) =>
+          String(row.category || "").trim() !== "" ||
+          String(row.quantity || "").trim() !== "1",
+      ));
 
   useEffect(() => {
     if (!isAuthenticated) {
       window.location.hash = "#login";
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) {
+      previousHashRef.current = window.location.hash || "#submit";
+      return undefined;
+    }
+
+    const warningMessage = "Current form will not be saved. Do you want to leave this page?";
+
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = warningMessage;
+      return warningMessage;
+    };
+
+    const handleHashChange = () => {
+      if (suppressHashPromptRef.current) {
+        suppressHashPromptRef.current = false;
+        previousHashRef.current = window.location.hash || "#submit";
+        return;
+      }
+
+      const nextHash = window.location.hash || "#home";
+      const currentHash = previousHashRef.current || "#submit";
+
+      if (nextHash === currentHash) {
+        return;
+      }
+
+      const shouldLeave = window.confirm(warningMessage);
+
+      if (!shouldLeave) {
+        suppressHashPromptRef.current = true;
+        window.location.hash = currentHash;
+        return;
+      }
+
+      previousHashRef.current = nextHash;
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     if (!accountId) {
@@ -114,12 +173,6 @@ function Submit() {
   if (!isAuthenticated) {
     return null;
   }
-
-  const generatedCategorySummary = generatedItems.reduce((acc, item) => {
-    const key = item.category || "Others";
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
 
   const handleSelectionChange = (index, field, value) => {
     setSelections((prev) =>
@@ -384,12 +437,6 @@ function Submit() {
                 <>
                   <div className="generated-form-info">
                     <div>
-                      <strong>Category Mix:</strong>{" "}
-                      {Object.entries(generatedCategorySummary)
-                        .map(([name, count]) => `${name} (${count})`)
-                        .join(", ")}
-                    </div>
-                    <div>
                       <strong>Generated Items:</strong> {generatedItems.length}
                     </div>
                     <div className="generated-form-note">
@@ -403,11 +450,78 @@ function Submit() {
                       <thead>
                         <tr>
                           <th>#</th>
-                          <th>Description</th>
-                          <th>Serial</th>
-                          <th>Purchase</th>
-                          <th>Return</th>
-                          <th>Problem</th>
+                          <th>
+                            Item Category
+                            <span
+                              className="th-help"
+                              data-help="Type selected for this row, such as RAM, SSD, or Monitor."
+                              tabIndex={0}
+                              role="button"
+                              aria-label="Item Category guide"
+                            >
+                              ?
+                            </span>
+                          </th>
+                          <th>
+                            Description
+                            <span
+                              className="th-help"
+                              data-help="Product model or item name so we can identify the exact unit."
+                              tabIndex={0}
+                              role="button"
+                              aria-label="Description guide"
+                            >
+                              ?
+                            </span>
+                          </th>
+                          <th>
+                            Serial
+                            <span
+                              className="th-help"
+                              data-help="Unique serial number from the item sticker, label, or box."
+                              tabIndex={0}
+                              role="button"
+                              aria-label="Serial guide"
+                            >
+                              ?
+                            </span>
+                          </th>
+                          <th>
+                            Purchase
+                            <span
+                              className="th-help"
+                              data-help="Original purchase date from your receipt or invoice."
+                              tabIndex={0}
+                              role="button"
+                              aria-label="Purchase guide"
+                            >
+                              ?
+                            </span>
+                          </th>
+                          <th>
+                            Return
+                            <span
+                              className="th-help"
+                              data-help="Date this item is being sent or returned for RMA."
+                              tabIndex={0}
+                              role="button"
+                              aria-label="Return guide"
+                            >
+                              ?
+                            </span>
+                          </th>
+                          <th>
+                            Problem
+                            <span
+                              className="th-help"
+                              data-help="Short issue details, such as symptoms, errors, or damage."
+                              tabIndex={0}
+                              role="button"
+                              aria-label="Problem guide"
+                            >
+                              ?
+                            </span>
+                          </th>
                           <th>Action</th>
                         </tr>
                       </thead>
@@ -415,6 +529,7 @@ function Submit() {
                         {generatedItems.map((item, index) => (
                           <tr key={`generated-${item.itemNo}`}>
                             <td>{item.itemNo}</td>
+                            <td>{item.category || "-"}</td>
                             <td>
                               <input
                                 name="itemDescription"
@@ -541,17 +656,85 @@ function Submit() {
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>Description</th>
-                      <th>Serial</th>
-                      <th>Purchase</th>
-                      <th>Return</th>
-                      <th>Problem</th>
+                      <th>
+                        Item Category
+                        <span
+                          className="th-help"
+                          data-help="Type selected for this row, such as RAM, SSD, or Monitor."
+                          tabIndex={0}
+                          role="button"
+                          aria-label="Item Category guide"
+                        >
+                          ?
+                        </span>
+                      </th>
+                      <th>
+                        Description
+                        <span
+                          className="th-help"
+                          data-help="Product model or item name so we can identify the exact unit."
+                          tabIndex={0}
+                          role="button"
+                          aria-label="Description guide"
+                        >
+                          ?
+                        </span>
+                      </th>
+                      <th>
+                        Serial
+                        <span
+                          className="th-help"
+                          data-help="Unique serial number from the item sticker, label, or box."
+                          tabIndex={0}
+                          role="button"
+                          aria-label="Serial guide"
+                        >
+                          ?
+                        </span>
+                      </th>
+                      <th>
+                        Purchase
+                        <span
+                          className="th-help"
+                          data-help="Original purchase date from your receipt or invoice."
+                          tabIndex={0}
+                          role="button"
+                          aria-label="Purchase guide"
+                        >
+                          ?
+                        </span>
+                      </th>
+                      <th>
+                        Return
+                        <span
+                          className="th-help"
+                          data-help="Date this item is being sent or returned for RMA."
+                          tabIndex={0}
+                          role="button"
+                          aria-label="Return guide"
+                        >
+                          ?
+                        </span>
+                      </th>
+                      <th>
+                        Problem
+                        <span
+                          className="th-help"
+                          data-help="Short issue details, such as symptoms, errors, or damage."
+                          tabIndex={0}
+                          role="button"
+                          aria-label="Problem guide"
+                        >
+                          ?
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {submissionSnapshot.items.map((item, index) => (
                       <tr key={`submitted-${index + 1}`}>
                         <td>{index + 1}</td>
+                        <td>{item.category || "-"}</td>
                         <td>{item.itemDescription || "-"}</td>
                         <td>{item.serialNumber || "-"}</td>
                         <td>{item.dateOfPurchase || "-"}</td>

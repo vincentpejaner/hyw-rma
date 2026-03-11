@@ -8,7 +8,7 @@ import Profile from "./profile.jsx";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
-const API_BASE = "http://localhost:3001";
+const API_BASE = "http://192.168.254.131:3001";
 
 function SearchCard({
   query,
