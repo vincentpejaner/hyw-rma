@@ -403,9 +403,49 @@ body.dark-mode .home-hero-text p {
 }
 
 body.dark-mode .hero-pill {
+  position: relative;
   color: #ebe7ff;
-  border-color: rgba(134, 108, 228, 0.62);
-  box-shadow: inset 0 0 0 1px rgba(121, 77, 255, 0.48), 0 0 16px rgba(101, 64, 214, 0.24);
+  border-color: transparent;
+  box-shadow: 0 0 16px rgba(101, 64, 214, 0.24);
+  isolation: isolate;
+}
+
+body.dark-mode .hero-pill::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #ff3b3b 0%,
+    #ff9a3b 14%,
+    #f7ff3b 28%,
+    #3bff7a 42%,
+    #3bd9ff 56%,
+    #5b6bff 70%,
+    #b43bff 84%,
+    #ff3b9a 100%
+  );
+  background-size: 240% 100%;
+  z-index: -1;
+  animation: hero-pill-rgb-flow 2.2s linear infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 2px;
+}
+
+@keyframes hero-pill-rgb-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0% 50%;
+  }
 }
 
 body.dark-mode .hero-btn-outline {
@@ -436,6 +476,7 @@ body.dark-mode .hero-image-light {
   .page-transition-layer,
   .home-hero-page,
   .hero-pill,
+  .hero-pill::before,
   .home-hero-text h1,
   .home-hero-text p,
   .hero-animate-title,
