@@ -18,26 +18,24 @@ function SearchCard({
   errorMsg,
   handleSearch,
   handleClear,
-  disabled = false,
 }) {
   return (
     <div className="search-container">
       <input
         type="text"
         className="search-input"
-        placeholder={disabled ? "Please log in to search" : "Enter Ticket ID..."}
+        placeholder="Enter Ticket ID..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && !disabled) handleSearch();
+          if (e.key === "Enter") handleSearch();
         }}
-        disabled={disabled}
       />
 
       <button
         className="search-button"
         onClick={handleSearch}
-        disabled={loading || disabled}
+        disabled={loading}
       >
         {loading ? "Searching..." : "Search"}
       </button>
@@ -46,7 +44,7 @@ function SearchCard({
         <button
           className="clear-button"
           onClick={handleClear}
-          disabled={loading || disabled}
+          disabled={loading}
         >
           Clear
         </button>
@@ -91,30 +89,19 @@ function Home() {
       return;
     }
 
-    // Get account ID from localStorage
+    // check for optional account information
     const accountData = localStorage.getItem("account");
-    if (!accountData) {
-      setErrorMsg("Please log in to track RMAs.");
-      setRma(null);
-      return;
-    }
-
-    const account = JSON.parse(accountData);
-    const accountId = account.account_id;
-
-    if (!accountId) {
-      setErrorMsg("Account information is invalid. Please log in again.");
-      setRma(null);
-      return;
-    }
+    const accountId = accountData ? JSON.parse(accountData).account_id : null;
+    
 
     setLoading(true);
     setErrorMsg("");
 
     try {
-    const res = await fetch(
-  `${API_BASE}/api/hyw/track/${ticket}?accountId=${accountId}`
-);
+      const url = accountId
+        ? `${API_BASE}/api/hyw/track/${ticket}?accountId=${accountId}`
+        : `${API_BASE}/api/hyw/track/${ticket}`;
+      const res = await fetch(url);
 
       const contentType = res.headers.get("content-type") || "";
       const data = contentType.includes("application/json")
@@ -145,12 +132,11 @@ function Home() {
   const handleProductFilterClear = () => {
     setProductFilter("");
   };
-
   return (
     <div className="site-container">
       <SiteHeader />
- 
-      <div className={`track-wrapper ${hasResult ? "has-result" : ""}`}> 
+
+      <div className={`track-wrapper ${hasResult ? "has-result" : ""}`}>
         {!hasResult && (
           <div className="track-hero">
             <div className="track-left">
@@ -160,28 +146,6 @@ function Home() {
                 view your current status, service progress, and the details we
                 recorded for your request—securely and in real time.
               </p>
-
-              {!isLoggedIn && (
-                <div className="login-notice">
-                  <p style={{ color: "#ff6b6b", fontWeight: "bold", marginTop: "20px" }}>
-                    Please log in to track your RMAs.
-                  </p>
-                  <button 
-                    onClick={() => window.location.hash = "#login"}
-                    style={{ 
-                      marginTop: "10px", 
-                      padding: "10px 20px", 
-                      backgroundColor: "#007bff", 
-                      color: "white", 
-                      border: "none", 
-                      borderRadius: "5px", 
-                      cursor: "pointer" 
-                    }}
-                  >
-                    Go to Login
-                  </button>
-                </div>
-              )}
 
               <div className="track-points">
                 <div className="track-point">
@@ -214,7 +178,6 @@ function Home() {
                 errorMsg={errorMsg}
                 handleSearch={handleSearch}
                 handleClear={handleClear}
-                disabled={!isLoggedIn}
               />
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
@@ -233,7 +196,6 @@ function Home() {
                 errorMsg={errorMsg}
                 handleSearch={handleSearch}
                 handleClear={handleClear}
-                disabled={!isLoggedIn}
               />
               {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
@@ -282,7 +244,8 @@ function Home() {
                   )}
                   {productFilter && (
                     <p className="filter-results-count">
-                      Showing {filteredItems.length} of {rma.items?.length || 0} items
+                      Showing {filteredItems.length} of {rma.items?.length || 0}{" "}
+                      items
                     </p>
                   )}
                 </div>
@@ -317,8 +280,17 @@ function Home() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="8" style={{ textAlign: "center", padding: "20px", color: "#999" }}>
-                            {productFilter ? "No products match your search" : "No items found"}
+                          <td
+                            colSpan="8"
+                            style={{
+                              textAlign: "center",
+                              padding: "20px",
+                              color: "#999",
+                            }}
+                          >
+                            {productFilter
+                              ? "No products match your search"
+                              : "No items found"}
                           </td>
                         </tr>
                       )}

@@ -182,10 +182,6 @@ function getRmaByTicket(req, res) {
     return res.status(400).json({ message: "Ticket ID is required." });
   }
 
-  if (!accountId) {
-    return res.status(400).json({ message: "Account ID is required." });
-  }
-
   const normalizedTicket = ticketId.replace(
     /^RMA-(\d{4})-(\d{4})-(\d{6})-(\d{3})$/i,
     "RMA-$1$2-$3-$4",
@@ -227,8 +223,8 @@ function getRmaByTicket(req, res) {
 
     const rmaAccountId = itemRows[0].account_id;
 
-    // Verify that the requesting account owns this RMA
-    if (rmaAccountId != accountId) {
+    // If accountId was provided, verify ownership
+    if (accountId && rmaAccountId != accountId) {
       return res
         .status(403)
         .json({ message: "Access denied. You can only view your own RMAs." });
@@ -246,7 +242,9 @@ function getRmaByTicket(req, res) {
       LIMIT 1
     `;
 
-    db.query(profileSql, [accountId], (profileErr, profileRows) => {
+    const profileLookupId = rmaAccountId || accountId;
+
+    db.query(profileSql, [profileLookupId], (profileErr, profileRows) => {
       if (profileErr) {
         console.error("Track profile query error:", profileErr);
         return res
@@ -462,7 +460,7 @@ async function submitRmaRequest(req, res) {
       const returnDate = item.returnDate || null;
       const problem = String(item.problem || "");
 
-    const productTicket = generateProductTicket();
+      const productTicket = generateProductTicket();
 
       console.log("Saving item:", {
         itemDescription,
