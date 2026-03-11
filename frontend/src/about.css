@@ -239,6 +239,28 @@ body.dark-mode .btn-primary {
   box-shadow: 0 10px 20px rgba(224, 64, 64, 0.22);
 }
 
+/* Smooth dark/light transition on About page */
+.about-hero,
+.about-content,
+.about-content h2,
+.about-content h3,
+.about-content h4,
+.about-content p,
+.lead,
+.section-block,
+.card,
+.feature-box,
+.timeline .event .date,
+.timeline .event .desc,
+.brand-badge,
+.btn-primary {
+  transition:
+    background-color 0.45s ease,
+    color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
+}
+
 /* Responsive tweaks */
 @media (max-width: 768px) {
   .about-hero { padding: 80px 16px; }

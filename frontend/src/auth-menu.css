@@ -265,6 +265,18 @@ body.dark-mode .account-menu-item:focus-visible {
   background: #273449;
 }
 
+body.dark-mode .account-logout {
+  background: linear-gradient(135deg, #e04040 0%, #e46475 100%);
+  color: #fff;
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  box-shadow: 0 10px 18px rgba(224, 64, 64, 0.2);
+}
+
+body.dark-mode .account-logout:hover,
+body.dark-mode .account-logout:focus-visible {
+  opacity: 0.96;
+}
+
 /* Dark mode header/footer should match the hero dark UI */
 body.dark-mode .page-header {
   background: linear-gradient(180deg, rgba(7, 9, 15, 0.96), rgba(7, 9, 15, 0.88));

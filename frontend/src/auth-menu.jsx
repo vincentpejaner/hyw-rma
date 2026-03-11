@@ -115,19 +115,6 @@ export default function AuthMenu() {
             >
               My RMA Request
             </a>
-
-            <div className="account-toggle-row">
-              <span>Dark Mode</span>
-              <button
-                type="button"
-                className={`darkmode-toggle ${darkMode ? "active" : ""}`}
-                role="switch"
-                aria-checked={darkMode}
-                onClick={() => setDarkMode((current) => !current)}
-              >
-                <span className="darkmode-knob" />
-              </button>
-            </div>
           </div>
 
           <p className="account-welcome">Welcome {accountName}</p>

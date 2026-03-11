@@ -37,6 +37,40 @@ html, body, #root {
   transform: translateY(10px);
 }
 
+.theme-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 20px;
+  z-index: 2200;
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 24, 39, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  font-size: 1.3rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.18s ease, background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+.theme-fab:hover {
+  transform: translateY(-2px);
+}
+
+body.dark-mode .theme-fab {
+  background: rgba(15, 23, 42, 0.88);
+  border-color: rgba(167, 139, 250, 0.32);
+  color: #f8fafc;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.5);
+}
+
 .home-hero-page {
   width: 100%;
   background: radial-gradient(circle at 70% 22%, rgba(123, 97, 255, 0.12) 0%, rgba(123, 97, 255, 0) 35%),
@@ -490,6 +524,14 @@ body.dark-mode .hero-image-light {
 
   .hero-floating {
     display: none;
+  }
+
+  .theme-fab {
+    right: 14px;
+    bottom: 14px;
+    width: 46px;
+    height: 46px;
+    font-size: 1.15rem;
   }
 }
 

@@ -1115,3 +1115,38 @@ body.dark-mode .modal-close-button {
   color: #eaf0ff;
   border-color: rgba(148, 163, 184, 0.24);
 }
+
+/* Smooth dark/light transition on Submit page */
+.submit-container,
+.submit-card,
+.selection-row,
+.generated-form-info,
+.preview-table-wrapper,
+.preview-table,
+.preview-table th,
+.preview-table td,
+.field-group label,
+.field-group select,
+.field-group input,
+.category-select-trigger,
+.category-select-menu,
+.category-option,
+.category-search-input,
+.summary-meta,
+.summary-company-block p,
+.summary-company-name,
+.form-ticket-id,
+.remove-button,
+.secondary-button,
+.primary-button,
+.summary-edit-button,
+.summary-submit-button,
+.table-delete-button,
+.submit-modal,
+.modal-close-button {
+  transition:
+    background-color 0.45s ease,
+    color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
+}

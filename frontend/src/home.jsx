@@ -83,6 +83,9 @@ function Home() {
 export default function App() {
   const [displayPage, setDisplayPage] = useState(() => getCurrentPage());
   const [transitionClass, setTransitionClass] = useState("page-transition-enter");
+  const [isDarkMode, setIsDarkMode] = useState(() =>
+    document.body.classList.contains("dark-mode"),
+  );
 
   useEffect(() => {
     let transitionTimeout;
@@ -117,6 +120,28 @@ export default function App() {
     };
   }, [displayPage]);
 
+  useEffect(() => {
+    const syncTheme = () => {
+      setIsDarkMode(document.body.classList.contains("dark-mode"));
+    };
+
+    syncTheme();
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleThemeToggle = () => {
+    const nextDarkMode = !document.body.classList.contains("dark-mode");
+    document.body.classList.toggle("dark-mode", nextDarkMode);
+    window.localStorage.setItem("theme", nextDarkMode ? "dark" : "light");
+    setIsDarkMode(nextDarkMode);
+  };
+
   let pageComponent = <Home />;
   if (displayPage === "about") pageComponent = <About />;
   if (displayPage === "login") pageComponent = <Login />;
@@ -126,8 +151,19 @@ export default function App() {
   if (displayPage === "profile") pageComponent = <Profile />;
 
   return (
-    <div className={`page-transition-layer ${transitionClass}`}>
-      {pageComponent}
-    </div>
+    <>
+      <div className={`page-transition-layer ${transitionClass}`}>
+        {pageComponent}
+      </div>
+      <button
+        type="button"
+        className="theme-fab"
+        onClick={handleThemeToggle}
+        aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        title={isDarkMode ? "Light mode" : "Dark mode"}
+      >
+        {isDarkMode ? "☀" : "☾"}
+      </button>
+    </>
   );
 }

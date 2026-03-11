@@ -594,3 +594,31 @@ body.dark-mode .track-table td {
   color: rgba(226, 232, 240, 0.88);
   border-bottom-color: rgba(148, 163, 184, 0.16);
 }
+
+/* Smooth dark/light transition on Track page */
+.site-container,
+.track-point,
+.search-container,
+.search-input,
+.search-button,
+.clear-button,
+.summary-card,
+.summary-header,
+.summary-field,
+.track-summary-top h2,
+.track-summary-ticket,
+.track-company-block p,
+.track-company-name,
+.track-summary-meta,
+.track-table-wrapper,
+.track-table,
+.track-table th,
+.track-table td,
+.status-pill,
+.error-text {
+  transition:
+    background-color 0.45s ease,
+    color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
+}
