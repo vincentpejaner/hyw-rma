@@ -66,10 +66,13 @@ function Submit() {
   const [generatedItemErrors, setGeneratedItemErrors] = useState([]);
   const [generatedFormError, setGeneratedFormError] = useState("");
   const [formTicketId, setFormTicketId] = useState("");
-  const [openSelectionCategoryIndex, setOpenSelectionCategoryIndex] = useState(null);
-  const [openGeneratedCategoryIndex, setOpenGeneratedCategoryIndex] = useState(null);
+  const [openSelectionCategoryIndex, setOpenSelectionCategoryIndex] =
+    useState(null);
+  const [openGeneratedCategoryIndex, setOpenGeneratedCategoryIndex] =
+    useState(null);
   const [categorySearchValues, setCategorySearchValues] = useState({});
-  const [generatedCategoryMenuStyle, setGeneratedCategoryMenuStyle] = useState(null);
+  const [generatedCategoryMenuStyle, setGeneratedCategoryMenuStyle] =
+    useState(null);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionSnapshot, setSubmissionSnapshot] = useState(null);
@@ -208,10 +211,6 @@ function Submit() {
     };
   }, []);
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   const handleSelectionChange = (index, field, value) => {
     setSelections((prev) =>
       prev.map((row, rowIndex) =>
@@ -253,7 +252,10 @@ function Submit() {
     const viewportPadding = 12;
     let left = rect.left;
     if (left + menuWidth > window.innerWidth - viewportPadding) {
-      left = Math.max(viewportPadding, window.innerWidth - menuWidth - viewportPadding);
+      left = Math.max(
+        viewportPadding,
+        window.innerWidth - menuWidth - viewportPadding,
+      );
     }
 
     let top = rect.bottom + 6;
@@ -300,7 +302,12 @@ function Submit() {
   };
 
   const getFilteredCategories = (index) => {
-    const query = String(categorySearchValues[index] || "").trim().toLowerCase();
+    const sortedOptions = [...CATEGORY_OPTIONS].sort((a, b) =>
+      a.localeCompare(b),
+    );
+    const query = String(categorySearchValues[index] || "")
+      .trim()
+      .toLowerCase();
     if (!query) {
       return sortedOptions;
     }
@@ -486,7 +493,8 @@ function Submit() {
       return undefined;
     }
 
-    const reposition = () => updateGeneratedCategoryMenuPosition(openGeneratedCategoryIndex);
+    const reposition = () =>
+      updateGeneratedCategoryMenuPosition(openGeneratedCategoryIndex);
     window.addEventListener("resize", reposition);
     window.addEventListener("scroll", reposition, true);
 
@@ -495,6 +503,10 @@ function Submit() {
       window.removeEventListener("scroll", reposition, true);
     };
   }, [openGeneratedCategoryIndex, generatedItems]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleFinalSubmit = async () => {
     if (!profileData.fullName && !profileData.companyName) {
@@ -513,7 +525,6 @@ function Submit() {
     setIsSubmittingFinal(true);
     setGeneratedFormError("");
 
-    
     try {
       const response = await fetch(
         "http://192.168.254.131:3001/api/hyw/submit-rma",
@@ -775,7 +786,9 @@ function Submit() {
                               className={`category-select-trigger ${row.category ? "" : "is-placeholder"}`}
                               onClick={() => handleOpenCategoryMenu(index)}
                               aria-haspopup="listbox"
-                              aria-expanded={openSelectionCategoryIndex === index}
+                              aria-expanded={
+                                openSelectionCategoryIndex === index
+                              }
                             >
                               <span>{row.category || "Select Category"}</span>
                               <span
@@ -898,227 +911,258 @@ function Submit() {
 
                   <div className="preview-table-wrapper">
                     <div className="preview-table-scroll">
-                    <table className="preview-table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>
-                            Item Category
-                            <span
-                              className="th-help"
-                              data-help="Type selected for this row, such as RAM, SSD, or Monitor."
-                              tabIndex={0}
-                              role="button"
-                              aria-label="Item Category guide"
-                            >
-                              ?
-                            </span>
-                          </th>
-                          <th>
-                            Description
-                            <span
-                              className="th-help"
-                              data-help="Product model or item name so we can identify the exact unit."
-                              tabIndex={0}
-                              role="button"
-                              aria-label="Description guide"
-                            >
-                              ?
-                            </span>
-                          </th>
-                          <th>
-                            Serial
-                            <span
-                              className="th-help"
-                              data-help="Unique serial number from the item sticker, label, or box."
-                              tabIndex={0}
-                              role="button"
-                              aria-label="Serial guide"
-                            >
-                              ?
-                            </span>
-                          </th>
-                          <th>
-                            Purchase
-                            <span
-                              className="th-help"
-                              data-help="Original purchase date from your receipt or invoice."
-                              tabIndex={0}
-                              role="button"
-                              aria-label="Purchase guide"
-                            >
-                              ?
-                            </span>
-                          </th>
-                          <th>
-                            Return
-                            <span
-                              className="th-help"
-                              data-help="Date this item is being sent or returned for RMA."
-                              tabIndex={0}
-                              role="button"
-                              aria-label="Return guide"
-                            >
-                              ?
-                            </span>
-                          </th>
-                          <th>
-                            Problem
-                            <span
-                              className="th-help"
-                              data-help="Short issue details, such as symptoms, errors, or damage."
-                              tabIndex={0}
-                              role="button"
-                              aria-label="Problem guide"
-                            >
-                              ?
-                            </span>
-                          </th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {generatedItems.map((item, index) => (
-                          <tr key={`generated-${item.itemNo}`}>
-                            <td>{item.itemNo}</td>
-                            <td>
-                              <div className="category-select-wrapper table-category-wrapper">
+                      <table className="preview-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>
+                              Item Category
+                              <span
+                                className="th-help"
+                                data-help="Type selected for this row, such as RAM, SSD, or Monitor."
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Item Category guide"
+                              >
+                                ?
+                              </span>
+                            </th>
+                            <th>
+                              Description
+                              <span
+                                className="th-help"
+                                data-help="Product model or item name so we can identify the exact unit."
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Description guide"
+                              >
+                                ?
+                              </span>
+                            </th>
+                            <th>
+                              Serial
+                              <span
+                                className="th-help"
+                                data-help="Unique serial number from the item sticker, label, or box."
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Serial guide"
+                              >
+                                ?
+                              </span>
+                            </th>
+                            <th>
+                              Purchase
+                              <span
+                                className="th-help"
+                                data-help="Original purchase date from your receipt or invoice."
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Purchase guide"
+                              >
+                                ?
+                              </span>
+                            </th>
+                            <th>
+                              Return
+                              <span
+                                className="th-help"
+                                data-help="Date this item is being sent or returned for RMA."
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Return guide"
+                              >
+                                ?
+                              </span>
+                            </th>
+                            <th>
+                              Problem
+                              <span
+                                className="th-help"
+                                data-help="Short issue details, such as symptoms, errors, or damage."
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Problem guide"
+                              >
+                                ?
+                              </span>
+                            </th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {generatedItems.map((item, index) => (
+                            <tr key={`generated-${item.itemNo}`}>
+                              <td>{item.itemNo}</td>
+                              <td>
+                                <div className="category-select-wrapper table-category-wrapper">
+                                  <button
+                                    type="button"
+                                    className={`category-select-trigger table-category-trigger ${item.category ? "" : "is-placeholder"}`}
+                                    onClick={() =>
+                                      handleOpenGeneratedCategoryMenu(index)
+                                    }
+                                    aria-haspopup="listbox"
+                                    aria-expanded={
+                                      openGeneratedCategoryIndex === index
+                                    }
+                                    ref={(element) => {
+                                      generatedCategoryTriggerRefs.current[
+                                        index
+                                      ] = element;
+                                    }}
+                                  >
+                                    <span>
+                                      {item.category || "Select Category"}
+                                    </span>
+                                    <span
+                                      className="category-caret"
+                                      aria-hidden="true"
+                                    >
+                                      v
+                                    </span>
+                                  </button>
+
+                                  {openGeneratedCategoryIndex === index && (
+                                    <div
+                                      className="category-select-menu table-category-menu table-category-menu-floating"
+                                      style={
+                                        generatedCategoryMenuStyle || undefined
+                                      }
+                                    >
+                                      <input
+                                        type="text"
+                                        className="category-search-input"
+                                        placeholder="Search category..."
+                                        value={
+                                          categorySearchValues[index] || ""
+                                        }
+                                        onChange={(event) =>
+                                          handleCategorySearchChange(
+                                            index,
+                                            event.target.value,
+                                          )
+                                        }
+                                        autoFocus
+                                      />
+                                      <div
+                                        className="category-option-list"
+                                        role="listbox"
+                                      >
+                                        {getFilteredCategories(index).map(
+                                          (option) => (
+                                            <button
+                                              type="button"
+                                              key={option}
+                                              className={`category-option ${item.category === option ? "active" : ""}`}
+                                              onClick={() =>
+                                                handleGeneratedCategorySelect(
+                                                  index,
+                                                  option,
+                                                )
+                                              }
+                                            >
+                                              {option}
+                                            </button>
+                                          ),
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td>
+                                <input
+                                  name="itemDescription"
+                                  value={item.itemDescription}
+                                  onChange={(event) =>
+                                    handleGeneratedItemChange(index, event)
+                                  }
+                                  placeholder="Product model/name"
+                                />
+                                {generatedItemErrors[index]
+                                  ?.itemDescription && (
+                                  <p className="table-field-error">
+                                    {generatedItemErrors[index].itemDescription}
+                                  </p>
+                                )}
+                              </td>
+                              <td>
+                                <input
+                                  name="serialNumber"
+                                  value={item.serialNumber}
+                                  onChange={(event) =>
+                                    handleGeneratedItemChange(index, event)
+                                  }
+                                  placeholder="Serial number"
+                                />
+                                {generatedItemErrors[index]?.serialNumber && (
+                                  <p className="table-field-error">
+                                    {generatedItemErrors[index].serialNumber}
+                                  </p>
+                                )}
+                              </td>
+                              <td>
+                                <input
+                                  type="date"
+                                  name="dateOfPurchase"
+                                  value={item.dateOfPurchase}
+                                  onChange={(event) =>
+                                    handleGeneratedItemChange(index, event)
+                                  }
+                                />
+                                {generatedItemErrors[index]?.dateOfPurchase && (
+                                  <p className="table-field-error">
+                                    {generatedItemErrors[index].dateOfPurchase}
+                                  </p>
+                                )}
+                              </td>
+                              <td>
+                                <input
+                                  type="date"
+                                  name="returnDate"
+                                  value={item.returnDate}
+                                  min={item.dateOfPurchase || undefined}
+                                  onChange={(event) =>
+                                    handleGeneratedItemChange(index, event)
+                                  }
+                                />
+                                {generatedItemErrors[index]?.returnDate && (
+                                  <p className="table-field-error">
+                                    {generatedItemErrors[index].returnDate}
+                                  </p>
+                                )}
+                              </td>
+                              <td>
+                                <input
+                                  name="problem"
+                                  value={item.problem}
+                                  onChange={(event) =>
+                                    handleGeneratedItemChange(index, event)
+                                  }
+                                  placeholder="Issue description"
+                                />
+                                {generatedItemErrors[index]?.problem && (
+                                  <p className="table-field-error">
+                                    {generatedItemErrors[index].problem}
+                                  </p>
+                                )}
+                              </td>
+                              <td>
                                 <button
                                   type="button"
-                                  className={`category-select-trigger table-category-trigger ${item.category ? "" : "is-placeholder"}`}
-                                  onClick={() => handleOpenGeneratedCategoryMenu(index)}
-                                  aria-haspopup="listbox"
-                                  aria-expanded={openGeneratedCategoryIndex === index}
-                                  ref={(element) => {
-                                    generatedCategoryTriggerRefs.current[index] = element;
-                                  }}
+                                  className="table-delete-button"
+                                  onClick={() =>
+                                    handleDeleteGeneratedRow(index)
+                                  }
                                 >
-                                  <span>{item.category || "Select Category"}</span>
-                                  <span className="category-caret" aria-hidden="true">
-                                    v
-                                  </span>
+                                  Delete
                                 </button>
-
-                                {openGeneratedCategoryIndex === index && (
-                                  <div
-                                    className="category-select-menu table-category-menu table-category-menu-floating"
-                                    style={generatedCategoryMenuStyle || undefined}
-                                  >
-                                    <input
-                                      type="text"
-                                      className="category-search-input"
-                                      placeholder="Search category..."
-                                      value={categorySearchValues[index] || ""}
-                                      onChange={(event) =>
-                                        handleCategorySearchChange(index, event.target.value)
-                                      }
-                                      autoFocus
-                                    />
-                                    <div className="category-option-list" role="listbox">
-                                      {getFilteredCategories(index).map((option) => (
-                                        <button
-                                          type="button"
-                                          key={option}
-                                          className={`category-option ${item.category === option ? "active" : ""}`}
-                                          onClick={() => handleGeneratedCategorySelect(index, option)}
-                                        >
-                                          {option}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td>
-                              <input
-                                name="itemDescription"
-                                value={item.itemDescription}
-                                onChange={(event) =>
-                                  handleGeneratedItemChange(index, event)
-                                }
-                                placeholder="Product model/name"
-                              />
-                              {generatedItemErrors[index]?.itemDescription && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].itemDescription}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                name="serialNumber"
-                                value={item.serialNumber}
-                                onChange={(event) =>
-                                  handleGeneratedItemChange(index, event)
-                                }
-                                placeholder="Serial number"
-                              />
-                              {generatedItemErrors[index]?.serialNumber && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].serialNumber}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                type="date"
-                                name="dateOfPurchase"
-                                value={item.dateOfPurchase}
-                                onChange={(event) =>
-                                  handleGeneratedItemChange(index, event)
-                                }
-                              />
-                              {generatedItemErrors[index]?.dateOfPurchase && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].dateOfPurchase}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                type="date"
-                                name="returnDate"
-                                value={item.returnDate}
-                                min={item.dateOfPurchase || undefined}
-                                onChange={(event) =>
-                                  handleGeneratedItemChange(index, event)
-                                }
-                              />
-                              {generatedItemErrors[index]?.returnDate && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].returnDate}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <input
-                                name="problem"
-                                value={item.problem}
-                                onChange={(event) =>
-                                  handleGeneratedItemChange(index, event)
-                                }
-                                placeholder="Issue description"
-                              />
-                              {generatedItemErrors[index]?.problem && (
-                                <p className="table-field-error">
-                                  {generatedItemErrors[index].problem}
-                                </p>
-                              )}
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className="table-delete-button"
-                                onClick={() => handleDeleteGeneratedRow(index)}
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
 
@@ -1170,98 +1214,98 @@ function Submit() {
 
               <div className="preview-table-wrapper">
                 <div className="preview-table-scroll">
-                <table className="preview-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>
-                        Item Category
-                        <span
-                          className="th-help"
-                          data-help="Type selected for this row, such as RAM, SSD, or Monitor."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Item Category guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Description
-                        <span
-                          className="th-help"
-                          data-help="Product model or item name so we can identify the exact unit."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Description guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Serial
-                        <span
-                          className="th-help"
-                          data-help="Unique serial number from the item sticker, label, or box."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Serial guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Purchase
-                        <span
-                          className="th-help"
-                          data-help="Original purchase date from your receipt or invoice."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Purchase guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Return
-                        <span
-                          className="th-help"
-                          data-help="Date this item is being sent or returned for RMA."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Return guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Problem
-                        <span
-                          className="th-help"
-                          data-help="Short issue details, such as symptoms, errors, or damage."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Problem guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {submissionSnapshot.items.map((item, index) => (
-                      <tr key={`submitted-${index + 1}`}>
-                        <td>{index + 1}</td>
-                        <td>{item.category || "-"}</td>
-                        <td>{item.itemDescription || "-"}</td>
-                        <td>{item.serialNumber || "-"}</td>
-                        <td>{item.dateOfPurchase || "-"}</td>
-                        <td>{item.returnDate || "-"}</td>
-                        <td>{item.problem || "-"}</td>
+                  <table className="preview-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>
+                          Item Category
+                          <span
+                            className="th-help"
+                            data-help="Type selected for this row, such as RAM, SSD, or Monitor."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Item Category guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Description
+                          <span
+                            className="th-help"
+                            data-help="Product model or item name so we can identify the exact unit."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Description guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Serial
+                          <span
+                            className="th-help"
+                            data-help="Unique serial number from the item sticker, label, or box."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Serial guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Purchase
+                          <span
+                            className="th-help"
+                            data-help="Original purchase date from your receipt or invoice."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Purchase guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Return
+                          <span
+                            className="th-help"
+                            data-help="Date this item is being sent or returned for RMA."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Return guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Problem
+                          <span
+                            className="th-help"
+                            data-help="Short issue details, such as symptoms, errors, or damage."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Problem guide"
+                          >
+                            ?
+                          </span>
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {submissionSnapshot.items.map((item, index) => (
+                        <tr key={`submitted-${index + 1}`}>
+                          <td>{index + 1}</td>
+                          <td>{item.category || "-"}</td>
+                          <td>{item.itemDescription || "-"}</td>
+                          <td>{item.serialNumber || "-"}</td>
+                          <td>{item.dateOfPurchase || "-"}</td>
+                          <td>{item.returnDate || "-"}</td>
+                          <td>{item.problem || "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
