@@ -237,7 +237,7 @@ function Submit() {
     setOpenSelectionCategoryIndex((prev) => (prev === index ? null : index));
     setCategorySearchValues((prev) => ({
       ...prev,
-      [index]: selections[index]?.category || "",
+      [index]: "",
     }));
   };
 
@@ -273,7 +273,7 @@ function Submit() {
     setOpenGeneratedCategoryIndex((prev) => (prev === index ? null : index));
     setCategorySearchValues((prev) => ({
       ...prev,
-      [index]: generatedItems[index]?.category || "",
+      [index]: "",
     }));
     setTimeout(() => updateGeneratedCategoryMenuPosition(index), 0);
   };
@@ -284,7 +284,7 @@ function Submit() {
 
   const handleCategorySelect = (index, category) => {
     handleSelectionChange(index, "category", category);
-    setCategorySearchValues((prev) => ({ ...prev, [index]: category }));
+    setCategorySearchValues((prev) => ({ ...prev, [index]: "" }));
     setOpenSelectionCategoryIndex(null);
   };
 
@@ -294,7 +294,7 @@ function Submit() {
         rowIndex === index ? { ...item, category } : item,
       ),
     );
-    setCategorySearchValues((prev) => ({ ...prev, [index]: category }));
+    setCategorySearchValues((prev) => ({ ...prev, [index]: "" }));
     setOpenGeneratedCategoryIndex(null);
   };
 
