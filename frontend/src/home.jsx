@@ -60,7 +60,7 @@ function Home() {
 
           <div className="home-hero-visual">
             <span className="hero-floating hero-floating-front">ESGAMING</span>
-            <span className="hero-floating hero-floating-end">CASING</span>
+            <span className="hero-floating hero-floating-end">ESGAMING</span>
             <img
               className="hero-image hero-image-dark"
               src={esGamingDark}
