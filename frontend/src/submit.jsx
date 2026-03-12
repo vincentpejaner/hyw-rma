@@ -66,8 +66,10 @@ function Submit() {
   const [generatedItemErrors, setGeneratedItemErrors] = useState([]);
   const [generatedFormError, setGeneratedFormError] = useState("");
   const [formTicketId, setFormTicketId] = useState("");
-  const [openCategoryIndex, setOpenCategoryIndex] = useState(null);
+  const [openSelectionCategoryIndex, setOpenSelectionCategoryIndex] = useState(null);
+  const [openGeneratedCategoryIndex, setOpenGeneratedCategoryIndex] = useState(null);
   const [categorySearchValues, setCategorySearchValues] = useState({});
+  const [generatedCategoryMenuStyle, setGeneratedCategoryMenuStyle] = useState(null);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionSnapshot, setSubmissionSnapshot] = useState(null);
@@ -84,6 +86,7 @@ function Submit() {
   });
   const previousHashRef = useRef(window.location.hash || "#submit");
   const suppressHashPromptRef = useRef(false);
+  const generatedCategoryTriggerRefs = useRef({});
 
   const hasUnsavedChanges =
     !isSubmitted &&
@@ -156,7 +159,7 @@ function Submit() {
     async function loadProfile() {
       try {
         const res = await fetch(
-          `http://192.168.254.131:3001/api/hyw/selectprofile/${accountId}`,
+          `http://26.246.128.102:3001/api/hyw/selectprofile/${accountId}`,
         );
         const data = await res.json();
 
@@ -177,14 +180,19 @@ function Submit() {
 
   useEffect(() => {
     const handlePointerDown = (event) => {
-      if (!event.target.closest(".category-select-wrapper")) {
-        setOpenCategoryIndex(null);
+      if (
+        !event.target.closest(".category-select-wrapper") &&
+        !event.target.closest(".table-category-menu-floating")
+      ) {
+        setOpenSelectionCategoryIndex(null);
+        setOpenGeneratedCategoryIndex(null);
       }
     };
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-        setOpenCategoryIndex(null);
+        setOpenSelectionCategoryIndex(null);
+        setOpenGeneratedCategoryIndex(null);
       }
     };
 
@@ -219,16 +227,55 @@ function Submit() {
     if (selections.length === 1) {
       return;
     }
-    setOpenCategoryIndex(null);
+    setOpenSelectionCategoryIndex(null);
+    setOpenGeneratedCategoryIndex(null);
     setSelections((prev) => prev.filter((_, rowIndex) => rowIndex !== index));
   };
 
   const handleOpenCategoryMenu = (index) => {
-    setOpenCategoryIndex((prev) => (prev === index ? null : index));
+    setOpenGeneratedCategoryIndex(null);
+    setOpenSelectionCategoryIndex((prev) => (prev === index ? null : index));
     setCategorySearchValues((prev) => ({
       ...prev,
       [index]: selections[index]?.category || "",
     }));
+  };
+
+  const updateGeneratedCategoryMenuPosition = (index) => {
+    const trigger = generatedCategoryTriggerRefs.current[index];
+    if (!trigger) {
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const menuWidth = Math.max(rect.width, 220);
+    const viewportPadding = 12;
+    let left = rect.left;
+    if (left + menuWidth > window.innerWidth - viewportPadding) {
+      left = Math.max(viewportPadding, window.innerWidth - menuWidth - viewportPadding);
+    }
+
+    let top = rect.bottom + 6;
+    const estimatedMenuHeight = 260;
+    if (top + estimatedMenuHeight > window.innerHeight - viewportPadding) {
+      top = Math.max(viewportPadding, rect.top - estimatedMenuHeight - 6);
+    }
+
+    setGeneratedCategoryMenuStyle({
+      top: `${Math.round(top)}px`,
+      left: `${Math.round(left)}px`,
+      width: `${Math.round(menuWidth)}px`,
+    });
+  };
+
+  const handleOpenGeneratedCategoryMenu = (index) => {
+    setOpenSelectionCategoryIndex(null);
+    setOpenGeneratedCategoryIndex((prev) => (prev === index ? null : index));
+    setCategorySearchValues((prev) => ({
+      ...prev,
+      [index]: generatedItems[index]?.category || "",
+    }));
+    setTimeout(() => updateGeneratedCategoryMenuPosition(index), 0);
   };
 
   const handleCategorySearchChange = (index, value) => {
@@ -238,17 +285,48 @@ function Submit() {
   const handleCategorySelect = (index, category) => {
     handleSelectionChange(index, "category", category);
     setCategorySearchValues((prev) => ({ ...prev, [index]: category }));
-    setOpenCategoryIndex(null);
+    setOpenSelectionCategoryIndex(null);
+  };
+
+  const handleGeneratedCategorySelect = (index, category) => {
+    setGeneratedItems((prev) =>
+      prev.map((item, rowIndex) =>
+        rowIndex === index ? { ...item, category } : item,
+      ),
+    );
+    setCategorySearchValues((prev) => ({ ...prev, [index]: category }));
+    setOpenGeneratedCategoryIndex(null);
   };
 
   const getFilteredCategories = (index) => {
     const query = String(categorySearchValues[index] || "").trim().toLowerCase();
-    if (!query) {
-      return CATEGORY_OPTIONS;
-    }
-    return CATEGORY_OPTIONS.filter((option) =>
-      option.toLowerCase().includes(query),
+    const sortedOptions = [...CATEGORY_OPTIONS].sort((a, b) =>
+      a.localeCompare(b),
     );
+
+    if (!query) {
+      return sortedOptions;
+    }
+
+    return sortedOptions.sort((a, b) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+      const aIndex = aLower.indexOf(query);
+      const bIndex = bLower.indexOf(query);
+      const aMatches = aIndex !== -1;
+      const bMatches = bIndex !== -1;
+
+      if (aMatches && !bMatches) {
+        return -1;
+      }
+      if (!aMatches && bMatches) {
+        return 1;
+      }
+      if (aMatches && bMatches && aIndex !== bIndex) {
+        return aIndex - bIndex;
+      }
+      return a.localeCompare(b);
+    });
   };
 
   const handleGenerateForm = () => {
@@ -279,7 +357,8 @@ function Submit() {
     setGeneratedItems(items);
     setGeneratedItemErrors(items.map(() => createGeneratedItemError()));
     setFormTicketId(nextTicketId);
-    setOpenCategoryIndex(null);
+    setOpenSelectionCategoryIndex(null);
+    setOpenGeneratedCategoryIndex(null);
     setGeneratedFormError("");
     setIsSubmitted(false);
     setIsFinalSubmitted(false);
@@ -400,6 +479,21 @@ function Submit() {
     setIsSubmitted(false);
     setGeneratedFormError("");
   };
+
+  useEffect(() => {
+    if (openGeneratedCategoryIndex === null) {
+      return undefined;
+    }
+
+    const reposition = () => updateGeneratedCategoryMenuPosition(openGeneratedCategoryIndex);
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
+
+    return () => {
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
+    };
+  }, [openGeneratedCategoryIndex, generatedItems]);
 
   const handleFinalSubmit = async () => {
     if (!submissionSnapshot?.items?.length || !submissionSnapshot?.ticketId) {
@@ -647,7 +741,7 @@ function Submit() {
                               className={`category-select-trigger ${row.category ? "" : "is-placeholder"}`}
                               onClick={() => handleOpenCategoryMenu(index)}
                               aria-haspopup="listbox"
-                              aria-expanded={openCategoryIndex === index}
+                              aria-expanded={openSelectionCategoryIndex === index}
                             >
                               <span>{row.category || "Select Category"}</span>
                               <span className="category-caret" aria-hidden="true">
@@ -655,7 +749,7 @@ function Submit() {
                               </span>
                             </button>
 
-                            {openCategoryIndex === index && (
+                            {openSelectionCategoryIndex === index && (
                               <div className="category-select-menu">
                                 <input
                                   type="text"
@@ -748,6 +842,7 @@ function Submit() {
                   <div className="summary-row">Total Items: {generatedItems.length}</div>
 
                   <div className="preview-table-wrapper">
+                    <div className="preview-table-scroll">
                     <table className="preview-table">
                       <thead>
                         <tr>
@@ -831,7 +926,55 @@ function Submit() {
                         {generatedItems.map((item, index) => (
                           <tr key={`generated-${item.itemNo}`}>
                             <td>{item.itemNo}</td>
-                            <td>{item.category || "-"}</td>
+                            <td>
+                              <div className="category-select-wrapper table-category-wrapper">
+                                <button
+                                  type="button"
+                                  className={`category-select-trigger table-category-trigger ${item.category ? "" : "is-placeholder"}`}
+                                  onClick={() => handleOpenGeneratedCategoryMenu(index)}
+                                  aria-haspopup="listbox"
+                                  aria-expanded={openGeneratedCategoryIndex === index}
+                                  ref={(element) => {
+                                    generatedCategoryTriggerRefs.current[index] = element;
+                                  }}
+                                >
+                                  <span>{item.category || "Select Category"}</span>
+                                  <span className="category-caret" aria-hidden="true">
+                                    v
+                                  </span>
+                                </button>
+
+                                {openGeneratedCategoryIndex === index && (
+                                  <div
+                                    className="category-select-menu table-category-menu table-category-menu-floating"
+                                    style={generatedCategoryMenuStyle || undefined}
+                                  >
+                                    <input
+                                      type="text"
+                                      className="category-search-input"
+                                      placeholder="Search category..."
+                                      value={categorySearchValues[index] || ""}
+                                      onChange={(event) =>
+                                        handleCategorySearchChange(index, event.target.value)
+                                      }
+                                      autoFocus
+                                    />
+                                    <div className="category-option-list" role="listbox">
+                                      {getFilteredCategories(index).map((option) => (
+                                        <button
+                                          type="button"
+                                          key={option}
+                                          className={`category-option ${item.category === option ? "active" : ""}`}
+                                          onClick={() => handleGeneratedCategorySelect(index, option)}
+                                        >
+                                          {option}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
                             <td>
                               <input
                                 name="itemDescription"
@@ -911,6 +1054,7 @@ function Submit() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
 
                   <div className="generated-actions">
@@ -955,6 +1099,7 @@ function Submit() {
               <p className="summary-meta">Total Items: {submissionSnapshot.totalItems}</p>
 
               <div className="preview-table-wrapper">
+                <div className="preview-table-scroll">
                 <table className="preview-table">
                   <thead>
                     <tr>
@@ -1047,6 +1192,7 @@ function Submit() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               <div className="summary-actions">

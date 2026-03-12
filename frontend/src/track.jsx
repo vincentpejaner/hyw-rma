@@ -8,7 +8,7 @@ import Profile from "./profile.jsx";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
-const API_BASE = "http://192.168.254.131:3001";
+const API_BASE = "http://26.246.128.102:3001";
 
 function SearchCard({
   query,
@@ -145,7 +145,7 @@ function Home() {
               <p className="track-sub">
                 Stay informed every step of the way. Enter your Ticket ID to
                 view your current status, service progress, and the details we
-                recorded for your request—securely and in real time.
+                recorded for your request securely and in real time.
               </p>
 
               <div className="track-points">
