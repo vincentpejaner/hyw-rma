@@ -23,40 +23,6 @@ export default function MyRma() {
   const accountEmail =
     account?.account_email || account?.account_username || "";
 
-  /*
-  useEffect(() => {
-    if (!accountEmail) {
-      window.location.hash = "#login";
-      return;
-    }
-
-    const fetchRequests = async () => {
-      setLoading(true);
-      setError("");
-
-      try {
-        const response = await fetch(
-          `${API_BASE}/api/hyw/mine/${encodeURIComponent(accountEmail)}`,
-        );
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch your RMA requests.");
-        }
-
-        setRequests(data.requests || []);
-      } catch (err) {
-        setError(err.message || "Failed to fetch your RMA requests.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRequests();
-  }, [accountEmail]);
-
-  */
-
   if (!accountEmail) {
     return null;
   }

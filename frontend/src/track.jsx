@@ -89,10 +89,11 @@ function Home() {
       return;
     }
 
+
+            
     // check for optional account information
     const accountData = localStorage.getItem("account");
     const accountId = accountData ? JSON.parse(accountData).account_id : null;
-    
 
     setLoading(true);
     setErrorMsg("");

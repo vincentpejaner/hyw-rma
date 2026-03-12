@@ -29,7 +29,7 @@ function getCurrentPage() {
 function Home() {
   return (
     <div className="site-container">
-      <SiteHeader />
+     <SiteHeader /> 
 
       <main className="home-hero-page">
         <section className="home-hero">

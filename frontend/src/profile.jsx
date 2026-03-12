@@ -74,29 +74,26 @@ function Profile() {
     };
 
     try {
-      const response = await fetch(
-        `http://${window.location.hostname}:3001/api/hyw/profile`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dataToSend),
-        },
-      );
+      const url = editing
+        ? `http://localhost:3001/api/hyw/update-profile/${accountId}` // update
+        : `http://localhost:3001/api/hyw/insert-profile`; // create
+
+      const method = editing ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+      });
 
       const result = await response.json();
 
       if (!response.ok) {
-        console.log(result.message || "Failed to update profile.");
+        console.log(result.message || "Failed to save profile.");
       } else {
-        console.log("Profile updated successfully!");
-        console.log(result);
-        setData({
-          companyName: "",
-          fullName: "",
-          companyEmail: "",
-          companyPhone: "",
-          companyAddress: "",
-        });
+        console.log("Profile saved successfully!");
+
+        setEditing(true); 
       }
     } catch (error) {
       console.log("Server error:", error);

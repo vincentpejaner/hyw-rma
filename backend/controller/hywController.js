@@ -525,6 +525,39 @@ async function submitRmaRequest(req, res) {
   }
 }
 
+function updateProfile(req, res) {
+  const { id } = req.params;
+  const { fullName, companyPhone, companyEmail, companyName, companyAddress } =
+    req.body;
+
+  const sql = `
+    UPDATE db_customer
+    SET
+     db_fullname = ?,
+     db_phone_number = ?,
+     db_companyEmail = ?,
+    db_companyName = ?,
+    db_companyAddress = ?
+    WHERE F_accountid = ?
+  `;
+
+  db.query(
+    sql,
+    [fullName, companyPhone, companyEmail, companyName, companyAddress, id],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Database error" });
+      }
+
+      res.json({
+        message: "Profile updated successfully",
+        affectedRows: result.affectedRows,
+      });
+    },
+  );
+}
+
 module.exports = {
   getHYW,
   insertHYW,
@@ -534,4 +567,5 @@ module.exports = {
   insertProfile,
   selectProfile,
   submitRmaRequest,
+  updateProfile,
 };
