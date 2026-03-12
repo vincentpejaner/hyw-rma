@@ -106,7 +106,8 @@ function Submit() {
       return undefined;
     }
 
-    const warningMessage = "Current form will not be saved. Do you want to leave this page?";
+    const warningMessage =
+      "Current form will not be saved. Do you want to leave this page?";
 
     const handleBeforeUnload = (event) => {
       event.preventDefault();
@@ -242,7 +243,9 @@ function Submit() {
   };
 
   const getFilteredCategories = (index) => {
-    const query = String(categorySearchValues[index] || "").trim().toLowerCase();
+    const query = String(categorySearchValues[index] || "")
+      .trim()
+      .toLowerCase();
     if (!query) {
       return CATEGORY_OPTIONS;
     }
@@ -260,7 +263,9 @@ function Submit() {
     );
 
     if (hasInvalidRow) {
-      setGeneratedFormError("Complete all category rows with quantity 1 or higher.");
+      setGeneratedFormError(
+        "Complete all category rows with quantity 1 or higher.",
+      );
       return;
     }
     const nextTicketId = createTicketId();
@@ -304,7 +309,8 @@ function Submit() {
   };
 
   const handleAddGeneratedRow = () => {
-    const fallbackCategory = selections[0]?.category || generatedItems[0]?.category || "Others";
+    const fallbackCategory =
+      selections[0]?.category || generatedItems[0]?.category || "Others";
 
     setGeneratedItems((prev) => [
       ...prev,
@@ -356,7 +362,8 @@ function Submit() {
         item.returnDate &&
         item.returnDate < item.dateOfPurchase
       ) {
-        rowErrors[index].returnDate = "Return date must be the same as or after purchase date.";
+        rowErrors[index].returnDate =
+          "Return date must be the same as or after purchase date.";
         isValid = false;
       }
       if (!String(item.problem || "").trim()) {
@@ -402,6 +409,14 @@ function Submit() {
   };
 
   const handleFinalSubmit = async () => {
+    if (!profileData.fullName && !profileData.companyName) {
+      setGeneratedFormError(
+        "Please complete your customer profile before submitting an RMA.",
+      );
+      console.log("Customer profile incomplete.");
+      return;
+    }
+
     if (!submissionSnapshot?.items?.length || !submissionSnapshot?.ticketId) {
       setGeneratedFormError("Missing submission details.");
       return;
@@ -410,16 +425,20 @@ function Submit() {
     setIsSubmittingFinal(true);
     setGeneratedFormError("");
 
+    
     try {
-      const response = await fetch("http://192.168.254.131:3001/api/hyw/submit-rma", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId,
-          ticketId: submissionSnapshot.ticketId,
-          items: submissionSnapshot.items,
-        }),
-      });
+      const response = await fetch(
+        "http://192.168.254.131:3001/api/hyw/submit-rma",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountId,
+            ticketId: submissionSnapshot.ticketId,
+            items: submissionSnapshot.items,
+          }),
+        },
+      );
 
       const data = await response.json();
       if (!response.ok) {
@@ -447,7 +466,7 @@ function Submit() {
     window.print();
   };
 
-    const handleExportExcel = async () => {
+  const handleExportExcel = async () => {
     if (!submissionSnapshot) {
       return;
     }
@@ -456,7 +475,9 @@ function Submit() {
     const companyAddress = profileData.companyAddress || "-";
     const companyEmail = profileData.companyEmail || "-";
     const companyPhone = profileData.companyPhone || "-";
-    const submittedAt = new Date(submissionSnapshot.submittedAt).toLocaleString();
+    const submittedAt = new Date(
+      submissionSnapshot.submittedAt,
+    ).toLocaleString();
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("RMA Form");
@@ -473,8 +494,15 @@ function Submit() {
 
     worksheet.mergeCells("A1:G1");
     worksheet.getCell("A1").value = "RMA Submission Report";
-    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FF111827" } };
-    worksheet.getCell("A1").alignment = { horizontal: "left", vertical: "middle" };
+    worksheet.getCell("A1").font = {
+      size: 18,
+      bold: true,
+      color: { argb: "FF111827" },
+    };
+    worksheet.getCell("A1").alignment = {
+      horizontal: "left",
+      vertical: "middle",
+    };
 
     worksheet.getCell("A3").value = "Ticket ID:";
     worksheet.getCell("B3").value = submissionSnapshot.ticketId || "-";
@@ -484,12 +512,19 @@ function Submit() {
     worksheet.getCell("B5").value = submissionSnapshot.totalItems;
 
     ["A3", "A4", "A5"].forEach((cell) => {
-      worksheet.getCell(cell).font = { bold: true, color: { argb: "FF1F2937" } };
+      worksheet.getCell(cell).font = {
+        bold: true,
+        color: { argb: "FF1F2937" },
+      };
     });
 
     worksheet.mergeCells("A7:G7");
     worksheet.getCell("A7").value = companyName;
-    worksheet.getCell("A7").font = { size: 15, bold: true, color: { argb: "FF111827" } };
+    worksheet.getCell("A7").font = {
+      size: 15,
+      bold: true,
+      color: { argb: "FF111827" },
+    };
     worksheet.mergeCells("A8:G8");
     worksheet.getCell("A8").value = companyAddress;
     worksheet.mergeCells("A9:G9");
@@ -515,7 +550,11 @@ function Submit() {
         pattern: "solid",
         fgColor: { argb: "FF111827" },
       };
-      cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      cell.alignment = {
+        horizontal: "left",
+        vertical: "middle",
+        wrapText: true,
+      };
       cell.border = {
         top: { style: "thin", color: { argb: "FFD1D5DB" } },
         left: { style: "thin", color: { argb: "FFD1D5DB" } },
@@ -633,7 +672,8 @@ function Submit() {
                 <>
                   <h1>RMA Item Generator</h1>
                   <p className="submit-card-subtitle">
-                    Select one or more categories and quantity, then generate item rows.
+                    Select one or more categories and quantity, then generate
+                    item rows.
                   </p>
 
                   <div className="selection-list">
@@ -650,7 +690,10 @@ function Submit() {
                               aria-expanded={openCategoryIndex === index}
                             >
                               <span>{row.category || "Select Category"}</span>
-                              <span className="category-caret" aria-hidden="true">
+                              <span
+                                className="category-caret"
+                                aria-hidden="true"
+                              >
                                 v
                               </span>
                             </button>
@@ -663,22 +706,33 @@ function Submit() {
                                   placeholder="Search category..."
                                   value={categorySearchValues[index] || ""}
                                   onChange={(event) =>
-                                    handleCategorySearchChange(index, event.target.value)
+                                    handleCategorySearchChange(
+                                      index,
+                                      event.target.value,
+                                    )
                                   }
                                   autoFocus
                                 />
-                                <div className="category-option-list" role="listbox">
-                                  {getFilteredCategories(index).map((option) => (
-                                    <button
-                                      type="button"
-                                      key={option}
-                                      className={`category-option ${row.category === option ? "active" : ""}`}
-                                      onClick={() => handleCategorySelect(index, option)}
-                                    >
-                                      {option}
-                                    </button>
-                                  ))}
-                                  {getFilteredCategories(index).length === 0 && (
+                                <div
+                                  className="category-option-list"
+                                  role="listbox"
+                                >
+                                  {getFilteredCategories(index).map(
+                                    (option) => (
+                                      <button
+                                        type="button"
+                                        key={option}
+                                        className={`category-option ${row.category === option ? "active" : ""}`}
+                                        onClick={() =>
+                                          handleCategorySelect(index, option)
+                                        }
+                                      >
+                                        {option}
+                                      </button>
+                                    ),
+                                  )}
+                                  {getFilteredCategories(index).length ===
+                                    0 && (
                                     <div className="category-option-empty">
                                       No category found.
                                     </div>
@@ -697,7 +751,11 @@ function Submit() {
                             min="1"
                             value={row.quantity}
                             onChange={(event) =>
-                              handleSelectionChange(index, "quantity", event.target.value)
+                              handleSelectionChange(
+                                index,
+                                "quantity",
+                                event.target.value,
+                              )
                             }
                           />
                         </div>
@@ -742,10 +800,13 @@ function Submit() {
                       <strong>Generated Items:</strong> {generatedItems.length}
                     </div>
                     <div className="generated-form-note">
-                      Complete all fields below before submitting your RMA request.
+                      Complete all fields below before submitting your RMA
+                      request.
                     </div>
                   </div>
-                  <div className="summary-row">Total Items: {generatedItems.length}</div>
+                  <div className="summary-row">
+                    Total Items: {generatedItems.length}
+                  </div>
 
                   <div className="preview-table-wrapper">
                     <table className="preview-table">
@@ -836,7 +897,9 @@ function Submit() {
                               <input
                                 name="itemDescription"
                                 value={item.itemDescription}
-                                onChange={(event) => handleGeneratedItemChange(index, event)}
+                                onChange={(event) =>
+                                  handleGeneratedItemChange(index, event)
+                                }
                                 placeholder="Product model/name"
                               />
                               {generatedItemErrors[index]?.itemDescription && (
@@ -849,7 +912,9 @@ function Submit() {
                               <input
                                 name="serialNumber"
                                 value={item.serialNumber}
-                                onChange={(event) => handleGeneratedItemChange(index, event)}
+                                onChange={(event) =>
+                                  handleGeneratedItemChange(index, event)
+                                }
                                 placeholder="Serial number"
                               />
                               {generatedItemErrors[index]?.serialNumber && (
@@ -863,7 +928,9 @@ function Submit() {
                                 type="date"
                                 name="dateOfPurchase"
                                 value={item.dateOfPurchase}
-                                onChange={(event) => handleGeneratedItemChange(index, event)}
+                                onChange={(event) =>
+                                  handleGeneratedItemChange(index, event)
+                                }
                               />
                               {generatedItemErrors[index]?.dateOfPurchase && (
                                 <p className="table-field-error">
@@ -877,7 +944,9 @@ function Submit() {
                                 name="returnDate"
                                 value={item.returnDate}
                                 min={item.dateOfPurchase || undefined}
-                                onChange={(event) => handleGeneratedItemChange(index, event)}
+                                onChange={(event) =>
+                                  handleGeneratedItemChange(index, event)
+                                }
                               />
                               {generatedItemErrors[index]?.returnDate && (
                                 <p className="table-field-error">
@@ -889,7 +958,9 @@ function Submit() {
                               <input
                                 name="problem"
                                 value={item.problem}
-                                onChange={(event) => handleGeneratedItemChange(index, event)}
+                                onChange={(event) =>
+                                  handleGeneratedItemChange(index, event)
+                                }
                                 placeholder="Issue description"
                               />
                               {generatedItemErrors[index]?.problem && (
@@ -932,7 +1003,9 @@ function Submit() {
                 </>
               )}
 
-              {generatedFormError && <p className="form-error">{generatedFormError}</p>}
+              {generatedFormError && (
+                <p className="form-error">{generatedFormError}</p>
+              )}
             </>
           )}
 
@@ -950,9 +1023,12 @@ function Submit() {
               </div>
 
               <p className="summary-meta">
-                Submitted: {new Date(submissionSnapshot.submittedAt).toLocaleString()}
+                Submitted:{" "}
+                {new Date(submissionSnapshot.submittedAt).toLocaleString()}
               </p>
-              <p className="summary-meta">Total Items: {submissionSnapshot.totalItems}</p>
+              <p className="summary-meta">
+                Total Items: {submissionSnapshot.totalItems}
+              </p>
 
               <div className="preview-table-wrapper">
                 <table className="preview-table">
@@ -1082,6 +1158,3 @@ function Submit() {
 }
 
 export default Submit;
-
-
-
