@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./my-rma.css";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
-
-const API_BASE = "http://26.246.128.102:3001/api/hyw/mine";
+import { API_BASE } from "./api-base.js";
 function getStoredAccount() {
   try {
     const rawAccount = window.localStorage.getItem("account");

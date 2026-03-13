@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import ExcelJS from "exceljs";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
+import { API_BASE } from "./api-base.js";
 
 const CATEGORY_OPTIONS = [
   "Motherboard",
@@ -169,9 +170,7 @@ function Submit() {
 
     async function loadProfile() {
       try {
-        const res = await fetch(
-          `http://26.246.128.102:3001/api/hyw/selectprofile/${accountId}`,
-        );
+        const res = await fetch(`${API_BASE}/selectprofile/${accountId}`);
         const data = await res.json();
 
         setProfileData({
@@ -542,18 +541,15 @@ function Submit() {
     setGeneratedFormError("");
 
     try {
-      const response = await fetch(
-        "http://192.168.254.131:3001/api/hyw/submit-rma",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId,
-            ticketId: submissionSnapshot.ticketId,
-            items: submissionSnapshot.items,
-          }),
-        },
-      );
+      const response = await fetch(`${API_BASE}/submit-rma`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId,
+          ticketId: submissionSnapshot.ticketId,
+          items: submissionSnapshot.items,
+        }),
+      });
 
       const data = await response.json();
       if (!response.ok) {

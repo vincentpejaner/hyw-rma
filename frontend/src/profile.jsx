@@ -2,8 +2,7 @@ import "./profile.css";
 import { useEffect, useMemo, useState } from "react";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
-
-const API_BASE = "http://26.246.128.102:3001/api/hyw/selectprofile";
+import { API_BASE } from "./api-base.js";
 
 const EMPTY_PROFILE = {
   companyName: "",
@@ -114,7 +113,7 @@ function Profile() {
       setStatus({ type: "", message: "" });
 
       try {
-        const response = await fetch(`${API_BASE}/${accountId}`);
+        const response = await fetch(`${API_BASE}/selectprofile/${accountId}`);
         const result = await response.json();
         const profile = result?.profile || result || {};
 

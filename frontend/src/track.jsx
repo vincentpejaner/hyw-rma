@@ -7,8 +7,7 @@ import Submit from "./submit.jsx";
 import Profile from "./profile.jsx";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
-
-const API_BASE = "http://26.246.128.102:3001";
+import { API_BASE } from "./api-base.js";
 
 function SearchCard({
   query,
@@ -100,8 +99,8 @@ function Home() {
 
     try {
       const url = accountId
-        ? `${API_BASE}/api/hyw/track/${ticket}?accountId=${accountId}`
-        : `${API_BASE}/api/hyw/track/${ticket}`;
+        ? `${API_BASE}/track/${ticket}?accountId=${accountId}`
+        : `${API_BASE}/track/${ticket}`;
       const res = await fetch(url);
 
       const contentType = res.headers.get("content-type") || "";

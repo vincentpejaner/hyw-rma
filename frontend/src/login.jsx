@@ -3,6 +3,7 @@ import { useState } from "react";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 import logo from "./images/logo1.png";
+import { API_BASE } from "./api-base.js";
 
 function Login() {
   const [credential, setCredential] = useState({ email: "", password: "" });
@@ -26,14 +27,11 @@ function Login() {
     }
 
     try {
-      const response = await fetch(
-        "http://26.246.128.102:3001/api/hyw/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...credential }),
-        },
-      );
+      const response = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...credential }),
+      });
 
       const data = await response.json();
 
