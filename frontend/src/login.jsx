@@ -73,7 +73,7 @@ function Login() {
             <img src={logo} alt="HYW Logo" />
           </div>
           <div className="login-header">
-            <h1>Log In GLENDON</h1>
+            <h1>Log In</h1>
             <p>HYW RMA System</p>
           </div>
 
