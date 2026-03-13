@@ -1,6 +1,16 @@
 const BACKEND_ORIGIN =
   process.env.BACKEND_ORIGIN || "https://hyw-rma-production.up.railway.app";
 
+async function readRequestBody(req) {
+  const chunks = [];
+
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 module.exports = async (req, res) => {
   const slug = Array.isArray(req.query.slug) ? req.query.slug.join("/") : "";
   const targetUrl = new URL(
@@ -34,8 +44,27 @@ module.exports = async (req, res) => {
   };
 
   if (req.method !== "GET" && req.method !== "HEAD") {
-    requestOptions.body =
-      typeof req.body === "string" ? req.body : JSON.stringify(req.body || {});
+    let requestBody = req.body;
+
+    if (
+      typeof requestBody === "undefined" ||
+      (requestBody &&
+        typeof requestBody === "object" &&
+        !Buffer.isBuffer(requestBody) &&
+        Object.keys(requestBody).length === 0 &&
+        Number(req.headers["content-length"] || 0) > 0)
+    ) {
+      requestBody = await readRequestBody(req);
+    }
+
+    if (Buffer.isBuffer(requestBody)) {
+      requestOptions.body = requestBody;
+    } else if (typeof requestBody === "string") {
+      requestOptions.body = requestBody;
+    } else {
+      requestOptions.body = JSON.stringify(requestBody || {});
+    }
+
     requestOptions.headers["content-type"] =
       requestOptions.headers["content-type"] || "application/json";
   }

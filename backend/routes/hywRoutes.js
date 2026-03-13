@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
   getHYW,
+  getHealthStatus,
   insertHYW,
   getMyRmaRequests,
   getRmaByTicket,
@@ -13,6 +14,7 @@ const {
   updateProfile
 } = require("../controller/hywController.js");
 
+router.get("/health", getHealthStatus);
 router.route("/").get(getHYW).post(insertHYW);
 
 router.post("/login", getAccount);

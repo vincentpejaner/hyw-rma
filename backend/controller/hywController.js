@@ -1,13 +1,44 @@
 const db = require("../db");
 
+function formatDbError(err, fallbackMessage) {
+  console.error(fallbackMessage, err);
+
+  return {
+    error: fallbackMessage,
+    code: err?.code || "DB_QUERY_FAILED",
+    details:
+      process.env.NODE_ENV === "production"
+        ? undefined
+        : err?.sqlMessage || err?.message || "Unknown database error",
+  };
+}
+
 function getHYW(req, res) {
   const query = "SELECT * FROM db_issue";
   db.query(query, (err, results) => {
     if (err) {
-      console.error("Error fetching HYW data:", err);
-      return res.status(500).json({ error: "Failed to fetch HYW data" });
+      return res
+        .status(500)
+        .json(formatDbError(err, "Failed to fetch HYW data"));
     }
     res.status(200).json(results);
+  });
+}
+
+function getHealthStatus(req, res) {
+  db.query("SELECT 1 AS db_ok", (err) => {
+    if (err) {
+      return res.status(500).json({
+        status: "error",
+        database: "unreachable",
+        ...formatDbError(err, "Database health check failed"),
+      });
+    }
+
+    return res.status(200).json({
+      status: "ok",
+      database: "reachable",
+    });
   });
 }
 
@@ -607,6 +638,7 @@ function updateProfile(req, res) {
 
 module.exports = {
   getHYW,
+  getHealthStatus,
   insertHYW,
   getMyRmaRequests,
   getRmaByTicket,
