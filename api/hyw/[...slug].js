@@ -12,7 +12,13 @@ async function readRequestBody(req) {
 }
 
 module.exports = async (req, res) => {
-  const slug = Array.isArray(req.query.slug) ? req.query.slug.join("/") : "";
+  const requestUrl = new URL(req.url, "http://localhost");
+  const fallbackSlug = requestUrl.pathname
+    .replace(/^\/api\/hyw\/?/, "")
+    .replace(/\/$/, "");
+  const slug = Array.isArray(req.query.slug)
+    ? req.query.slug.join("/")
+    : req.query.slug || fallbackSlug;
   const targetUrl = new URL(
     `/api/hyw/${slug}`,
     BACKEND_ORIGIN.endsWith("/") ? BACKEND_ORIGIN : `${BACKEND_ORIGIN}/`,
