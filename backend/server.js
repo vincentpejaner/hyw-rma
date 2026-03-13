@@ -17,4 +17,3 @@ app.options("/", cors(corsOptions)); // FIXED
 
 app.use(express.json());
 app.use("/api/hyw", require("./routes/hywRoutes"));
-app.use("/api/hyw", require("./routes/hywRoutes"));
