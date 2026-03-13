@@ -12,7 +12,7 @@ async function readRequestBody(req) {
 }
 
 module.exports = async (req, res) => {
-  const requestUrl = new URL(req.url, "http://localhost");
+  const requestUrl = new URL(req.url, "https://proxy.local");
   const fallbackSlug = requestUrl.pathname
     .replace(/^\/api\/hyw\/?/, "")
     .replace(/\/$/, "");
