@@ -17,3 +17,8 @@ app.options("/", cors(corsOptions)); // FIXED
 
 app.use(express.json());
 app.use("/api/hyw", require("./routes/hywRoutes"));
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
