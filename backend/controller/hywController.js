@@ -363,7 +363,7 @@ function getRmaByTicket(req, res) {
 
 // FUNCTION TO HANDLE LOGIN REQUEST FROM FRONTEND
 function getAccount(req, res) {
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
 
   if (!email || !password) {
     return res
@@ -376,10 +376,9 @@ function getAccount(req, res) {
 
   db.query(query, [email, password], (err, results) => {
     if (err) {
-      console.error("Login query error:", err);
       return res
         .status(500)
-        .json({ message: "Failed to fetch account details." });
+        .json(formatDbError(err, "Failed to fetch account details."));
     }
     if (!results || results.length === 0) {
       return res.status(401).json({ message: "Invalid email or password." });
