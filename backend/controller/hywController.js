@@ -376,6 +376,7 @@ function getAccount(req, res) {
 
   db.query(query, [email, password], (err, results) => {
     if (err) {
+      console.error("Login query failed:", err);
       return res
         .status(500)
         .json(formatDbError(err, "Failed to fetch account details."));

@@ -27,7 +27,7 @@ function Login() {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/hyw/login`, {
+      const response = await fetch(`https://hyw-rma-production-81c6.up.railway.app/api/hyw/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
@@ -40,7 +40,7 @@ function Login() {
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (!response.ok) {
         setError(data.message || "Invalid credentials");
         setLoading(false);
         return;
