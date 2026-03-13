@@ -4,6 +4,4 @@ const DIRECT_API_ORIGIN =
 const isSecureDeployment =
   typeof window !== "undefined" && window.location.protocol === "https:";
 
-export const API_BASE = isSecureDeployment
-  ? "/api/hyw"
-  : `${DIRECT_API_ORIGIN}/api/hyw`;
+export const API_BASE = "/api/hyw";
