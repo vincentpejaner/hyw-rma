@@ -15,7 +15,7 @@ const {
 } = require("../controller/hywController.js");
 
 router.get("/health", getHealthStatus);
-router.route("/").get(getHYW).post(insertHYW);
+//router.route("/").get(getHYW).post(insertHYW);
 
 router.post("/login", getAccount);
 router.get("/mine/:accountId", getMyRmaRequests);
