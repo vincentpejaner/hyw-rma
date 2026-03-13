@@ -1,5 +1,5 @@
 const DIRECT_API_ORIGIN =
-  import.meta.env.VITE_DIRECT_API_ORIGIN || "http://26.246.128.102:3001";
+  import.meta.env.VITE_DIRECT_API_ORIGIN || "https://hyw-rma-production.up.railway.app";
 
 const isSecureDeployment =
   typeof window !== "undefined" && window.location.protocol === "https:";
