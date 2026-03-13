@@ -4,6 +4,17 @@ const cors = require("cors");
 const PORT = Number(process.env.PORT || 3001);
 
 app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://hyw-rma.vercel.app",
+      "http://localhost:5173"
+    ],
+    methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+    allowedHeaders: ["Content-Type","Authorization"],
+    credentials: true
+  })
+);
 app.use(express.json());
 
 
