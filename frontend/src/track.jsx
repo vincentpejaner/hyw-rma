@@ -99,8 +99,8 @@ function Home() {
 
     try {
       const url = accountId
-        ? `${API_BASE}/track/${ticket}?accountId=${accountId}`
-        : `${API_BASE}/track/${ticket}`;
+        ? `https://hyw-rma-production-81c6.up.railway.app/api/hyw/track/${ticket}?accountId=${accountId}`
+        : `https://hyw-rma-production-81c6.up.railway.app/api/hyw/track/${ticket}`;
       const res = await fetch(url);
 
       const contentType = res.headers.get("content-type") || "";
