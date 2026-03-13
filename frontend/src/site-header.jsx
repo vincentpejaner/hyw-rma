@@ -38,7 +38,7 @@ export default function SiteHeader() {
       </button>
 
       <div className="header-content">
-        <nav className={`header-nav header-nav-left ${menuOpen ? "active" : ""}`}>
+        <nav className="header-nav header-nav-left desktop-nav">
           <a href="#home" onClick={() => setMenuOpen(false)}>
             Home
           </a>
@@ -51,7 +51,7 @@ export default function SiteHeader() {
           <img src={isDarkMode ? logoDark : logoLight} alt="HYW Logo" />
         </div>
 
-        <nav className={`header-nav header-nav-right ${menuOpen ? "active" : ""}`}>
+        <nav className="header-nav header-nav-right desktop-nav">
           <a href="#track" onClick={() => setMenuOpen(false)}>
             Track RMA
           </a>
@@ -60,6 +60,21 @@ export default function SiteHeader() {
           </a>
         </nav>
       </div>
+
+      <nav className={`header-nav header-nav-mobile ${menuOpen ? "active" : ""}`}>
+        <a href="#home" onClick={() => setMenuOpen(false)}>
+          Home
+        </a>
+        <a href="#submit" onClick={() => setMenuOpen(false)}>
+          Submit RMA
+        </a>
+        <a href="#track" onClick={() => setMenuOpen(false)}>
+          Track RMA
+        </a>
+        <a href="#about" onClick={() => setMenuOpen(false)}>
+          About Us
+        </a>
+      </nav>
 
       <div className="header-actions">
         <AuthMenu />
