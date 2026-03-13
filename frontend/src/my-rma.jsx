@@ -46,7 +46,7 @@ export default function MyRma() {
 
       try {
         const response = await fetch(
-          `${API_BASE}/${accountId}`,
+          `${API_BASE}/mine/${accountId}`,
         );
         const contentType = response.headers.get("content-type") || "";
         const result = contentType.includes("application/json")
