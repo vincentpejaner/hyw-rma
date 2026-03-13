@@ -1,5 +1,5 @@
 const DIRECT_API_ORIGIN =
-  import.meta.env.VITE_DIRECT_API_ORIGIN || "http://26.246.128.102:3001";
+  import.meta.env.VITE_DIRECT_API_ORIGIN || "http://192.168.254.131:3001";
 
 const isSecureDeployment =
   typeof window !== "undefined" && window.location.protocol === "https:";
