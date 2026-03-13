@@ -67,10 +67,13 @@ function Submit() {
   const [generatedItemErrors, setGeneratedItemErrors] = useState([]);
   const [generatedFormError, setGeneratedFormError] = useState("");
   const [formTicketId, setFormTicketId] = useState("");
-  const [openSelectionCategoryIndex, setOpenSelectionCategoryIndex] = useState(null);
-  const [openGeneratedCategoryIndex, setOpenGeneratedCategoryIndex] = useState(null);
+  const [openSelectionCategoryIndex, setOpenSelectionCategoryIndex] =
+    useState(null);
+  const [openGeneratedCategoryIndex, setOpenGeneratedCategoryIndex] =
+    useState(null);
   const [categorySearchValues, setCategorySearchValues] = useState({});
-  const [generatedCategoryMenuStyle, setGeneratedCategoryMenuStyle] = useState(null);
+  const [generatedCategoryMenuStyle, setGeneratedCategoryMenuStyle] =
+    useState(null);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionSnapshot, setSubmissionSnapshot] = useState(null);
@@ -110,7 +113,8 @@ function Submit() {
       return undefined;
     }
 
-    const warningMessage = "Current form will not be saved. Do you want to leave this page?";
+    const warningMessage =
+      "Current form will not be saved. Do you want to leave this page?";
 
     const handleBeforeUnload = (event) => {
       event.preventDefault();
@@ -210,10 +214,6 @@ function Submit() {
     };
   }, []);
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   const handleSelectionChange = (index, field, value) => {
     setSelections((prev) =>
       prev.map((row, rowIndex) =>
@@ -257,7 +257,10 @@ function Submit() {
     let left = rect.left;
 
     if (left + menuWidth > window.innerWidth - viewportPadding) {
-      left = Math.max(viewportPadding, window.innerWidth - menuWidth - viewportPadding);
+      left = Math.max(
+        viewportPadding,
+        window.innerWidth - menuWidth - viewportPadding,
+      );
     }
 
     let top = rect.bottom + 6;
@@ -312,11 +315,12 @@ function Submit() {
   };
 
   const getFilteredCategories = (index) => {
-    const query = String(categorySearchValues[index] || "").trim().toLowerCase();
     const sortedOptions = [...CATEGORY_OPTIONS].sort((a, b) =>
       a.localeCompare(b),
     );
-
+    const query = String(categorySearchValues[index] || "")
+      .trim()
+      .toLowerCase();
     if (!query) {
       return sortedOptions;
     }
@@ -351,7 +355,9 @@ function Submit() {
     );
 
     if (hasInvalidRow) {
-      setGeneratedFormError("Complete all category rows with quantity 1 or higher.");
+      setGeneratedFormError(
+        "Complete all category rows with quantity 1 or higher.",
+      );
       return;
     }
     const nextTicketId = createTicketId();
@@ -396,7 +402,8 @@ function Submit() {
   };
 
   const handleAddGeneratedRow = () => {
-    const fallbackCategory = selections[0]?.category || generatedItems[0]?.category || "Others";
+    const fallbackCategory =
+      selections[0]?.category || generatedItems[0]?.category || "Others";
 
     setGeneratedItems((prev) => [
       ...prev,
@@ -448,7 +455,8 @@ function Submit() {
         item.returnDate &&
         item.returnDate < item.dateOfPurchase
       ) {
-        rowErrors[index].returnDate = "Return date must be the same as or after purchase date.";
+        rowErrors[index].returnDate =
+          "Return date must be the same as or after purchase date.";
         isValid = false;
       }
       if (!String(item.problem || "").trim()) {
@@ -498,12 +506,7 @@ function Submit() {
       return undefined;
     }
 
-    const reposition = () => {
-      requestAnimationFrame(() => {
-        updateGeneratedCategoryMenuPosition(openGeneratedCategoryIndex);
-      });
-    };
-
+    const reposition = () => updateGeneratedCategoryMenuPosition(openGeneratedCategoryIndex);
     window.addEventListener("resize", reposition);
     window.addEventListener("scroll", reposition, true);
 
@@ -513,7 +516,19 @@ function Submit() {
     };
   }, [openGeneratedCategoryIndex, generatedItems]);
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const handleFinalSubmit = async () => {
+    if (!profileData.fullName && !profileData.companyName) {
+      setGeneratedFormError(
+        "Please complete your customer profile before submitting an RMA.",
+      );
+      console.log("Customer profile incomplete.");
+      return;
+    }
+
     if (!submissionSnapshot?.items?.length || !submissionSnapshot?.ticketId) {
       setGeneratedFormError("Missing submission details.");
       return;
@@ -523,15 +538,18 @@ function Submit() {
     setGeneratedFormError("");
 
     try {
-      const response = await fetch("http://192.168.254.131:3001/api/hyw/submit-rma", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId,
-          ticketId: submissionSnapshot.ticketId,
-          items: submissionSnapshot.items,
-        }),
-      });
+      const response = await fetch(
+        "http://192.168.254.131:3001/api/hyw/submit-rma",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountId,
+            ticketId: submissionSnapshot.ticketId,
+            items: submissionSnapshot.items,
+          }),
+        },
+      );
 
       const data = await response.json();
       if (!response.ok) {
@@ -559,7 +577,7 @@ function Submit() {
     window.print();
   };
 
-    const handleExportExcel = async () => {
+  const handleExportExcel = async () => {
     if (!submissionSnapshot) {
       return;
     }
@@ -568,7 +586,9 @@ function Submit() {
     const companyAddress = profileData.companyAddress || "-";
     const companyEmail = profileData.companyEmail || "-";
     const companyPhone = profileData.companyPhone || "-";
-    const submittedAt = new Date(submissionSnapshot.submittedAt).toLocaleString();
+    const submittedAt = new Date(
+      submissionSnapshot.submittedAt,
+    ).toLocaleString();
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("RMA Form");
@@ -585,8 +605,15 @@ function Submit() {
 
     worksheet.mergeCells("A1:G1");
     worksheet.getCell("A1").value = "RMA Submission Report";
-    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FF111827" } };
-    worksheet.getCell("A1").alignment = { horizontal: "left", vertical: "middle" };
+    worksheet.getCell("A1").font = {
+      size: 18,
+      bold: true,
+      color: { argb: "FF111827" },
+    };
+    worksheet.getCell("A1").alignment = {
+      horizontal: "left",
+      vertical: "middle",
+    };
 
     worksheet.getCell("A3").value = "Ticket ID:";
     worksheet.getCell("B3").value = submissionSnapshot.ticketId || "-";
@@ -596,12 +623,19 @@ function Submit() {
     worksheet.getCell("B5").value = submissionSnapshot.totalItems;
 
     ["A3", "A4", "A5"].forEach((cell) => {
-      worksheet.getCell(cell).font = { bold: true, color: { argb: "FF1F2937" } };
+      worksheet.getCell(cell).font = {
+        bold: true,
+        color: { argb: "FF1F2937" },
+      };
     });
 
     worksheet.mergeCells("A7:G7");
     worksheet.getCell("A7").value = companyName;
-    worksheet.getCell("A7").font = { size: 15, bold: true, color: { argb: "FF111827" } };
+    worksheet.getCell("A7").font = {
+      size: 15,
+      bold: true,
+      color: { argb: "FF111827" },
+    };
     worksheet.mergeCells("A8:G8");
     worksheet.getCell("A8").value = companyAddress;
     worksheet.mergeCells("A9:G9");
@@ -627,7 +661,11 @@ function Submit() {
         pattern: "solid",
         fgColor: { argb: "FF111827" },
       };
-      cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      cell.alignment = {
+        horizontal: "left",
+        vertical: "middle",
+        wrapText: true,
+      };
       cell.border = {
         top: { style: "thin", color: { argb: "FFD1D5DB" } },
         left: { style: "thin", color: { argb: "FFD1D5DB" } },
@@ -745,7 +783,8 @@ function Submit() {
                 <>
                   <h1>RMA Item Generator</h1>
                   <p className="submit-card-subtitle">
-                    Select one or more categories and quantity, then generate item rows.
+                    Select one or more categories and quantity, then generate
+                    item rows.
                   </p>
 
                   <div className="selection-list">
@@ -759,10 +798,15 @@ function Submit() {
                               className={`category-select-trigger ${row.category ? "" : "is-placeholder"}`}
                               onClick={() => handleOpenCategoryMenu(index)}
                               aria-haspopup="listbox"
-                              aria-expanded={openSelectionCategoryIndex === index}
+                              aria-expanded={
+                                openSelectionCategoryIndex === index
+                              }
                             >
                               <span>{row.category || "Select Category"}</span>
-                              <span className="category-caret" aria-hidden="true">
+                              <span
+                                className="category-caret"
+                                aria-hidden="true"
+                              >
                                 v
                               </span>
                             </button>
@@ -775,22 +819,33 @@ function Submit() {
                                   placeholder="Search category..."
                                   value={categorySearchValues[index] || ""}
                                   onChange={(event) =>
-                                    handleCategorySearchChange(index, event.target.value)
+                                    handleCategorySearchChange(
+                                      index,
+                                      event.target.value,
+                                    )
                                   }
                                   autoFocus
                                 />
-                                <div className="category-option-list" role="listbox">
-                                  {getFilteredCategories(index).map((option) => (
-                                    <button
-                                      type="button"
-                                      key={option}
-                                      className={`category-option ${row.category === option ? "active" : ""}`}
-                                      onClick={() => handleCategorySelect(index, option)}
-                                    >
-                                      {option}
-                                    </button>
-                                  ))}
-                                  {getFilteredCategories(index).length === 0 && (
+                                <div
+                                  className="category-option-list"
+                                  role="listbox"
+                                >
+                                  {getFilteredCategories(index).map(
+                                    (option) => (
+                                      <button
+                                        type="button"
+                                        key={option}
+                                        className={`category-option ${row.category === option ? "active" : ""}`}
+                                        onClick={() =>
+                                          handleCategorySelect(index, option)
+                                        }
+                                      >
+                                        {option}
+                                      </button>
+                                    ),
+                                  )}
+                                  {getFilteredCategories(index).length ===
+                                    0 && (
                                     <div className="category-option-empty">
                                       No category found.
                                     </div>
@@ -809,7 +864,11 @@ function Submit() {
                             min="1"
                             value={row.quantity}
                             onChange={(event) =>
-                              handleSelectionChange(index, "quantity", event.target.value)
+                              handleSelectionChange(
+                                index,
+                                "quantity",
+                                event.target.value,
+                              )
                             }
                           />
                         </div>
@@ -854,10 +913,13 @@ function Submit() {
                       <strong>Generated Items:</strong> {generatedItems.length}
                     </div>
                     <div className="generated-form-note">
-                      Complete all fields below before submitting your RMA request.
+                      Complete all fields below before submitting your RMA
+                      request.
                     </div>
                   </div>
-                  <div className="summary-row">Total Items: {generatedItems.length}</div>
+                  <div className="summary-row">
+                    Total Items: {generatedItems.length}
+                  </div>
 
                   <div className="preview-table-wrapper">
                     <div className="preview-table-scroll">
@@ -961,6 +1023,7 @@ function Submit() {
                                     v
                                   </span>
                                 </button>
+
                               </div>
                             </td>
                             <td>
@@ -1109,7 +1172,9 @@ function Submit() {
                 </>
               )}
 
-              {generatedFormError && <p className="form-error">{generatedFormError}</p>}
+              {generatedFormError && (
+                <p className="form-error">{generatedFormError}</p>
+              )}
             </>
           )}
 
@@ -1127,104 +1192,107 @@ function Submit() {
               </div>
 
               <p className="summary-meta">
-                Submitted: {new Date(submissionSnapshot.submittedAt).toLocaleString()}
+                Submitted:{" "}
+                {new Date(submissionSnapshot.submittedAt).toLocaleString()}
               </p>
-              <p className="summary-meta">Total Items: {submissionSnapshot.totalItems}</p>
+              <p className="summary-meta">
+                Total Items: {submissionSnapshot.totalItems}
+              </p>
 
               <div className="preview-table-wrapper">
                 <div className="preview-table-scroll">
-                <table className="preview-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>
-                        Item Category
-                        <span
-                          className="th-help"
-                          data-help="Type selected for this row, such as RAM, SSD, or Monitor."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Item Category guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Description
-                        <span
-                          className="th-help"
-                          data-help="Product model or item name so we can identify the exact unit."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Description guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Serial
-                        <span
-                          className="th-help"
-                          data-help="Unique serial number from the item sticker, label, or box."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Serial guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Purchase
-                        <span
-                          className="th-help"
-                          data-help="Original purchase date from your receipt or invoice."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Purchase guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Return
-                        <span
-                          className="th-help"
-                          data-help="Date this item is being sent or returned for RMA."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Return guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                      <th>
-                        Problem
-                        <span
-                          className="th-help"
-                          data-help="Short issue details, such as symptoms, errors, or damage."
-                          tabIndex={0}
-                          role="button"
-                          aria-label="Problem guide"
-                        >
-                          ?
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {submissionSnapshot.items.map((item, index) => (
-                      <tr key={`submitted-${index + 1}`}>
-                        <td>{index + 1}</td>
-                        <td>{item.category || "-"}</td>
-                        <td>{item.itemDescription || "-"}</td>
-                        <td>{item.serialNumber || "-"}</td>
-                        <td>{item.dateOfPurchase || "-"}</td>
-                        <td>{item.returnDate || "-"}</td>
-                        <td>{item.problem || "-"}</td>
+                  <table className="preview-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>
+                          Item Category
+                          <span
+                            className="th-help"
+                            data-help="Type selected for this row, such as RAM, SSD, or Monitor."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Item Category guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Description
+                          <span
+                            className="th-help"
+                            data-help="Product model or item name so we can identify the exact unit."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Description guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Serial
+                          <span
+                            className="th-help"
+                            data-help="Unique serial number from the item sticker, label, or box."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Serial guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Purchase
+                          <span
+                            className="th-help"
+                            data-help="Original purchase date from your receipt or invoice."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Purchase guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Return
+                          <span
+                            className="th-help"
+                            data-help="Date this item is being sent or returned for RMA."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Return guide"
+                          >
+                            ?
+                          </span>
+                        </th>
+                        <th>
+                          Problem
+                          <span
+                            className="th-help"
+                            data-help="Short issue details, such as symptoms, errors, or damage."
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Problem guide"
+                          >
+                            ?
+                          </span>
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {submissionSnapshot.items.map((item, index) => (
+                        <tr key={`submitted-${index + 1}`}>
+                          <td>{index + 1}</td>
+                          <td>{item.category || "-"}</td>
+                          <td>{item.itemDescription || "-"}</td>
+                          <td>{item.serialNumber || "-"}</td>
+                          <td>{item.dateOfPurchase || "-"}</td>
+                          <td>{item.returnDate || "-"}</td>
+                          <td>{item.problem || "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -1261,6 +1329,3 @@ function Submit() {
 }
 
 export default Submit;
-
-
-
