@@ -79,11 +79,10 @@ function insertHYW(req, res) {
 
     const processRma = (customerId) => {
       // Generate randomized ticket for db_ticket
-      const randomTicket =
-        "RMA-" +
-        Date.now() +
-        "-" +
-        Math.random().toString(36).substr(2, 9).toUpperCase();
+      // Keep within db_ticket VARCHAR(15)
+      const timestamp = Date.now().toString().slice(-6); // 6 digits
+      const random = Math.random().toString(36).substr(2, 4).toUpperCase(); // 4 chars
+      const randomTicket = `RMA-${timestamp}-${random}`; // 15 chars
 
       const queryProduct =
         "INSERT INTO db_product (db_product_name, db_serial_number, db_purchase_date, db_return_date, db_ticket, ticket_id, F_customerid) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -525,9 +524,10 @@ async function submitRmaRequest(req, res) {
         : "RMA-" + Date.now();
 
     function generateProductTicket() {
-      const timestamp = Date.now().toString().slice(-6); // last 6 digits
-      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-      return `RMA-${timestamp}-${random}`;
+      // Keep within db_ticket VARCHAR(15)
+      const timestamp = Date.now().toString().slice(-6); // 6 digits
+      const random = Math.random().toString(36).substring(2, 6).toUpperCase(); // 4 chars
+      return `RMA-${timestamp}-${random}`; // 15 chars
     }
 
     for (const item of items) {

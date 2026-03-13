@@ -1,15 +1,5 @@
-const path = require("path");
 const mysql = require("mysql2");
-
-// Load environment variables from backend/.env regardless of where the process is started
-require("dotenv").config({ path: path.join(__dirname, ".env") });
-
-if (!process.env.MYSQLHOST || !process.env.MYSQLUSER) {
-  console.warn(
-    "[db] Missing MySQL env vars (MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE). " +
-      "Double-check your Railway env or backend/.env file.",
-  );
-}
+require("dotenv").config();
 
 const db = mysql.createPool({
   host: process.env.MYSQLHOST,
