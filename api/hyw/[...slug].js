@@ -1,5 +1,5 @@
 const BACKEND_ORIGIN =
-  process.env.BACKEND_ORIGIN || "http://26.246.128.102:3001";
+  process.env.BACKEND_ORIGIN || "https://hyw-rma-production.up.railway.app";
 
 module.exports = async (req, res) => {
   const slug = Array.isArray(req.query.slug) ? req.query.slug.join("/") : "";
