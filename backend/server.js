@@ -17,6 +17,9 @@ app.options("/", cors(corsOptions)); // FIXED
 
 app.use(express.json());
 app.use("/api/hyw", require("./routes/hywRoutes"));
+app.get("/", (req, res) => {
+  res.send("HYW RMA API is running");
+});
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
