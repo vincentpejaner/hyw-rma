@@ -125,23 +125,40 @@ function insertHYW(req, res) {
   });
 }
 
-// FUNCTION TO HANDLE RMA TRACKING BY TICKET NUMBER FROM FRONTEND
+// FUNCTION TO HANDLE RMA REQUEST HISTORY FOR A LOGGED-IN ACCOUNT
 function getMyRmaRequests(req, res) {
-  const ticketId = (req.params.id || "").trim();
+  const accountId = Number(req.params.accountId || req.query.accountId);
 
-  if (!ticketId) {
-    return res.status(400).json({ message: "Ticket id is required." });
+  if (!accountId) {
+    return res.status(400).json({ message: "Account ID is required." });
   }
 
   const query = `
-   SELECT * FROM db_customer c
-   RIGHT JOIN db_account a ON c.F_accountid = a.account_id
-   RIGHT JOIN db_product p ON c.db_customerid = p.F_customerid
-   RIGHT JOIN db_issue i ON p.db_productid = i.F_productid
-   WHERE p.ticket_id = ?
+   SELECT
+     c.F_accountid AS account_id,
+     c.db_fullname,
+     c.db_phone_number,
+     c.db_companyEmail,
+     c.db_companyName,
+     c.db_companyAddress,
+     p.db_productid,
+     p.db_product_name,
+     p.db_serial_number,
+     p.db_purchase_date,
+     p.db_return_date,
+     p.db_ticket,
+     p.ticket_id,
+     i.db_issue_type,
+     i.db_resolution,
+     i.db_description
+   FROM db_customer c
+   INNER JOIN db_product p ON c.db_customerid = p.F_customerid
+   LEFT JOIN db_issue i ON p.db_productid = i.F_productid
+   WHERE c.F_accountid = ?
+   ORDER BY p.ticket_id DESC, p.db_productid ASC
   `;
 
-  db.query(query, [ticketId], (err, results) => {
+  db.query(query, [accountId], (err, results) => {
     if (err) {
       console.error("My RMA query error:", err);
       return res
@@ -149,26 +166,56 @@ function getMyRmaRequests(req, res) {
         .json({ message: "Failed to fetch your RMA requests." });
     }
 
-    console.log("Raw results for ticket", ticketId, ":", results);
+    const groupedRequests = new Map();
 
-    const requests = (results || [])
-      .filter((row) => row.db_issue_type)
-      .map((row) => ({
-        ticketNumber: row.db_ticket,
-        productModel: row.db_product_name,
-        serialNumber: row.db_serial_number,
-        purchaseDate: row.db_purchase_date,
-        returnDate: row.db_return_date,
-        issueType: row.db_issue_type,
-        preferredResolution: row.db_resolution,
-        issueDescription: row.db_description,
-        fullName: row.db_fullname || "",
-        emailAddress: row.db_companyEmail || "",
-        phoneNumber: row.db_phone_number || "",
-        status: "Submitted",
-      }));
+    (results || []).forEach((row) => {
+      const formTicketId = String(row.ticket_id || "").trim();
+      if (!formTicketId) {
+        return;
+      }
 
-    console.log("Filtered RMA requests for ticket", ticketId, ":", requests);
+      if (!groupedRequests.has(formTicketId)) {
+        groupedRequests.set(formTicketId, {
+          ticketId: formTicketId,
+          status: row.db_resolution || "Submitted",
+          submittedBy: {
+            fullName: row.db_fullname || "",
+            companyPhone: row.db_phone_number || "",
+            companyEmail: row.db_companyEmail || "",
+            companyName: row.db_companyName || "",
+            companyAddress: row.db_companyAddress || "",
+          },
+          items: [],
+        });
+      }
+
+      const currentRequest = groupedRequests.get(formTicketId);
+      currentRequest.items.push({
+        itemNo: currentRequest.items.length + 1,
+        category: row.db_issue_type || "",
+        itemDescription: row.db_product_name || "",
+        serialNumber: row.db_serial_number || "",
+        dateOfPurchase: row.db_purchase_date || "",
+        returnDate: row.db_return_date || "",
+        problem: row.db_description || "",
+        resolution: row.db_resolution || "Pending",
+        productTicket: row.db_ticket || "",
+      });
+
+      if (
+        currentRequest.status === "Submitted" &&
+        row.db_resolution &&
+        row.db_resolution !== "Submitted"
+      ) {
+        currentRequest.status = row.db_resolution;
+      }
+    });
+
+    const requests = Array.from(groupedRequests.values()).map((request) => ({
+      ...request,
+      totalItems: request.items.length,
+    }));
+
     return res.status(200).json({ requests });
   });
 }
