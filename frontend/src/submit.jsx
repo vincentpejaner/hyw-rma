@@ -80,6 +80,8 @@ function Submit() {
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [isFinalSubmitted, setIsFinalSubmitted] = useState(false);
   const [showSubmissionSuccess, setShowSubmissionSuccess] = useState(false);
+  const [showProfileIncompleteModal, setShowProfileIncompleteModal] =
+    useState(false);
 
   const [profileData, setProfileData] = useState({
     fullName: "",
@@ -100,6 +102,10 @@ function Submit() {
           String(row.category || "").trim() !== "" ||
           String(row.quantity || "").trim() !== "1",
       ));
+
+  const isProfileComplete = Object.values(profileData).every(
+    (value) => String(value || "").trim() !== "",
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -521,11 +527,9 @@ function Submit() {
   }
 
   const handleFinalSubmit = async () => {
-    if (!profileData.fullName && !profileData.companyName) {
-      setGeneratedFormError(
-        "Please complete your customer profile before submitting an RMA.",
-      );
-      console.log("Customer profile incomplete.");
+    if (!isProfileComplete) {
+      setGeneratedFormError("");
+      setShowProfileIncompleteModal(true);
       return;
     }
 
@@ -764,6 +768,37 @@ function Submit() {
             >
               Return to Home
             </button>
+          </div>
+        </div>
+      )}
+
+      {showProfileIncompleteModal && (
+        <div className="submit-overlay success" role="dialog" aria-modal="true">
+          <div className="submit-modal">
+            <h3>Complete your profile details first</h3>
+            <p>
+              Finish your Account Profile before submitting an RMA request so the
+              form has complete customer information.
+            </p>
+            <div className="submit-modal-actions">
+              <button
+                type="button"
+                className="modal-close-button"
+                onClick={() => setShowProfileIncompleteModal(false)}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                className="modal-close-button modal-primary-button"
+                onClick={() => {
+                  setShowProfileIncompleteModal(false);
+                  window.location.hash = "#profile";
+                }}
+              >
+                Go to Account Profile
+              </button>
+            </div>
           </div>
         </div>
       )}

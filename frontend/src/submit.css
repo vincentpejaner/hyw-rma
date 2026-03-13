@@ -209,6 +209,12 @@ body {
   cursor: pointer;
 }
 
+.modal-primary-button {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+
 .submit-main {
   flex: 1;
   padding: 32px 16px;
@@ -1162,6 +1168,12 @@ body.dark-mode .modal-close-button {
   background: #111b2e;
   color: #eaf0ff;
   border-color: rgba(148, 163, 184, 0.24);
+}
+
+body.dark-mode .modal-primary-button {
+  background: linear-gradient(135deg, #e04040 0%, #e46475 100%);
+  color: #ffffff;
+  border-color: transparent;
 }
 
 /* Smooth dark/light transition on Submit page */
