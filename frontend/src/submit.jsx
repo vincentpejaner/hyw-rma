@@ -541,7 +541,7 @@ function Submit() {
     setGeneratedFormError("");
 
     try {
-      const response = await fetch(`${API_BASE}/submit-rma`, {
+      const response = await fetch(`https://hyw-rma-production-81c6.up.railway.app/api/hyw/submit-rma`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
