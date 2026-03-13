@@ -215,7 +215,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  max-width: 1720px;
+  max-width: 1880px;
   margin: 0 auto;
   width: 100%;
 }
@@ -225,7 +225,7 @@ body {
 }
 
 .submit-card {
-  width: min(1420px, 100%);
+  width: min(1680px, 100%);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -507,17 +507,22 @@ body {
 .preview-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1180px;
+  min-width: 1440px;
 }
 
 .preview-table th,
 .preview-table td {
   text-align: left;
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #f1f5f9;
   font-size: 0.88rem;
   vertical-align: middle;
   overflow: visible;
+}
+
+.preview-table th:nth-child(2),
+.preview-table td:nth-child(2) {
+  min-width: 240px;
 }
 
 .preview-table th {
@@ -598,17 +603,18 @@ body {
 }
 
 .table-category-trigger {
+  min-width: 220px;
   height: 36px;
   border-radius: 6px;
   font-size: 0.86rem;
 }
 
 .table-category-wrapper {
-  min-width: 170px;
+  min-width: 220px;
 }
 
 .table-category-menu {
-  min-width: 170px;
+  min-width: 220px;
 }
 
 .table-category-menu-floating {
@@ -616,7 +622,6 @@ body {
   top: 0;
   left: 0;
   right: auto;
-  margin-top: 0;
   z-index: 1200;
 }
 

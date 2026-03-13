@@ -1,5 +1,6 @@
 ﻿import "./submit.css";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import ExcelJS from "exceljs";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
@@ -186,6 +187,7 @@ function Submit() {
       ) {
         setOpenSelectionCategoryIndex(null);
         setOpenGeneratedCategoryIndex(null);
+        setGeneratedCategoryMenuStyle(null);
       }
     };
 
@@ -193,6 +195,7 @@ function Submit() {
       if (event.key === "Escape") {
         setOpenSelectionCategoryIndex(null);
         setOpenGeneratedCategoryIndex(null);
+        setGeneratedCategoryMenuStyle(null);
       }
     };
 
@@ -234,6 +237,7 @@ function Submit() {
 
   const handleOpenCategoryMenu = (index) => {
     setOpenGeneratedCategoryIndex(null);
+    setGeneratedCategoryMenuStyle(null);
     setOpenSelectionCategoryIndex((prev) => (prev === index ? null : index));
     setCategorySearchValues((prev) => ({
       ...prev,
@@ -248,9 +252,10 @@ function Submit() {
     }
 
     const rect = trigger.getBoundingClientRect();
-    const menuWidth = Math.max(rect.width, 220);
+    const menuWidth = Math.max(rect.width, 240);
     const viewportPadding = 12;
     let left = rect.left;
+
     if (left + menuWidth > window.innerWidth - viewportPadding) {
       left = Math.max(viewportPadding, window.innerWidth - menuWidth - viewportPadding);
     }
@@ -270,12 +275,19 @@ function Submit() {
 
   const handleOpenGeneratedCategoryMenu = (index) => {
     setOpenSelectionCategoryIndex(null);
-    setOpenGeneratedCategoryIndex((prev) => (prev === index ? null : index));
+    setOpenGeneratedCategoryIndex((prev) => {
+      const nextIndex = prev === index ? null : index;
+      if (nextIndex === null) {
+        setGeneratedCategoryMenuStyle(null);
+      } else {
+        requestAnimationFrame(() => updateGeneratedCategoryMenuPosition(nextIndex));
+      }
+      return nextIndex;
+    });
     setCategorySearchValues((prev) => ({
       ...prev,
       [index]: "",
     }));
-    setTimeout(() => updateGeneratedCategoryMenuPosition(index), 0);
   };
 
   const handleCategorySearchChange = (index, value) => {
@@ -296,6 +308,7 @@ function Submit() {
     );
     setCategorySearchValues((prev) => ({ ...prev, [index]: "" }));
     setOpenGeneratedCategoryIndex(null);
+    setGeneratedCategoryMenuStyle(null);
   };
 
   const getFilteredCategories = (index) => {
@@ -485,7 +498,12 @@ function Submit() {
       return undefined;
     }
 
-    const reposition = () => updateGeneratedCategoryMenuPosition(openGeneratedCategoryIndex);
+    const reposition = () => {
+      requestAnimationFrame(() => {
+        updateGeneratedCategoryMenuPosition(openGeneratedCategoryIndex);
+      });
+    };
+
     window.addEventListener("resize", reposition);
     window.addEventListener("scroll", reposition, true);
 
@@ -943,36 +961,6 @@ function Submit() {
                                     v
                                   </span>
                                 </button>
-
-                                {openGeneratedCategoryIndex === index && (
-                                  <div
-                                    className="category-select-menu table-category-menu table-category-menu-floating"
-                                    style={generatedCategoryMenuStyle || undefined}
-                                  >
-                                    <input
-                                      type="text"
-                                      className="category-search-input"
-                                      placeholder="Search category..."
-                                      value={categorySearchValues[index] || ""}
-                                      onChange={(event) =>
-                                        handleCategorySearchChange(index, event.target.value)
-                                      }
-                                      autoFocus
-                                    />
-                                    <div className="category-option-list" role="listbox">
-                                      {getFilteredCategories(index).map((option) => (
-                                        <button
-                                          type="button"
-                                          key={option}
-                                          className={`category-option ${item.category === option ? "active" : ""}`}
-                                          onClick={() => handleGeneratedCategorySelect(index, option)}
-                                        >
-                                          {option}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             </td>
                             <td>
@@ -1056,6 +1044,51 @@ function Submit() {
                     </table>
                     </div>
                   </div>
+
+                  {openGeneratedCategoryIndex !== null &&
+                    generatedCategoryMenuStyle &&
+                    createPortal(
+                      <div
+                        className="category-select-menu table-category-menu table-category-menu-floating"
+                        style={generatedCategoryMenuStyle}
+                      >
+                        <input
+                          type="text"
+                          className="category-search-input"
+                          placeholder="Search category..."
+                          value={categorySearchValues[openGeneratedCategoryIndex] || ""}
+                          onChange={(event) =>
+                            handleCategorySearchChange(
+                              openGeneratedCategoryIndex,
+                              event.target.value,
+                            )
+                          }
+                          autoFocus
+                        />
+                        <div className="category-option-list" role="listbox">
+                          {getFilteredCategories(openGeneratedCategoryIndex).map((option) => (
+                            <button
+                              type="button"
+                              key={option}
+                              className={`category-option ${
+                                generatedItems[openGeneratedCategoryIndex]?.category === option
+                                  ? "active"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                handleGeneratedCategorySelect(openGeneratedCategoryIndex, option)
+                              }
+                            >
+                              {option}
+                            </button>
+                          ))}
+                          {getFilteredCategories(openGeneratedCategoryIndex).length === 0 && (
+                            <div className="category-option-empty">No category found.</div>
+                          )}
+                        </div>
+                      </div>,
+                      document.body,
+                    )}
 
                   <div className="generated-actions">
                     <button
