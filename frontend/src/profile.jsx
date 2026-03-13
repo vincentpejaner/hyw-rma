@@ -113,7 +113,7 @@ function Profile() {
       setStatus({ type: "", message: "" });
 
       try {
-        const response = await fetch(`${API_BASE}/selectprofile/${accountId}`);
+        const response = await fetch(`https://hyw-rma-production-81c6.up.railway.app/selectprofile/${accountId}`);
         const result = await response.json();
         const profile = result?.profile || result || {};
 
