@@ -26,9 +26,9 @@ export default function SiteHeader() {
   }, []);
 
   return (
-    <header className="page-header">
+    <header className="page-header site-header">
       <button
-        className="menu-toggle"
+        className="sh-menu-toggle"
         onClick={() => setMenuOpen((current) => !current)}
         aria-label="Toggle menu"
       >
@@ -37,8 +37,8 @@ export default function SiteHeader() {
         <span></span>
       </button>
 
-      <div className="header-content">
-        <nav className="header-nav header-nav-left desktop-nav">
+      <div className="sh-content">
+        <nav className="sh-nav sh-nav-left sh-desktop-nav">
           <a href="#home" onClick={() => setMenuOpen(false)}>
             Home
           </a>
@@ -47,11 +47,11 @@ export default function SiteHeader() {
           </a>
         </nav>
 
-        <div className="header-logo">
+        <div className="sh-logo">
           <img src={isDarkMode ? logoDark : logoLight} alt="HYW Logo" />
         </div>
 
-        <nav className="header-nav header-nav-right desktop-nav">
+        <nav className="sh-nav sh-nav-right sh-desktop-nav">
           <a href="#track" onClick={() => setMenuOpen(false)}>
             Track RMA
           </a>
@@ -61,7 +61,7 @@ export default function SiteHeader() {
         </nav>
       </div>
 
-      <nav className={`header-nav header-nav-mobile ${menuOpen ? "active" : ""}`}>
+      <nav className={`sh-nav sh-nav-mobile ${menuOpen ? "active" : ""}`}>
         <a href="#home" onClick={() => setMenuOpen(false)}>
           Home
         </a>
@@ -76,7 +76,7 @@ export default function SiteHeader() {
         </a>
       </nav>
 
-      <div className="header-actions">
+      <div className="sh-actions">
         <AuthMenu />
       </div>
     </header>
