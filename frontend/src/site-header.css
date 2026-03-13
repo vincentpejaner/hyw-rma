@@ -105,12 +105,14 @@ body.dark-mode .header-nav a:hover {
   }
 
   .header-nav-mobile.active {
-    max-height: 240px;
+    max-height: min(75vh, 360px);
     padding: 6px 0;
     border-width: 1px;
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
     opacity: 1;
     pointer-events: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .header-nav-mobile a {
