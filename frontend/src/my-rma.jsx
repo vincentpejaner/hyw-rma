@@ -4,7 +4,6 @@ import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 
 const API_BASE = "http://26.246.128.102:3001/api/hyw/mine";
-
 function getStoredAccount() {
   try {
     const rawAccount = window.localStorage.getItem("account");
@@ -47,14 +46,18 @@ export default function MyRma() {
       setError("");
 
       try {
-        const response = await fetch(`${API_BASE}/mine/${accountId}`);
+        const response = await fetch(
+          `${API_BASE}/${accountId}`,
+        );
         const contentType = response.headers.get("content-type") || "";
         const result = contentType.includes("application/json")
           ? await response.json()
           : null;
 
         if (!response.ok) {
-          throw new Error(result?.message || "Failed to load your RMA requests.");
+          throw new Error(
+            result?.message || "Failed to load your RMA requests.",
+          );
         }
 
         if (!result) {
@@ -77,7 +80,11 @@ export default function MyRma() {
   }, [accountId]);
 
   const totalItems = useMemo(
-    () => requests.reduce((sum, request) => sum + Number(request.totalItems || 0), 0),
+    () =>
+      requests.reduce(
+        (sum, request) => sum + Number(request.totalItems || 0),
+        0,
+      ),
     [requests],
   );
 
@@ -91,8 +98,9 @@ export default function MyRma() {
             <p className="my-rma-eyebrow">My RMA Request</p>
             <h1>Your submitted RMA forms, grouped by ticket.</h1>
             <p>
-              Review every form submitted under your signed-in account, including
-              item details, serial numbers, issue descriptions, and current status.
+              Review every form submitted under your signed-in account,
+              including item details, serial numbers, issue descriptions, and
+              current status.
             </p>
           </div>
 
@@ -100,12 +108,16 @@ export default function MyRma() {
             <div className="my-rma-stat-card">
               <span className="my-rma-stat-label">Total requests</span>
               <strong>{requests.length}</strong>
-              <span className="my-rma-stat-note">Grouped by submitted form ticket</span>
+              <span className="my-rma-stat-note">
+                Grouped by submitted form ticket
+              </span>
             </div>
             <div className="my-rma-stat-card">
               <span className="my-rma-stat-label">Total items</span>
               <strong>{totalItems}</strong>
-              <span className="my-rma-stat-note">Across all requests in your history</span>
+              <span className="my-rma-stat-note">
+                Across all requests in your history
+              </span>
             </div>
           </div>
         </section>
@@ -117,7 +129,9 @@ export default function MyRma() {
           </div>
         )}
 
-        {!loading && error && <div className="my-rma-state is-error">{error}</div>}
+        {!loading && error && (
+          <div className="my-rma-state is-error">{error}</div>
+        )}
 
         {!loading && !error && requests.length === 0 && (
           <div className="my-rma-state">
@@ -141,9 +155,12 @@ export default function MyRma() {
                   </div>
                   <div className="my-rma-card-badges">
                     <span className="my-rma-items-badge">
-                      {request.totalItems} item{request.totalItems === 1 ? "" : "s"}
+                      {request.totalItems} item
+                      {request.totalItems === 1 ? "" : "s"}
                     </span>
-                    <span className="my-rma-status">{request.status || "Submitted"}</span>
+                    <span className="my-rma-status">
+                      {request.status || "Submitted"}
+                    </span>
                   </div>
                 </div>
 
@@ -170,7 +187,9 @@ export default function MyRma() {
                     </thead>
                     <tbody>
                       {request.items.map((item) => (
-                        <tr key={`${request.ticketId}-${item.itemNo}-${item.productTicket}`}>
+                        <tr
+                          key={`${request.ticketId}-${item.itemNo}-${item.productTicket}`}
+                        >
                           <td>{item.itemNo}</td>
                           <td>{item.category || "-"}</td>
                           <td>{item.itemDescription || "-"}</td>
@@ -178,7 +197,9 @@ export default function MyRma() {
                           <td>{formatDate(item.dateOfPurchase)}</td>
                           <td>{formatDate(item.returnDate)}</td>
                           <td>{item.problem || "-"}</td>
-                          <td className="my-rma-mono">{item.productTicket || "-"}</td>
+                          <td className="my-rma-mono">
+                            {item.productTicket || "-"}
+                          </td>
                           <td>
                             <span className="my-rma-status-chip">
                               {item.resolution || "Pending"}
