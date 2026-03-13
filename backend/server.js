@@ -1,13 +1,14 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
+const PORT = Number(process.env.PORT || 3001);
 
 app.use(cors());
 app.use(express.json());
 
 
-app.get('/', (req, res) => res.send("Server is running!"));
+app.get("/", (req, res) => res.send("Server is running!"));
 
-app.use('/api/hyw', require('./routes/hywRoutes.js'));
+app.use("/api/hyw", require("./routes/hywRoutes.js"));
 
-app.listen(3001, "0.0.0.0", () => console.log("Listening on port 3001"));
+app.listen(PORT, "0.0.0.0", () => console.log(`Listening on port ${PORT}`));
