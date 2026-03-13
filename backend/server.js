@@ -6,7 +6,17 @@ const app = express();
 const cors = require("cors");
 const PORT = Number(process.env.PORT || 3001);
 
-app.use(cors());
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: [
+      "https://hyw-rma.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 console.log("MYSQLHOST:", process.env.MYSQLHOST);
