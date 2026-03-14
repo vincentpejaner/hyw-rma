@@ -18,13 +18,18 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
     if (!credential.email || !credential.password) {
       setError("Please fill in all fields");
-      setLoading(false);
       return;
     }
+
+    if (!window.navigator.onLine) {
+      setError("No internet connection. Please reconnect and try again.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const response = await fetch(`${API_BASE}/login`, {

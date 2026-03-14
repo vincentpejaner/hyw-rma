@@ -27,6 +27,7 @@ function handleProfile() {
 export default function AuthMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const menuRef = useRef(null);
   const [account, setAccount] = useState(() => getStoredAccount());
   const [darkMode, setDarkMode] = useState(
@@ -93,6 +94,13 @@ export default function AuthMenu() {
     : null;
 
   const handleLogout = async () => {
+    setLogoutError("");
+
+    if (!window.navigator.onLine) {
+      setLogoutError("No internet connection. Connect first before logging out.");
+      return;
+    }
+
     setIsLoggingOut(true);
     setMenuOpen(false);
 
@@ -100,15 +108,17 @@ export default function AuthMenu() {
       const storedAccount = JSON.parse(window.localStorage.getItem("account"));
 
       if (storedAccount?.account_id) {
-        fetch(`${API_BASE}/logout`, {
+        const response = await fetch(`${API_BASE}/logout`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             account_id: storedAccount.account_id,
           }),
-        }).catch(() => {
-          /* best effort logout */
         });
+
+        if (!response.ok) {
+          throw new Error("Logout failed. Please try again.");
+        }
       }
 
       localStorage.clear();
@@ -116,6 +126,9 @@ export default function AuthMenu() {
       window.location.hash = "#login";
     } catch (error) {
       console.error("Logout failed:", error);
+      setLogoutError(
+        "Could not reach the server. Please check your internet and try again.",
+      );
       setIsLoggingOut(false);
     }
   };
@@ -172,10 +185,11 @@ export default function AuthMenu() {
             type="button"
             className="account-logout"
             onClick={handleLogout}
-          
+            disabled={isLoggingOut}
           >
             {isLoggingOut ? "Logging out..." : "Log Out"}
           </button>
+          {logoutError && <p className="account-error">{logoutError}</p>}
         </div>
       )}
       {logoutOverlay}

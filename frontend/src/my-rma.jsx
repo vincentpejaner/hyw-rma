@@ -44,6 +44,12 @@ export default function MyRma() {
       setLoading(true);
       setError("");
 
+      if (!window.navigator.onLine) {
+        setError("No internet connection. Please reconnect to load requests.");
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(
           `${API_BASE}/mine/${accountId}`,

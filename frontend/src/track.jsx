@@ -88,6 +88,12 @@ function Home() {
       return;
     }
 
+    if (!window.navigator.onLine) {
+      setErrorMsg("No internet connection. Please reconnect and try again.");
+      setRma(null);
+      return;
+    }
+
 
             
     // check for optional account information

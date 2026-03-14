@@ -1,6 +1,10 @@
 import { API_BASE } from "./api-base.js";
 
 export function checkSession() {
+  if (!window.navigator.onLine) {
+    return;
+  }
+
   const account = JSON.parse(localStorage.getItem("account"));
 
   if (!account) {

@@ -131,6 +131,15 @@ function Profile() {
       setIsLoading(true);
       setStatus({ type: "", message: "" });
 
+      if (!window.navigator.onLine) {
+        setStatus({
+          type: "error",
+          message: "No internet connection. Unable to load profile.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(`${API_BASE}/selectprofile/${accountId}`);
         const result = await response.json();
@@ -184,6 +193,14 @@ function Profile() {
       ...data,
       accountId,
     };
+
+    if (!window.navigator.onLine) {
+      setStatus({
+        type: "error",
+        message: "No internet connection. Unable to save profile.",
+      });
+      return;
+    }
 
     try {
       setIsSaving(true);

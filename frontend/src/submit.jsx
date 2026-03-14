@@ -182,6 +182,10 @@ function Submit() {
     }
 
     async function loadProfile() {
+      if (!window.navigator.onLine) {
+        return;
+      }
+
       try {
         const res = await fetch(`${API_BASE}/selectprofile/${accountId}`);
         const data = await res.json();
@@ -549,6 +553,13 @@ function Submit() {
   }
 
   const handleFinalSubmit = async () => {
+    if (!window.navigator.onLine) {
+      setGeneratedFormError(
+        "No internet connection. Reconnect before submitting your RMA.",
+      );
+      return;
+    }
+
     if (!isProfileComplete) {
       setGeneratedFormError("");
       setShowProfileIncompleteModal(true);

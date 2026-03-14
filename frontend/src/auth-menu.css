@@ -164,6 +164,13 @@
   cursor: not-allowed;
 }
 
+.account-error {
+  margin: 10px 0 0;
+  color: #dc2626;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .logout-loading-overlay {
   position: fixed;
   inset: 0;
@@ -289,6 +296,10 @@ body.dark-mode .account-toggle-row {
 
 body.dark-mode .account-email {
   color: rgba(229, 231, 235, 0.6);
+}
+
+body.dark-mode .account-error {
+  color: #fca5a5;
 }
 
 body.dark-mode .account-menu-item,
