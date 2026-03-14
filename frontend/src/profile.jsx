@@ -114,12 +114,6 @@ function Profile() {
       return;
     }
 
-    const interval = setInterval(() => {
-      checkSession();
-    }, 5000);
-
-    return () => clearInterval(interval);
-
     async function loadProfile() {
       setIsLoading(true);
       setStatus({ type: "", message: "" });
