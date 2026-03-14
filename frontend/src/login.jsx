@@ -30,12 +30,10 @@ function Login() {
       const response = await fetch(`${API_BASE}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          {
-            email: credential.email,
-            password: credential.password
-          }
-        ),
+        body: JSON.stringify({
+          email: credential.email,
+          password: credential.password,
+        }),
       });
 
       const data = await response.json();
@@ -46,14 +44,15 @@ function Login() {
         return;
       }
 
-      localStorage.setItem(
-        "account",
-        JSON.stringify({
-          account_id: data.account.account_id,
-          account_username: data.account.account_username,
-          account_name: data.account.account_name,
-        }),
-      );
+   localStorage.setItem(
+  "account",
+  JSON.stringify({
+    account_id: data.account.account_id,
+    account_username: data.account.account_username,
+    account_name: data.account.account_name,
+    token: data.token
+  })
+);
       console.log(
         "Login successful:",
         JSON.parse(localStorage.getItem("account")),
@@ -61,7 +60,7 @@ function Login() {
 
       setLoading(false);
 
-     window.location.hash = `#submit/${data.account.account_id}`;
+      window.location.hash = `#submit/${data.account.account_id}`;
     } catch (err) {
       console.error("Server error:", err);
       setError("Server error. Try again later.");

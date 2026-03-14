@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 import { API_BASE } from "./api-base.js";
-
+import { checkSession } from "./checkSession.js";
 const EMPTY_PROFILE = {
   companyName: "",
   fullName: "",
@@ -51,6 +51,14 @@ const PROFILE_FIELDS = [
   },
 ];
 
+useEffect(() => {
+  const interval = setInterval(() => {
+    checkSession();
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
+
 const getStoredAccount = () => {
   try {
     const rawAccount = window.localStorage.getItem("account");
@@ -74,14 +82,18 @@ function Profile() {
 
   const completedFields = useMemo(
     () =>
-      Object.values(data).filter((value) => String(value || "").trim() !== "").length,
+      Object.values(data).filter((value) => String(value || "").trim() !== "")
+        .length,
     [data],
   );
-  const completionPercent = Math.round((completedFields / PROFILE_FIELDS.length) * 100);
+  const completionPercent = Math.round(
+    (completedFields / PROFILE_FIELDS.length) * 100,
+  );
   const hasChanges = useMemo(
     () =>
       PROFILE_FIELDS.some(
-        ({ name }) => String(data[name] || "") !== String(initialData[name] || ""),
+        ({ name }) =>
+          String(data[name] || "") !== String(initialData[name] || ""),
       ),
     [data, initialData],
   );
@@ -220,7 +232,10 @@ function Profile() {
               x
             </button>
             <h3 id="profile-success-title">Successfully Updated profile</h3>
-            <p>Your account details have been saved and will be used for future RMA requests.</p>
+            <p>
+              Your account details have been saved and will be used for future
+              RMA requests.
+            </p>
           </div>
         </div>
       )}
@@ -269,7 +284,9 @@ function Profile() {
             </div>
 
             {status.type === "error" && status.message && (
-              <div className={`profile-status profile-status-${status.type || "info"}`}>
+              <div
+                className={`profile-status profile-status-${status.type || "info"}`}
+              >
                 {status.message}
               </div>
             )}
@@ -310,7 +327,9 @@ function Profile() {
                   className="save-button"
                   disabled={isLoading || isSaving || !hasChanges}
                 >
-                  {isSaving && <span className="save-button-spinner" aria-hidden="true" />}
+                  {isSaving && (
+                    <span className="save-button-spinner" aria-hidden="true" />
+                  )}
                   <span>
                     {isLoading
                       ? "Loading..."

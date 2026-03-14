@@ -361,13 +361,13 @@ function getRmaByTicket(req, res) {
 }
 
 // FUNCTION TO HANDLE LOGIN REQUEST FROM FRONTEND
+const crypto = require("crypto");
+
 function getAccount(req, res) {
   const { email, password } = req.body || {};
 
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Email and password are required." });
+    return res.status(400).json({ message: "Email and password are required." });
   }
 
   const query =
@@ -376,16 +376,28 @@ function getAccount(req, res) {
   db.query(query, [email, password], (err, results) => {
     if (err) {
       console.error("Login query failed:", err);
-      return res
-        .status(500)
-        .json(formatDbError(err, "Failed to fetch account details."));
+      return res.status(500).json({ message: "Database error" });
     }
+
     if (!results || results.length === 0) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
-    return res
-      .status(200)
-      .json({ message: "Login successful.", account: results[0] });
+
+    const account = results[0];
+
+    // generate new session token
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const updateQuery =
+      "UPDATE db_account SET db_session_token=? WHERE account_id=?";
+
+    db.query(updateQuery, [token, account.account_id]);
+
+    return res.status(200).json({
+      message: "Login successful.",
+      account: account,
+      token: token,
+    });
   });
 }
 
@@ -393,7 +405,7 @@ function getAccount(req, res) {
 function insertProfile(req, res) {
   const {
     fullName,
-    companyPhone,
+    companyPhone, 
     companyEmail,
     companyName,
     companyAddress,
@@ -636,6 +648,24 @@ function updateProfile(req, res) {
   );
 }
 
+function checkSession(req, res) {
+  const { account_id, token } = req.body;
+
+  const query = "SELECT session_token FROM db_account WHERE account_id=?";
+
+  db.query(query, [account_id], (err, results) => {
+    if (err) return res.status(500).json({ message: "Database error" });
+
+    if (!results.length || results[0].session_token !== token) {
+      return res.status(401).json({
+        message: "Account logged in on another device."
+      });
+    }
+
+    res.status(200).json({ message: "Session valid" });
+  });
+}
+
 module.exports = {
   getHYW,
   getHealthStatus,
@@ -647,4 +677,5 @@ module.exports = {
   selectProfile,
   submitRmaRequest,
   updateProfile,
+  checkSession,
 };
