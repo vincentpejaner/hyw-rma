@@ -114,13 +114,11 @@ function Profile() {
       return;
     }
 
-    useEffect(() => {
-      const interval = setInterval(() => {
-        checkSession();
-      }, 5000);
+    const interval = setInterval(() => {
+      checkSession();
+    }, 5000);
 
-      return () => clearInterval(interval);
-    }, []);
+    return () => clearInterval(interval);
 
     async function loadProfile() {
       setIsLoading(true);
