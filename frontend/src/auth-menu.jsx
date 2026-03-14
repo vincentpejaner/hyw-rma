@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./auth-menu.css";
+import { API_BASE } from "./api-base.js";
 
 const DEFAULT_AVATAR =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23f3f4f6'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%239ca3af'/%3E%3Cpath d='M14 52c2-10 10-16 18-16s16 6 18 16' fill='%239ca3af'/%3E%3C/svg%3E";
