@@ -25,6 +25,7 @@ function handleProfile() {
 
 export default function AuthMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef(null);
   const account = getStoredAccount();
   const [darkMode, setDarkMode] = useState(
@@ -66,24 +67,32 @@ export default function AuthMenu() {
     "Account";
   const accountEmail = account.account_email || account.account_username || "";
 
-  const handleLogout = () => {
-    setMenuOpen(false);
-    const storedAccount = JSON.parse(window.localStorage.getItem("account"));
-
-    if (storedAccount?.account_id) {
-      fetch(`${API_BASE}/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          account_id: storedAccount.account_id,
-        }),
-      }).catch(() => {
-        /* best effort logout */
-      });
+  const handleLogout = async () => {
+    if (isLoggingOut) {
+      return;
     }
 
-    localStorage.clear();
-    window.location.hash = "#login";
+    setIsLoggingOut(true);
+    setMenuOpen(false);
+
+    try {
+      const storedAccount = JSON.parse(window.localStorage.getItem("account"));
+
+      if (storedAccount?.account_id) {
+        await fetch(`${API_BASE}/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            account_id: storedAccount.account_id,
+          }),
+        });
+      }
+    } catch {
+      /* best effort logout */
+    } finally {
+      localStorage.clear();
+      window.location.hash = "#login";
+    }
   };
 
   return (
@@ -137,9 +146,16 @@ export default function AuthMenu() {
             type="button"
             className="account-logout"
             onClick={handleLogout}
+            disabled={isLoggingOut}
           >
-            Log Out
+            {isLoggingOut ? "Logging out..." : "Log Out"}
           </button>
+        </div>
+      )}
+
+      {isLoggingOut && (
+        <div className="logout-loading-overlay" aria-live="polite">
+          <div className="logout-loading-spinner" aria-hidden="true" />
         </div>
       )}
     </div>

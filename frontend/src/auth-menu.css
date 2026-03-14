@@ -159,6 +159,42 @@
   opacity: 0.94;
 }
 
+.account-logout:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.logout-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.logout-loading-spinner {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  animation: logout-spin 0.85s linear infinite;
+}
+
+@keyframes logout-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 body.dark-mode {
   background: #0f172a;
   color: #e5e7eb;
