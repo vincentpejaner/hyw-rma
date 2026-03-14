@@ -158,7 +158,7 @@ export default function AuthMenu() {
             onClick={handleLogout}
             disabled={isLoggingOut}
           >
-            Log Out
+            {isLoggingOut ? "Logging out..." : "Log Out"}
           </button>
         </div>
       )}
