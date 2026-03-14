@@ -68,7 +68,18 @@ export default function AuthMenu() {
   const handleLogout = () => {
     window.localStorage.removeItem("account");
     setMenuOpen(false);
-    window.location.hash = "#home";
+    const account = JSON.parse(localStorage.getItem("account"));
+
+    fetch(`${API_BASE}/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        account_id: account.account_id,
+      }),
+    });
+
+    localStorage.clear();
+    window.location.hash = "#login";
   };
 
   return (
