@@ -52,9 +52,7 @@ const PROFILE_FIELDS = [
   },
 ];
 
-useEffect(() => {
-  checkSession();
-}, []);
+
 
 const getStoredAccount = () => {
   try {
@@ -158,6 +156,9 @@ function Profile() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    useEffect(() => {
+  checkSession();
+}, []);
     if (!accountId) {
       setStatus({
         type: "error",
