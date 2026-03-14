@@ -320,13 +320,20 @@ body.dark-mode .footer-section a:hover {
   }
 
   .account-dropdown {
-    position: fixed;
-    top: 76px;
-    right: 10px;
-    left: 10px;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    width: min(320px, calc(100vw - 20px));
     min-width: 0;
-    max-height: calc(100dvh - 92px);
+    max-height: calc(100dvh - 120px);
     overflow-y: auto;
     border-radius: 12px;
+  }
+
+  .account-menu-item,
+  .account-welcome {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
