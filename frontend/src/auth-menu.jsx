@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import "./auth-menu.css";
 import { API_BASE } from "./api-base.js";
 
@@ -25,6 +26,7 @@ function handleProfile() {
 
 export default function AuthMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef(null);
   const account = getStoredAccount();
   const [darkMode, setDarkMode] = useState(
@@ -65,26 +67,45 @@ export default function AuthMenu() {
     account.account_email ||
     "Account";
   const accountEmail = account.account_email || account.account_username || "";
+  const logoutOverlay = isLoggingOut
+    ? createPortal(
+        <div className="logout-loading-overlay" aria-live="polite">
+          <div className="logout-loading-spinner" aria-hidden="true" />
+        </div>,
+        document.body,
+      )
+    : null;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
     setMenuOpen(false);
-    const storedAccount = JSON.parse(window.localStorage.getItem("account"));
+
+    try {
+      const storedAccount = JSON.parse(window.localStorage.getItem("account"));
 
     if (storedAccount?.account_id) {
-      fetch(`${API_BASE}/logout`, {
+      fetch(`https://hyw-rma-production-81c6.up.railway.app/api/hyw/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           account_id: storedAccount.account_id,
         }),
-      }).catch(() => {  
- 
+      }).catch(() => {
+        /* best effort logout */
       });
     }
 
     localStorage.clear();
     window.location.hash = "#login";
-  };
+  } catch (error) {
+    console.error("Logout failed:", error);
+    setIsLoggingOut(false);
+  }
+
 
   return (
     <div className="auth-menu" ref={menuRef}>
@@ -137,11 +158,13 @@ export default function AuthMenu() {
             type="button"
             className="account-logout"
             onClick={handleLogout}
+            disabled={isLoggingOut}
           >
             Log Out
           </button>
         </div>
       )}
+      {logoutOverlay}
     </div>
   );
-}
+}}
