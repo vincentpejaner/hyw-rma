@@ -108,7 +108,7 @@ export default function AuthMenu() {
       const storedAccount = JSON.parse(window.localStorage.getItem("account"));
 
       if (storedAccount?.account_id) {
-        const response = await fetch(`${API_BASE}/logout`, {
+        const response = await fetch(`https://hyw-rma-production-81c6.up.railway.app/api/hyw/logout`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
