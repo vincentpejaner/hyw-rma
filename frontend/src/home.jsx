@@ -17,10 +17,15 @@ function isAuthenticated() {
 }
 
 function getCurrentPage() {
-  const route = (window.location.hash || "#home").replace("#", "");
+  const route = (window.location.hash || "#home").replace("#", "").split("/")[0];
+  const authenticated = isAuthenticated();
 
-  if (route === "submit" && !isAuthenticated()) {
+  if (route === "submit" && !authenticated) {
     return "login";
+  }
+
+  if (route === "login" && authenticated) {
+    return "home";
   }
 
   return route;
@@ -93,11 +98,27 @@ export default function App() {
     const onHash = () => {
       const hash = (window.location.hash || "#home").replace("#", "");
       const route = hash.split("/")[0];
-      const targetRoute =
-        route === "submit" && !isAuthenticated() ? "login" : route;
+      const authenticated = isAuthenticated();
 
-      if (route === "submit" && !isAuthenticated()) {
+      if (route === "submit" && !authenticated) {
         window.location.hash = "#login";
+        return;
+      }
+
+      if (route === "login" && authenticated) {
+        window.location.hash = "#home";
+        return;
+      }
+
+      const targetRoute = route || "home";
+
+      if (
+        !["home", "about", "login", "my-rma", "submit", "track", "profile"].includes(
+          targetRoute,
+        )
+      ) {
+        window.location.hash = "#home";
+        return;
       }
 
       if (targetRoute === displayPage) {
