@@ -404,15 +404,16 @@ function getAccount(req, res) {
 }
 
 function logOut(req, res) {
-  const { account_id } = req.body || {};
+  const { account_id, accountId } = req.body || {};
+  const resolvedAccountId = Number(account_id || accountId);
 
-  if (!account_id) {
+  if (!resolvedAccountId) {
     return res.status(400).json({ message: "Missing account_id" });
   }
 
   const query = "UPDATE db_account SET db_session_token=NULL WHERE account_id=?";
 
-  db.query(query, [account_id], (err) => {
+  db.query(query, [resolvedAccountId], (err) => {
     if (err) {
       console.error("Logout query failed:", err);
       return res.status(500).json({ message: "Database error" });

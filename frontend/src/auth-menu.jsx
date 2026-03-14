@@ -19,9 +19,22 @@ function getStoredAccount() {
   }
 }
 
+function getAccountId(account) {
+  const rawId = account?.account_id ?? account?.accountId ?? account?.id;
+  const parsed = Number(rawId);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 function handleProfile() {
   const account = JSON.parse(window.localStorage.getItem("account"));
-  window.location.hash = `#profile/${account.account_id}`;
+  const accountId = getAccountId(account);
+
+  if (!accountId) {
+    window.location.hash = "#login";
+    return;
+  }
+
+  window.location.hash = `#profile/${accountId}`;
 }
 
 export default function AuthMenu() {
@@ -106,19 +119,47 @@ export default function AuthMenu() {
 
     try {
       const storedAccount = JSON.parse(window.localStorage.getItem("account"));
+      const accountId = getAccountId(storedAccount);
 
-      if (storedAccount?.account_id) {
-        const response = await fetch(`${API_BASE}/logout`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            account_id: storedAccount.account_id,
-          }),
-        });
+      if (!accountId) {
+        throw new Error("Missing account session. Please sign in again.");
+      }
 
-        if (!response.ok) {
-          throw new Error("Logout failed. Please try again.");
+      const logoutUrls = [
+        `${API_BASE}/logout`,
+        "https://hyw-rma-production-81c6.up.railway.app/api/hyw/logout",
+      ];
+
+      let lastErrorMessage = "Logout failed. Please try again.";
+
+      for (const url of logoutUrls) {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              account_id: accountId,
+              accountId,
+              token: storedAccount?.token || null,
+            }),
+          });
+
+          if (response.ok) {
+            lastErrorMessage = "";
+            break;
+          }
+
+          const responseData = await response.json().catch(() => null);
+          if (responseData?.message) {
+            lastErrorMessage = responseData.message;
+          }
+        } catch {
+          // Try next endpoint.
         }
+      }
+
+      if (lastErrorMessage) {
+        throw new Error(lastErrorMessage);
       }
 
       localStorage.clear();
@@ -127,12 +168,12 @@ export default function AuthMenu() {
     } catch (error) {
       console.error("Logout failed:", error);
       setLogoutError(
-        "Could not reach the server. Please check your internet and try again.",
+        error?.message ||
+          "Could not reach the server. Please check your internet and try again.",
       );
       setIsLoggingOut(false);
     }
   };
-
 
   return (
     <div className="auth-menu" ref={menuRef}>
