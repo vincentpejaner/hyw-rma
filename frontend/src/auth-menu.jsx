@@ -28,7 +28,7 @@ export default function AuthMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef(null);
-  const account = getStoredAccount();
+  const [account, setAccount] = useState(() => getStoredAccount());
   const [darkMode, setDarkMode] = useState(
     () => window.localStorage.getItem("theme") === "dark",
   );
@@ -52,6 +52,22 @@ export default function AuthMenu() {
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [menuOpen]);
+
+  useEffect(() => {
+    const syncAccount = () => {
+      setAccount(getStoredAccount());
+    };
+
+    window.addEventListener("storage", syncAccount);
+    window.addEventListener("hashchange", syncAccount);
+    window.addEventListener("focus", syncAccount);
+
+    return () => {
+      window.removeEventListener("storage", syncAccount);
+      window.removeEventListener("hashchange", syncAccount);
+      window.removeEventListener("focus", syncAccount);
+    };
+  }, []);
 
   if (!account) {
     return (
@@ -77,32 +93,32 @@ export default function AuthMenu() {
     : null;
 
   const handleLogout = async () => {
-    
-
     setIsLoggingOut(true);
     setMenuOpen(false);
 
     try {
       const storedAccount = JSON.parse(window.localStorage.getItem("account"));
 
-    if (storedAccount?.account_id) {
-      fetch(`https://hyw-rma-production-81c6.up.railway.app/api/hyw/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          account_id: storedAccount.account_id,
-        }),
-      }).catch(() => {
-        /* best effort logout */
-      });
-    }
+      if (storedAccount?.account_id) {
+        fetch(`${API_BASE}/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            account_id: storedAccount.account_id,
+          }),
+        }).catch(() => {
+          /* best effort logout */
+        });
+      }
 
-    localStorage.clear();
-    window.location.hash = "#login";
-  } catch (error) {
-    console.error("Logout failed:", error);
-    setIsLoggingOut(false);
-  }
+      localStorage.clear();
+      setAccount(null);
+      window.location.hash = "#login";
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setIsLoggingOut(false);
+    }
+  };
 
 
   return (
@@ -165,4 +181,4 @@ export default function AuthMenu() {
       {logoutOverlay}
     </div>
   );
-}}
+}
