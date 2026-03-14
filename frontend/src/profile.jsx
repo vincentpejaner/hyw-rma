@@ -114,6 +114,14 @@ function Profile() {
       return;
     }
 
+    useEffect(() => {
+      const interval = setInterval(() => {
+        checkSession();
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }, []);
+
     async function loadProfile() {
       setIsLoading(true);
       setStatus({ type: "", message: "" });
@@ -154,10 +162,6 @@ function Profile() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-
-    useEffect(() => {
-      checkSession();
-    }, []);
 
     if (!accountId) {
       setStatus({
