@@ -77,9 +77,7 @@ export default function AuthMenu() {
     : null;
 
   const handleLogout = async () => {
-    if (isLoggingOut) {
-      return;
-    }
+    
 
     setIsLoggingOut(true);
     setMenuOpen(false);
@@ -87,23 +85,25 @@ export default function AuthMenu() {
     try {
       const storedAccount = JSON.parse(window.localStorage.getItem("account"));
 
-      if (storedAccount?.account_id) {
-        await fetch(`${API_BASE}/logout`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            account_id: storedAccount.account_id,
-          }),
-        });
-      }
-    } catch {
-      /* best effort logout */
-    } finally {
-      localStorage.clear();
-      setIsLoggingOut(false);
-      window.location.hash = "#login";
+    if (storedAccount?.account_id) {
+      fetch(`https://hyw-rma-production-81c6.up.railway.app/api/hyw/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account_id: storedAccount.account_id,
+        }),
+      }).catch(() => {
+        /* best effort logout */
+      });
     }
-  };
+
+    localStorage.clear();
+    window.location.hash = "#login";
+  } catch (error) {
+    console.error("Logout failed:", error);
+    setIsLoggingOut(false);
+  }
+
 
   return (
     <div className="auth-menu" ref={menuRef}>
@@ -156,7 +156,7 @@ export default function AuthMenu() {
             type="button"
             className="account-logout"
             onClick={handleLogout}
-            disabled={isLoggingOut}
+          
           >
             {isLoggingOut ? "Logging out..." : "Log Out"}
           </button>
@@ -165,4 +165,4 @@ export default function AuthMenu() {
       {logoutOverlay}
     </div>
   );
-}
+}}
