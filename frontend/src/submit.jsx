@@ -406,6 +406,13 @@ function Submit() {
     );
   };
 
+  const preventManualDateTyping = (event) => {
+    if (event.key === "Tab") {
+      return;
+    }
+    event.preventDefault();
+  };
+
   const handleAddGeneratedRow = () => {
     const fallbackCategory =
       selections[0]?.category || generatedItems[0]?.category || "Others";
@@ -1089,6 +1096,9 @@ function Submit() {
                                 name="dateOfPurchase"
                                 value={item.dateOfPurchase}
                                 onChange={(event) => handleGeneratedItemChange(index, event)}
+                                onKeyDown={preventManualDateTyping}
+                                onPaste={preventManualDateTyping}
+                                onDrop={preventManualDateTyping}
                               />
                               {generatedItemErrors[index]?.dateOfPurchase && (
                                 <p className="table-field-error">
@@ -1103,6 +1113,9 @@ function Submit() {
                                 value={item.returnDate}
                                 min={item.dateOfPurchase || undefined}
                                 onChange={(event) => handleGeneratedItemChange(index, event)}
+                                onKeyDown={preventManualDateTyping}
+                                onPaste={preventManualDateTyping}
+                                onDrop={preventManualDateTyping}
                               />
                               {generatedItemErrors[index]?.returnDate && (
                                 <p className="table-field-error">
