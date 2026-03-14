@@ -77,9 +77,7 @@ export default function AuthMenu() {
     : null;
 
   const handleLogout = async () => {
-    if (isLoggingOut) {
-      return;
-    }
+    
 
     setIsLoggingOut(true);
     setMenuOpen(false);
@@ -158,7 +156,7 @@ export default function AuthMenu() {
             type="button"
             className="account-logout"
             onClick={handleLogout}
-            disabled={isLoggingOut}
+          
           >
             Log Out
           </button>
