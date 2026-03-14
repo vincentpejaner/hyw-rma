@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import "./auth-menu.css";
 import { API_BASE } from "./api-base.js";
 
@@ -66,6 +67,14 @@ export default function AuthMenu() {
     account.account_email ||
     "Account";
   const accountEmail = account.account_email || account.account_username || "";
+  const logoutOverlay = isLoggingOut
+    ? createPortal(
+        <div className="logout-loading-overlay" aria-live="polite">
+          <div className="logout-loading-spinner" aria-hidden="true" />
+        </div>,
+        document.body,
+      )
+    : null;
 
   const handleLogout = async () => {
     if (isLoggingOut) {
@@ -91,6 +100,7 @@ export default function AuthMenu() {
       /* best effort logout */
     } finally {
       localStorage.clear();
+      setIsLoggingOut(false);
       window.location.hash = "#login";
     }
   };
@@ -148,16 +158,11 @@ export default function AuthMenu() {
             onClick={handleLogout}
             disabled={isLoggingOut}
           >
-            {isLoggingOut ? "Logging out..." : "Log Out"}
+            Log Out
           </button>
         </div>
       )}
-
-      {isLoggingOut && (
-        <div className="logout-loading-overlay" aria-live="polite">
-          <div className="logout-loading-spinner" aria-hidden="true" />
-        </div>
-      )}
+      {logoutOverlay}
     </div>
   );
 }
