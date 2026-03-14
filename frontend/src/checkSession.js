@@ -8,23 +8,27 @@ export function checkSession() {
     return;
   }
 
-  fetch(
-    `https://hyw-rma-production-81c6.up.railway.app/api/hyw/check-session`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        account_id: account.account_id,
-        token: account.token,
-      }),
-    },
-  )
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.message === "Account logged in on another device.") {
-        alert("Your account was logged in on another device.");
-        localStorage.clear();
-        window.location.hash = "#login";
+  fetch(`${API_BASE}/check-session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      account_id: account.account_id,
+      token: account.token,
+    }),
+  })
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok || data.message === "Account logged in on another device.") {
+        throw new Error(
+          data?.message || "Session invalid. Please sign in again.",
+        );
       }
+      return data;
+    })
+    .catch((error) => {
+      console.warn("Session check failed:", error?.message || error);
+      alert("Your account was logged in on another device.");
+      localStorage.clear();
+      window.location.hash = "#login";
     });
 }

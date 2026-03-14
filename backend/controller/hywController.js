@@ -407,7 +407,7 @@ function logOut(req, res) {
   const { account_id } = req.body;
 
   const query =
-    "UPDATE db_account SET is_logged_in=0, session_token=NULL WHERE account_id=?";
+    "UPDATE db_account SET is_logged_in=0, db_session_token=NULL WHERE account_id=?";
 
   db.query(query, [account_id], (err) => {
     if (err) return res.status(500).json({ message: "Database error" });

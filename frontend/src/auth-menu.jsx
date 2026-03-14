@@ -67,17 +67,20 @@ export default function AuthMenu() {
   const accountEmail = account.account_email || account.account_username || "";
 
   const handleLogout = () => {
-    window.localStorage.removeItem("account");
     setMenuOpen(false);
-    const account = JSON.parse(localStorage.getItem("account"));
+    const storedAccount = JSON.parse(window.localStorage.getItem("account"));
 
-    fetch(`${API_BASE}/logout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        account_id: account.account_id,
-      }),
-    });
+    if (storedAccount?.account_id) {
+      fetch(`${API_BASE}/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account_id: storedAccount.account_id,
+        }),
+      }).catch(() => {
+        /* best effort logout */
+      });
+    }
 
     localStorage.clear();
     window.location.hash = "#login";

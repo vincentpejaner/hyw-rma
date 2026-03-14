@@ -6,13 +6,6 @@ import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 import { API_BASE } from "./api-base.js";
 import { checkSession } from "./checkSession.js";
-useEffect(() => {
-  const interval = setInterval(() => {
-    checkSession();
-  }, 5000);
-
-  return () => clearInterval(interval);
-}, []);
 const CATEGORY_OPTIONS = [
   "Motherboard",
   "Storage (HDD)",
@@ -119,6 +112,19 @@ function Submit() {
     if (!isAuthenticated) {
       window.location.hash = "#login";
     }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return undefined;
+    }
+
+    checkSession();
+    const interval = setInterval(() => {
+      checkSession();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [isAuthenticated]);
 
   useEffect(() => {

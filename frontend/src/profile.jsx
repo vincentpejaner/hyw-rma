@@ -74,6 +74,19 @@ function Profile() {
   const [status, setStatus] = useState({ type: "", message: "" });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  useEffect(() => {
+    if (!accountId) {
+      return undefined;
+    }
+
+    checkSession();
+    const interval = setInterval(() => {
+      checkSession();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [accountId]);
+
   const completedFields = useMemo(
     () =>
       Object.values(data).filter((value) => String(value || "").trim() !== "")
