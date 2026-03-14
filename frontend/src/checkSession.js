@@ -25,5 +25,10 @@ export function checkSession() {
       }
       return data;
     })
-   
+    .catch((error) => {
+      console.warn("Session check failed:", error?.message || error);
+      alert("Your account was logged in on another device.");
+      localStorage.clear();
+      window.location.hash = "#login";
+    });
 }
