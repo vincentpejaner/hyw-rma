@@ -44,8 +44,6 @@ function getHealthStatus(req, res) {
 
 //FUNCTION TO INSERT DATA
 function insertHYW(req, res) {
-  console.log("insertHYW received body:", req.body);
-
   const {
     fullName,
     emailAddress,
@@ -513,8 +511,6 @@ function selectProfile(req, res) {
 async function submitRmaRequest(req, res) {
   let { items, accountId, ticketId } = req.body;
 
-  console.log("Incoming request:", req.body);
-
   if (typeof accountId === "object" && accountId !== null) {
     accountId = accountId.account_id;
   }
@@ -587,15 +583,6 @@ async function submitRmaRequest(req, res) {
       const problem = String(item.problem || "");
 
       const productTicket = generateProductTicket();
-
-      console.log("Saving item:", {
-        itemDescription,
-        serialNumber,
-        purchaseDate,
-        returnDate,
-        problem,
-        productTicket,
-      });
 
       const productSql = `
         INSERT INTO db_product
