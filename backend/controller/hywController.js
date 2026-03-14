@@ -367,7 +367,9 @@ function getAccount(req, res) {
   const { email, password } = req.body || {};
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required." });
+    return res
+      .status(400)
+      .json({ message: "Email and password are required." });
   }
 
   const query =
@@ -401,11 +403,24 @@ function getAccount(req, res) {
   });
 }
 
+function logOut(req, res) {
+  const { account_id } = req.body;
+
+  const query =
+    "UPDATE db_account SET is_logged_in=0, session_token=NULL WHERE account_id=?";
+
+  db.query(query, [account_id], (err) => {
+    if (err) return res.status(500).json({ message: "Database error" });
+
+    res.json({ message: "Logged out successfully" });
+  });
+}
+
 //FUNCTION TO HANDLE INSERT DATA FOR PROFILE CREATION FROM FRONTEND
 function insertProfile(req, res) {
   const {
     fullName,
-    companyPhone, 
+    companyPhone,
     companyEmail,
     companyName,
     companyAddress,
@@ -658,7 +673,7 @@ function checkSession(req, res) {
 
     if (!results.length || results[0].session_token !== token) {
       return res.status(401).json({
-        message: "Account logged in on another device."
+        message: "Account logged in on another device.",
       });
     }
 
@@ -678,4 +693,5 @@ module.exports = {
   submitRmaRequest,
   updateProfile,
   checkSession,
+  logOut
 };

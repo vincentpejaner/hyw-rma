@@ -12,7 +12,8 @@ const {
   selectProfile,
   submitRmaRequest,
   updateProfile,
-  checkSession
+  checkSession,
+  logOut,
 } = require("../controller/hywController.js");
 
 router.get("/health", getHealthStatus);
@@ -26,5 +27,6 @@ router.get("/selectprofile/:id", selectProfile);
 router.post("/submit-rma", submitRmaRequest);
 router.put("/update-profile/:id", updateProfile);
 router.post("/check-session", checkSession);
+router.post("/logout", logOut);
 
 module.exports = router;
