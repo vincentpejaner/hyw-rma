@@ -4,6 +4,7 @@ import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 import { API_BASE } from "./api-base.js";
 import { checkSession } from "./checkSession.js";
+
 const EMPTY_PROFILE = {
   companyName: "",
   fullName: "",
@@ -52,11 +53,7 @@ const PROFILE_FIELDS = [
 ];
 
 useEffect(() => {
-  const interval = setInterval(() => {
-    checkSession();
-  }, 5000);
-
-  return () => clearInterval(interval);
+  checkSession();
 }, []);
 
 const getStoredAccount = () => {
