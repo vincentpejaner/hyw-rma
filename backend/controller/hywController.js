@@ -419,8 +419,7 @@ function logOut(req, res) {
   }
 
   // Some production databases enforce NOT NULL on db_session_token; write empty string instead of NULL.
-  const query =
-    "UPDATE db_account SET db_session_token='' WHERE account_id=?";
+  const query = "UPDATE db_account SET db_session_token='' WHERE account_id=?";
 
   db.query(query, [resolvedAccountId], (err, result) => {
     if (err) {
@@ -718,5 +717,5 @@ module.exports = {
   submitRmaRequest,
   updateProfile,
   checkSession,
-  logOut
+  logOut,
 };
