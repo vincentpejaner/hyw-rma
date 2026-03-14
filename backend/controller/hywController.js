@@ -391,7 +391,7 @@ function getAccount(req, res) {
     const token = crypto.randomBytes(32).toString("hex");
 
   const updateQuery =
-    "UPDATE db_account SET session_token=? WHERE account_id=?";
+    "UPDATE db_account SET db_session_token=? WHERE account_id=?";
 
     db.query(updateQuery, [token, account.account_id]);
 
@@ -407,7 +407,7 @@ function logOut(req, res) {
   const { account_id } = req.body;
 
   const query =
-    "UPDATE db_account SET is_logged_in=0, session_token=NULL WHERE account_id=?";
+    "UPDATE db_account SET is_logged_in=0, db_session_token=NULL WHERE account_id=?";
 
   db.query(query, [account_id], (err) => {
     if (err) return res.status(500).json({ message: "Database error" });
@@ -666,12 +666,15 @@ function updateProfile(req, res) {
 function checkSession(req, res) {
   const { account_id, token } = req.body;
 
-  const query = "SELECT session_token FROM db_account WHERE account_id=?";
+  const query = "SELECT db_session_token FROM db_account WHERE account_id=?";
 
   db.query(query, [account_id], (err, results) => {
-    if (err) return res.status(500).json({ message: "Database error" });
+    if (err) {
+      console.error("Session check query failed:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
 
-    if (!results.length || results[0].session_token !== token) {
+    if (!results.length || results[0].db_session_token !== token) {
       return res.status(401).json({
         message: "Account logged in on another device.",
       });
