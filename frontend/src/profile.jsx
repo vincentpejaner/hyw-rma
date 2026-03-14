@@ -1,5 +1,6 @@
 import "./profile.css";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useEffect } from "react";
 import SiteHeader from "./site-header.jsx";
 import SiteFooter from "./site-footer.jsx";
 import { API_BASE } from "./api-base.js";
@@ -51,8 +52,6 @@ const PROFILE_FIELDS = [
     wide: true,
   },
 ];
-
-
 
 const getStoredAccount = () => {
   try {
@@ -157,8 +156,9 @@ function Profile() {
     event.preventDefault();
 
     useEffect(() => {
-  checkSession();
-}, []);
+      checkSession();
+    }, []);
+
     if (!accountId) {
       setStatus({
         type: "error",
