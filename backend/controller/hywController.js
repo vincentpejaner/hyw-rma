@@ -390,15 +390,22 @@ function getAccount(req, res) {
     // generate new session token
     const token = crypto.randomBytes(32).toString("hex");
 
-  const updateQuery =
-    "UPDATE db_account SET db_session_token=? WHERE account_id=?";
+    const updateQuery =
+      "UPDATE db_account SET db_session_token=? WHERE account_id=?";
 
-    db.query(updateQuery, [token, account.account_id]);
+    db.query(updateQuery, [token, account.account_id], (updateErr) => {
+      if (updateErr) {
+        console.error("Session token update failed:", updateErr);
+        return res
+          .status(500)
+          .json(formatDbError(updateErr, "Failed to create session"));
+      }
 
-    return res.status(200).json({
-      message: "Login successful.",
-      account: account,
-      token: token,
+      return res.status(200).json({
+        message: "Login successful.",
+        account: account,
+        token: token,
+      });
     });
   });
 }
@@ -411,12 +418,20 @@ function logOut(req, res) {
     return res.status(400).json({ message: "Missing account_id" });
   }
 
-  const query = "UPDATE db_account SET db_session_token=NULL WHERE account_id=?";
+  // Some production databases enforce NOT NULL on db_session_token; write empty string instead of NULL.
+  const query =
+    "UPDATE db_account SET db_session_token='' WHERE account_id=?";
 
-  db.query(query, [resolvedAccountId], (err) => {
+  db.query(query, [resolvedAccountId], (err, result) => {
     if (err) {
       console.error("Logout query failed:", err);
-      return res.status(500).json({ message: "Database error" });
+      return res
+        .status(500)
+        .json(formatDbError(err, "Database error clearing session"));
+    }
+
+    if (!result?.affectedRows) {
+      return res.status(404).json({ message: "Account not found" });
     }
 
     res.json({ message: "Logged out successfully" });
