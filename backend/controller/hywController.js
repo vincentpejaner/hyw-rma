@@ -666,12 +666,12 @@ function updateProfile(req, res) {
 function checkSession(req, res) {
   const { account_id, token } = req.body;
 
-  const query = "SELECT session_token FROM db_account WHERE account_id=?";
+  const query = "SELECT db_session_token FROM db_account WHERE account_id=?";
 
   db.query(query, [account_id], (err, results) => {
     if (err) return res.status(500).json({ message: "Database error" });
 
-    if (!results.length || results[0].session_token !== token) {
+    if (!results.length || results[0].db_session_token !== token) {
       return res.status(401).json({
         message: "Account logged in on another device.",
       });
