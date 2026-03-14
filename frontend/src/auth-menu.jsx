@@ -71,14 +71,14 @@ export default function AuthMenu() {
     const storedAccount = JSON.parse(window.localStorage.getItem("account"));
 
     if (storedAccount?.account_id) {
-      fetch(`${API_BASE}/logout`, {
+      fetch(`https://hyw-rma-production-81c6.up.railway.app/api/hyw/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           account_id: storedAccount.account_id,
         }),
-      }).catch(() => {
-        /* best effort logout */
+      }).catch(() => {  
+ 
       });
     }
 
