@@ -16,19 +16,12 @@ export function checkSession() {
       token: account.token,
     }),
   })
-    .then(async (res) => {
-      const data = await res.json();
-      if (!res.ok || data.message === "Account logged in on another device.") {
-        throw new Error(
-          data?.message || "Session invalid. Please sign in again.",
-        );
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.message === "Account logged in on another device.") {
+        alert("Your account was logged in on another device.");
+        localStorage.clear();
+        window.location.hash = "#login";
       }
-      return data;
-    })
-    .catch((error) => {
-      console.warn("Session check failed:", error?.message || error);
-      alert("Your account was logged in on another device.");
-      localStorage.clear();
-      window.location.hash = "#login";
     });
 }
